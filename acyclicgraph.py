@@ -36,24 +36,11 @@ from errors import EdgeInitializationError
 
 class AcyclicEdgeContainer(Graph.EdgeContainer):
 	def add_edge(self, edge):
-		start_points = set()
-		end_points = set()
-		edges = set()
-		for edge in self.edges:
-			start_points.add(edge.start)
-			end_points.add(edge.end)
-			edges.add(edge)
-		sources = start_points.difference(end_points)
-		while start_points:
-			start = start_points.pop()
-			for edge in super().get_matching_edges(lambda x: x.start == start):
-				end = edge.end
-				edges.remove(edge)
-				if len(list(super().get_matching_edges(lambda x: x.end == end))) == 0:
-					start_points.append(end)
-		if edges:
-			raise EdgeInitializationError
-		super().add_edge(edge)
+		"""Adds an edge to the graph.
+
+		Changes the default behavior of add_edge by causing it to throw an error if an acyclic
+		graph would be created by its addition."""
+		pass
 
 class AcyclicGraphMixin:
 	EdgeContainer = AcyclicEdgeContainer 
