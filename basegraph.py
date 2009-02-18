@@ -29,35 +29,7 @@ This module contains Graphine's base hypergraph represenatation.
 # You should have received a copy of the GNU General Public License
 # along with Graphine.  If not, see <http://www.gnu.org/licenses/>.
 
-class InitializationError(Exception): pass
-
-class DeletionError(Exception): pass
-
-class OperationError(Exception): pass
-
-class ContainerInitializationError(InitializationError): pass
-
-class ContainerDeletionError(DeletionError): pass
-
-class ContainerOperationError(OperationError): pass
-
-class GraphInitializationError(InitializationError): pass
-
-class GraphDeletionError(DeletionError): pass
-
-class GraphOperationError(OperationError): pass
-
-class NodeInitializationError(InitializationError): pass
-
-class NodeDeletionError(DeletionError): pass
-
-class NodeOperationError(OperationError): pass
-
-class EdgeInitializationError(InitializationError): pass
-
-class EdgeDeletionError(DeletionError): pass
-
-class EdgeOperationError(OperationError): pass
+import errors
 
 class Graph:
 	"""Base class for all Graph mixins"""

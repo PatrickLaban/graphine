@@ -31,7 +31,8 @@ overrides Graph's EdgeContainer class.
 # You should have received a copy of the GNU General Public License
 # along with Graphine.  If not, see <http://www.gnu.org/licenses/>.
 
-from basegraph import Graph, EdgeInitializationError
+from basegraph import Graph
+from errors import EdgeInitializationError
 
 class AcyclicEdgeContainer(Graph.EdgeContainer):
 	def add_edge(self, edge):
