@@ -34,6 +34,7 @@ import unittest
 from basegraph import Graph
 from undirectedgraph import UndirectedGraphMixin
 from acyclicgraph import AcyclicGraphMixin
+from errors import EdgeInitializationError
 
 class BaseGraphTest(unittest.TestCase):
 
@@ -110,7 +111,7 @@ class AcyclicGraphTest(unittest.TestCase):
 		self.graph.add_edge(b, d)
 		self.graph.add_edge(b, f)
 		self.graph.add_edge(c, g)
-		self.graph.add_edge(f, e)
+		self.failUnlessRaises(EdgeInitializationError, self.graph.add_edge, f, e)
 		self.start = a
 
 		

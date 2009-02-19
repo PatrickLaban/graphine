@@ -11,7 +11,7 @@ Released 16 Feb 2009
 
 This module provides a mixin that provides for
 an acyclic graph. Notice that it only
-overrides Graph's EdgeContainer class.
+overrides Graph's add_edge method.
 """
 
 # Copyright (C) 2009 Geremy Condra and OpenMigration, LLC
@@ -34,13 +34,10 @@ overrides Graph's EdgeContainer class.
 from basegraph import Graph
 from errors import EdgeInitializationError
 
-class AcyclicEdgeContainer(Graph.EdgeContainer):
-	def add_edge(self, edge):
-		"""Adds an edge to the graph.
-
-		Changes the default behavior of add_edge by causing it to throw an error if an acyclic
-		graph would be created by its addition."""
-		pass
-
 class AcyclicGraphMixin:
-	EdgeContainer = AcyclicEdgeContainer 
+	def add_edge(self, start, end, *args, **kwargs):
+		"""Adds the specified edge to the graph.
+
+		Also performs a test to ensure that a cycle will not be formed."""
+		if start in self.depth_first_traversal(end): raise EdgeInitializationError
+		super().add_edge(start, end, *args, **kwargs)
