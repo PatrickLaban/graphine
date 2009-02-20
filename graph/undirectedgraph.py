@@ -57,7 +57,7 @@ class UndirectedEdgeContainer(Graph.EdgeContainer):
 			super().remove_edge(found_edge)
 
 	def __len__(self):
-		return len(self.edges)/2
+		return int(len(self.edges)/2)
 	
 class UndirectedGraphMixin:
 	EdgeContainer = UndirectedEdgeContainer

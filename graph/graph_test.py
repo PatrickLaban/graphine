@@ -62,29 +62,11 @@ class BaseGraphTest(unittest.TestCase):
 		self.node_set = self.node_container.nodes.copy()
 		self.edge_set = self.edge_container.edges.copy()
 
+	def testOrder(self):
+		self.failUnless(self.graph.order() == 7)
 
-class BaseNodeContainerTest(BaseGraphTest):
-
-	def testGetAllNodes(self):
-		all_nodes = set(node for node in self.node_container.get_all_nodes())
-		self.failUnlessEqual(self.node_set, all_nodes)
-
-	def testGetMatchingNodes(self):
-		recognizer = lambda x: x.name == "A"
-		nodes_returned = list(self.node_container.get_matching_nodes(recognizer))
-		self.failUnlessEqual([self.nodes["A"]], nodes_returned)
-
-	def testAddNode(self):
-		n = self.graph.Node()
-		self.node_container.add_node(n)
-		self.failUnlessEqual(self.node_container.nodes.difference(self.node_set), {n})
-
-	def testRemoveNode(self):
-		self.node_container.remove_node(self.nodes["A"])
-		self.failUnlessEqual(self.node_set.difference(self.node_container.nodes), {self.nodes["A"]})
-
-
-class BaseGraphAlgorithmTest(BaseGraphTest):
+	def testSize(self):
+		self.failUnless(self.graph.size() == 7)
 
 	def testDepthFirstTraversal(self):
 		# the tricky part about this is that there is no concept of left-right ordering in this, since node ordering
@@ -103,6 +85,25 @@ class BaseGraphAlgorithmTest(BaseGraphTest):
 		positions = {node.name:pos for pos, node in enumerate(self.graph.breadth_first_traversal(self.nodes["A"]))}
 		self.failUnless(positions["A"] < min(positions["B"], positions["C"], positions["E"]))
 		self.failUnless(max(positions["B"], positions["C"], positions["E"]) < min(positions["D"], positions["F"], positions["G"]))
+
+	def testNodeContainerGetAllNodes(self):
+		all_nodes = set(node for node in self.node_container.get_all_nodes())
+		self.failUnlessEqual(self.node_set, all_nodes)
+
+	def testNodeContainerGetMatchingNodes(self):
+		recognizer = lambda x: x.name == "A"
+		nodes_returned = list(self.node_container.get_matching_nodes(recognizer))
+		self.failUnlessEqual([self.nodes["A"]], nodes_returned)
+
+	def testNodeContainerAddNode(self):
+		n = self.graph.Node()
+		self.node_container.add_node(n)
+		self.failUnlessEqual(self.node_container.nodes.difference(self.node_set), {n})
+
+	def testNodeContainerRemoveNode(self):
+		self.node_container.remove_node(self.nodes["A"])
+		self.failUnlessEqual(self.node_set.difference(self.node_container.nodes), {self.nodes["A"]})
+
 
 class UndirectedGraphTest(BaseGraphTest):
 
