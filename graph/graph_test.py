@@ -42,6 +42,7 @@ class BaseGraphTest(unittest.TestCase):
 
 	def setUp(self):
 		self.nodes = {}
+		self.edges = []
 		self.graph = self.graph_type()
 		self.nodes["A"] = self.graph.add_node(name="A")
 		self.nodes["B"] = self.graph.add_node(name="B")
@@ -50,13 +51,13 @@ class BaseGraphTest(unittest.TestCase):
 		self.nodes["E"] = self.graph.add_node(name="E")
 		self.nodes["F"] = self.graph.add_node(name="F")
 		self.nodes["G"] = self.graph.add_node(name="G")
-		self.graph.add_edge(self.nodes["A"], self.nodes["B"])
-		self.graph.add_edge(self.nodes["B"], self.nodes["D"])
-		self.graph.add_edge(self.nodes["B"], self.nodes["F"])
-		self.graph.add_edge(self.nodes["F"], self.nodes["E"])
-		self.graph.add_edge(self.nodes["A"], self.nodes["C"])
-		self.graph.add_edge(self.nodes["C"], self.nodes["G"])
-		self.graph.add_edge(self.nodes["A"], self.nodes["E"])
+		self.edges += [self.graph.add_edge(self.nodes["A"], self.nodes["B"])]
+		self.edges += [self.graph.add_edge(self.nodes["B"], self.nodes["D"])]
+		self.edges += [self.graph.add_edge(self.nodes["B"], self.nodes["F"])]
+		self.edges += [self.graph.add_edge(self.nodes["F"], self.nodes["E"])]
+		self.edges += [self.graph.add_edge(self.nodes["A"], self.nodes["C"])]
+		self.edges += [self.graph.add_edge(self.nodes["C"], self.nodes["G"])]
+		self.edges += [self.graph.add_edge(self.nodes["A"], self.nodes["E"])]
 		self.node_container = self.graph.nodes
 		self.edge_container = self.graph.edges
 		self.node_set = self.node_container.nodes.copy()
@@ -103,6 +104,15 @@ class BaseGraphTest(unittest.TestCase):
 	def testNodeContainerRemoveNode(self):
 		self.node_container.remove_node(self.nodes["A"])
 		self.failUnlessEqual(self.node_set.difference(self.node_container.nodes), {self.nodes["A"]})
+
+	def testEdgeContainerGetAllEdges(self):
+		all_edges = set(edge for edge in self.edge_container.get_all_edges())
+		self.failUnlessEqual(self.edge_set, all_edges)
+
+	def testEdgeContainerGetMatchingEdges(self):
+		recognizer = lambda x: x.start == self.nodes["A"]
+		edges_returned = set(self.edge_container.get_matching_edges(recognizer))
+		self.failUnlessEqual({self.edges[0], self.edges[4], self.edges[6]}, edges_returned)
 
 
 class UndirectedGraphTest(BaseGraphTest):
