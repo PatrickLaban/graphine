@@ -38,82 +38,89 @@ from errors import EdgeInitializationError
 
 class BaseGraphTest(unittest.TestCase):
 
-	def setUp(self):
-		self.graph = Graph()
-		a = self.graph.add_node(name="A")
-		b = self.graph.add_node(name="B")
-		c = self.graph.add_node(name="C")
-		d = self.graph.add_node(name="D")
-		e = self.graph.add_node(name="E")
-		f = self.graph.add_node(name="F")
-		g = self.graph.add_node(name="G")
-		self.graph.add_edge(a, b)
-		self.graph.add_edge(b, d)
-		self.graph.add_edge(b, f)
-		self.graph.add_edge(f, e)
-		self.graph.add_edge(a, c)
-		self.graph.add_edge(c, g)
-		self.graph.add_edge(a, e)
-		self.start = a
-
-	def testDepthFirstTraversal(self):
-		self.assertEqual([node.name for node in self.graph.depth_first_traversal(self.start)], ["A", "B", "D", "F", "E", "C", "G"])
-
-	def testBreadthFirstTraversal(self):
-		self.assertEqual([node.name for node in self.graph.breadth_first_traversal(self.start)], ["A", "B", "C", "E", "D", "F", "G"])
-
-class UndirectedGraphTest(unittest.TestCase):
+	graph_type = Graph
 
 	def setUp(self):
-		class UndirectedGraph(UndirectedGraphMixin, Graph):
-			pass
+		self.nodes = {}
+		self.graph = self.graph_type()
+		self.nodes["A"] = self.graph.add_node(name="A")
+		self.nodes["B"] = self.graph.add_node(name="B")
+		self.nodes["C"] = self.graph.add_node(name="C")
+		self.nodes["D"] = self.graph.add_node(name="D")
+		self.nodes["E"] = self.graph.add_node(name="E")
+		self.nodes["F"] = self.graph.add_node(name="F")
+		self.nodes["G"] = self.graph.add_node(name="G")
+		self.graph.add_edge(self.nodes["A"], self.nodes["B"])
+		self.graph.add_edge(self.nodes["B"], self.nodes["D"])
+		self.graph.add_edge(self.nodes["B"], self.nodes["F"])
+		self.graph.add_edge(self.nodes["F"], self.nodes["E"])
+		self.graph.add_edge(self.nodes["A"], self.nodes["C"])
+		self.graph.add_edge(self.nodes["C"], self.nodes["G"])
+		self.graph.add_edge(self.nodes["A"], self.nodes["E"])
+		self.node_container = self.graph.nodes
+		self.edge_container = self.graph.edges
+		self.node_set = self.node_container.nodes.copy()
+		self.edge_set = self.edge_container.edges.copy()
 
-		self.graph = UndirectedGraph()
-		a = self.graph.add_node(name="A")
-		b = self.graph.add_node(name="B")
-		c = self.graph.add_node(name="C")
-		d = self.graph.add_node(name="D")
-		e = self.graph.add_node(name="E")
-		f = self.graph.add_node(name="F")
-		g = self.graph.add_node(name="G")
-		self.graph.add_edge(a, b)
-		self.graph.add_edge(b, d)
-		self.graph.add_edge(b, f)
-		self.graph.add_edge(f, e)
-		self.graph.add_edge(a, c)
-		self.graph.add_edge(c, g)
-		self.graph.add_edge(a, e)
-		self.start = a
+
+class BaseNodeContainerTest(BaseGraphTest):
+
+	def testGetAllNodes(self):
+		all_nodes = set(node for node in self.node_container.get_all_nodes())
+		self.failUnlessEqual(self.node_set, all_nodes)
+
+	def testGetMatchingNodes(self):
+		recognizer = lambda x: x.name == "A"
+		nodes_returned = list(self.node_container.get_matching_nodes(recognizer))
+		self.failUnlessEqual([self.nodes["A"]], nodes_returned)
+
+	def testAddNode(self):
+		n = self.graph.Node()
+		self.node_container.add_node(n)
+		self.failUnlessEqual(self.node_container.nodes.difference(self.node_set), {n})
+
+	def testRemoveNode(self):
+		self.node_container.remove_node(self.nodes["A"])
+		self.failUnlessEqual(self.node_set.difference(self.node_container.nodes), {self.nodes["A"]})
+
+
+class BaseGraphAlgorithmTest(BaseGraphTest):
 
 	def testDepthFirstTraversal(self):
-		self.assertEqual([node.name for node in self.graph.depth_first_traversal(self.start)], ["A", "B", "D", "F", "E", "C", "G"])
+		# the tricky part about this is that there is no concept of left-right ordering in this, since node ordering
+		# is not preserved. 
+		# We can therefore test only the preorder property universally
+		positions = {node.name:pos for pos, node in enumerate(self.graph.depth_first_traversal(self.nodes["A"]))} 
+		self.failUnless(positions["A"] < positions["B"])
+		self.failUnless(positions["A"] < positions["C"])
+		self.failUnless(positions["A"] < positions["E"])
+		self.failUnless(positions["B"] < positions["D"])
+		self.failUnless(positions["C"] < positions["G"])
+		self.failUnless(positions["F"] > min(positions["B"], positions["E"]))
 
 	def testBreadthFirstTraversal(self):
-		self.assertEqual([node.name for node in self.graph.breadth_first_traversal(self.start)], ["A", "B", "C", "E", "D", "F", "G"])
+		# we want to test to ensure that A is visited first, then its children, and so on
+		for node in self.graph.depth_first_traversal(self.nodes["A"]):
+			print(node.name)
+		positions = {node.name:pos for pos, node in enumerate(self.graph.depth_first_traversal(self.nodes["A"]))}
+		self.failUnless(positions["A"] < min(positions["B"], positions["C"], positions["E"]))
+		print(positions)
+		self.failUnless(max(positions["B"], positions["C"], positions["E"]) < min(positions["D"], positions["F"], positions["G"]))
 
-class AcyclicGraphTest(unittest.TestCase):
-	
-	def testCreation(self):
-		class AcyclicGraph(AcyclicGraphMixin, Graph):
-			pass
+class UndirectedGraphTest(BaseGraphTest):
 
-		self.graph = AcyclicGraph()
-		a = self.graph.add_node(name="A")
-		b = self.graph.add_node(name="B")
-		c = self.graph.add_node(name="C")
-		d = self.graph.add_node(name="D")
-		e = self.graph.add_node(name="E")
-		f = self.graph.add_node(name="F")
-		g = self.graph.add_node(name="G")
-		self.graph.add_edge(a, b)
-		self.graph.add_edge(a, c)
-		self.graph.add_edge(e, a)
-		self.graph.add_edge(b, d)
-		self.graph.add_edge(b, f)
-		self.graph.add_edge(c, g)
-		self.failUnlessRaises(EdgeInitializationError, self.graph.add_edge, f, e)
-		self.start = a
+	class UndirectedGraph(UndirectedGraphMixin, Graph):
+		pass
 
+	graph_type = UndirectedGraph
+
+
+class AcyclicGraphTest(BaseGraphTest):
+
+	class AcyclicGraph(AcyclicGraphMixin, Graph):
+		pass
+
+	graph_type = AcyclicGraph
 		
 if __name__ == "__main__":
 	unittest.main()

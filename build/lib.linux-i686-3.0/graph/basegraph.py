@@ -29,6 +29,7 @@ This module contains Graphine's base hypergraph represenatation.
 # You should have received a copy of the GNU General Public License
 # along with Graphine.  If not, see <http://www.gnu.org/licenses/>.
 
+from collections import deque
 import errors
 
 class Graph:
@@ -66,7 +67,7 @@ class Graph:
 		def __init__(self):
 			"""Sets the internal backing store."""
 			try:
-				self.nodes = []
+				self.nodes = set()
 			except Exception as error:
 				raise ContainerInitializationError from error
 
@@ -108,7 +109,7 @@ class Graph:
 		def add_node(self, node):
 			"""Inserts the given node into the data store."""
 			try:
-				self.nodes.append(node)
+				self.nodes.add(node)
 			except Exception as error:
 				raise ContainerOperationError from error
 
@@ -129,7 +130,7 @@ class Graph:
 		def __init__(self):
 			"""Backing store is a list."""
 			try:
-				self.edges = []
+				self.edges = set()
 			except Exception as error:
 				raise ContainerInitializationError from error
 
@@ -170,7 +171,7 @@ class Graph:
 		def add_edge(self, edge):
 			"""Inserts the edge into the data store."""
 			try:
-				self.edges.append(edge)
+				self.edges.add(edge)
 			except Exception as error:
 				raise ContainerOperationError from error
 
@@ -325,15 +326,15 @@ class Graph:
 	def breadth_first_traversal(self, root):
 		"""Traverses the graph by visiting a node, then each of its children, then their children"""
 		try:
-			not_yet_visited = [root]
-			visited = []
-			while len(not_yet_visited):
-				node = not_yet_visited.pop(0)
-				visited.append(node)
+			visited = {}
+			unvisited = dequeue([root])
+			while unvisited:
+				node = unvisited.popleft()
 				yield node
+				visited.add(node)
 				for child in self.get_adjacent_nodes(node):
-					if child not in not_yet_visited and child not in visited:
-						not_yet_visited.append(child)
+					if child not in visited:
+						unvisited.push(child)			
 		except Exception as error:
 			raise GraphOperationError from error
 

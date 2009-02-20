@@ -66,7 +66,7 @@ class Graph:
 		def __init__(self):
 			"""Sets the internal backing store."""
 			try:
-				self.nodes = []
+				self.nodes = set()
 			except Exception as error:
 				raise ContainerInitializationError from error
 
@@ -108,7 +108,7 @@ class Graph:
 		def add_node(self, node):
 			"""Inserts the given node into the data store."""
 			try:
-				self.nodes.append(node)
+				self.nodes.add(node)
 			except Exception as error:
 				raise ContainerOperationError from error
 
@@ -129,7 +129,7 @@ class Graph:
 		def __init__(self):
 			"""Backing store is a list."""
 			try:
-				self.edges = []
+				self.edges = set()
 			except Exception as error:
 				raise ContainerInitializationError from error
 
@@ -170,7 +170,7 @@ class Graph:
 		def add_edge(self, edge):
 			"""Inserts the edge into the data store."""
 			try:
-				self.edges.append(edge)
+				self.edges.add(edge)
 			except Exception as error:
 				raise ContainerOperationError from error
 

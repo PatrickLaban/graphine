@@ -38,10 +38,10 @@ from basegraph import Graph
 class UndirectedEdgeContainer(Graph.EdgeContainer):
 
 	def add_edge(self, edge):
-		self.edges.append(edge)
+		self.edges.add(edge)
 		new_edge = copy.deepcopy(edge)
 		new_edge.start, new_edge.end = edge.end, edge.start
-		self.edges.append(new_edge)
+		self.edges.add(new_edge)
 
 	def remove_edge(self, edge):
 		def recognizer(self, x):
@@ -55,6 +55,12 @@ class UndirectedEdgeContainer(Graph.EdgeContainer):
 		edges = super().get_matching_edges(recognizer)
 		for found_edge in edges:
 			super().remove_edge(found_edge)
+
+	def __len__(self):
+		return len(self.edges)/2
 	
 class UndirectedGraphMixin:
-	EdgeContainer = UndirectedEdgeContainer	
+	EdgeContainer = UndirectedEdgeContainer
+
+class UndirectedGraph(UndirectedGraphMixin, Graph):
+	pass	
