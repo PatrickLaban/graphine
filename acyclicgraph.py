@@ -41,3 +41,6 @@ class AcyclicGraphMixin:
 		Also performs a test to ensure that a cycle will not be formed."""
 		if start in self.depth_first_traversal(end): raise EdgeInitializationError
 		super().add_edge(start, end, *args, **kwargs)
+
+class DirectedAcyclicGraph(AcyclicGraphMixin, Graph):
+	pass

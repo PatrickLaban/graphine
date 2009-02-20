@@ -92,10 +92,14 @@ class Graph:
 			except Exception as error:
 				raise ContainerOperationError from error
 
-		def get_nodes_by_property(self, property, value):
-			"""Convenience function to iterate over nodes matching the desired property:value mapping."""
+		def get_nodes_by_properties(self, mappings):
+			"""Convenience function to iterate over nodes matching the desired property:value mappings."""
 			try:
-				recognizer = lambda x: getattr(x, property) == value
+				def recognizer(x):
+					for property, value in mappings.items():
+						if getattr(x, property) != value:
+							return False
+					return True
 				for node in self.get_matching_nodes(recognizer):
 					yield node
 			except Exception as error:
@@ -114,6 +118,10 @@ class Graph:
 				self.nodes.remove(node)
 			except Exception as error:
 				raise ContainerOperationError from error
+
+		def __len__(self):
+			"""Returns the size of the data store"""
+			return len(self.nodes)
 
 	class EdgeContainer:
 		"""Basic container type for Edge objects."""
@@ -173,6 +181,10 @@ class Graph:
 			except Exception as error:
 				raise ContainerOperationError from error
 
+		def __len__(self):
+			"""Return the size of the data store"""
+			return len(self.edges)
+
 	def __init__(self):
 		"""base initializer"""
 		try:
@@ -210,10 +222,18 @@ class Graph:
 		except Exception as error:
 			raise GraphOperationError from error
 
+	def get_nodes_by_properties(self, mappings):
+		"""Convenience function to get nodes based on some properties."""
+		try:
+			for node in self.get_nodes_by_properties(mappings):
+				yield node
+		except Exception as error:
+			raise GraphOperationError from error
+
 	def get_nodes_by_property(self, property, value):
 		"""Convenience function to get nodes based on some identifier."""
 		try:
-			for node in self.get_nodes_by_property({property:value}):
+			for node in self.get_nodes_by_properties({property:value}):
 				yield node
 		except Exception as error:
 			raise GraphOperationError from error
@@ -316,5 +336,13 @@ class Graph:
 						not_yet_visited.append(child)
 		except Exception as error:
 			raise GraphOperationError from error
+
+	def size(self):
+		"""Reports the number of edges in the graph"""
+		return len(self.edges)
+
+	def order(self):
+		"""Reports the number of nodes in the graph"""
+		return len(self.nodes)
 				
 			
