@@ -39,8 +39,16 @@ class AcyclicGraphMixin:
 		"""Adds the specified edge to the graph.
 
 		Also performs a test to ensure that a cycle will not be formed."""
-		if start in self.depth_first_traversal(end): raise EdgeInitializationError
-		super().add_edge(start, end, *args, **kwargs)
+		if start in self.depth_first_traversal(end): 
+			raise EdgeInitializationError
+		else:
+			try:
+				new_edge = self.Edge(start, end, *args, **kwargs)
+				self.edges.add_edge(new_edge)
+				return new_edge
+			except Exception as error:
+				raise GraphOperationError from error
+
 
 class DirectedAcyclicGraph(AcyclicGraphMixin, Graph):
 	pass
