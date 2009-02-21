@@ -105,6 +105,11 @@ class BaseGraphTest(unittest.TestCase):
 		self.node_container.remove_node(self.nodes["A"])
 		self.failUnlessEqual(self.node_set.difference(self.node_container.nodes), {self.nodes["A"]})
 
+	def testEdgeContainerAddEdge(self):
+		e = self.graph.Edge(self.nodes["A"], self.nodes["B"])
+		self.edge_container.add_edge(e)
+		self.failUnlessEqual(self.edge_container.edges.difference(self.edge_set), {e})
+
 	def testEdgeContainerGetAllEdges(self):
 		all_edges = set(edge for edge in self.edge_container.get_all_edges())
 		self.failUnlessEqual(self.edge_set, all_edges)
@@ -115,12 +120,19 @@ class BaseGraphTest(unittest.TestCase):
 		self.failUnlessEqual({self.edges[0], self.edges[4], self.edges[6]}, edges_returned)
 
 
+
 class UndirectedGraphTest(BaseGraphTest):
 
 	class UndirectedGraph(UndirectedGraphMixin, Graph):
 		pass
 
 	graph_type = UndirectedGraph
+
+	def testEdgeContainerAddEdge(self):
+		e = self.graph.Edge(self.nodes["A"], self.nodes["B"])
+		self.edge_container.add_edge(e)
+		e2 = list(self.edge_container.get_edges_by_properties({"start": self.nodes["B"], "end": self.nodes["A"]}))[0]
+		self.failUnlessEqual(self.edge_container.edges.difference(self.edge_set), {e, e2})
 
 
 class AcyclicGraphTest(BaseGraphTest):
@@ -129,6 +141,7 @@ class AcyclicGraphTest(BaseGraphTest):
 		pass
 
 	graph_type = AcyclicGraph
+
 		
 if __name__ == "__main__":
 	unittest.main()
