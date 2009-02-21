@@ -129,9 +129,9 @@ class UndirectedGraphTest(BaseGraphTest):
 	graph_type = UndirectedGraph
 
 	def testEdgeContainerAddEdge(self):
-		e = self.graph.Edge(self.nodes["A"], self.nodes["B"])
+		e = self.graph.Edge(self.nodes["A"], self.nodes["G"])
 		self.edge_container.add_edge(e)
-		e2 = list(self.edge_container.get_edges_by_properties({"start": self.nodes["B"], "end": self.nodes["A"]}))[0]
+		e2 = list(self.edge_container.get_edges_by_properties({"start": self.nodes["G"], "end": self.nodes["A"]}))[0]
 		self.failUnlessEqual(self.edge_container.edges.difference(self.edge_set), {e, e2})
 
 
@@ -142,6 +142,19 @@ class AcyclicGraphTest(BaseGraphTest):
 
 	graph_type = AcyclicGraph
 
-		
+	def testAcyclicProperty(self):
+		g = self.graph_type()
+		a = g.add_node(name="A")
+		b = g.add_node(name="B")
+		c = g.add_node(name="C")
+		g.add_edge(a, b)
+		g.add_edge(b, c)
+		# should raise an exception
+		self.failUnlessRaises(EdgeInitializationError, g.add_edge, c, a)
+
+class TreeTest:
+	pass
+
+
 if __name__ == "__main__":
 	unittest.main()
