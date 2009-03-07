@@ -1,0 +1,802 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head> 
+
+<meta name="date" content="2006-02-10"> 
+<meta name="channel" content="Developer">
+<meta name="author" content="Nicholas C. Zakas">
+<meta name="description" content="Alternate Ajax Techniques, Part 1 ">
+<meta name="keywords" content="java script, javascript programming, custom programming, tutorial, populate, asynchronous javascript and xml, ajax - webreference.com">
+<meta name="section" content="ajax, javascript">
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Alternate Ajax Techniques, Part 1 - WebReference.com</title>
+<style type="text/css">
+<!--
+FORM.tb {display:inline;}
+  .twidth{width:100%}
+  .include{ font-size: 75%; font-family: verdana, arial, helvetica;}
+  .includebig{font-family: verdana, arial, helvetica;}
+  .includebig A:link { color: blue; }
+  .includebig A:visited { color: purple; }
+  .include  A:link { color: blue; }
+  .include A:visited { color: purple; }
+  .submitter { font-size: 75%; font-family: verdana, arial, helvetica; }
+  .codehighlight {background:#eee}
+  .WRy1{background:#fc0}
+  .WRy2{background:#fff3ac}
+pre.code {color: #660099; margin-left:5%}
+address {text-align: right}
+
+a:hover{background:#FD3;}
+
+a.small, .small A
+{
+	font-family: Verdana, Helvetica, sans-serif;
+	font-size: 10px;
+	font-weight: normal;
+	text-decoration: none;
+	color: #000000;
+}
+
+A:link.small, .small A:link
+{
+	font-family: Verdana, Helvetica, sans-serif;
+	font-size: 10px;
+	font-weight: normal;
+	text-decoration: none;
+	color: #000000;
+}	
+	
+A:visited.small, .small A:visited
+{
+	font-family: Verdana, Helvetica, sans-serif;
+	font-size: 10px;
+	font-weight: normal;
+	text-decoration: none;
+	color: #000000;
+}	
+A:hover.small, .small A:hover
+{
+	font-family: Verdana, Helvetica, sans-serif;
+	font-size: 10px;
+	font-weight: normal;
+	text-decoration: underline;
+	color: #CC0000;
+}
+
+
+
+body {background:#FFFFFF; margin-left: 5%; margin-right: 5%}
+.WRBannerCenter {margin-left:-5%; margin-right:-5%; margin-top:8px; margin-bottom:8px; text-align:center}
+
+-->
+</style>
+
+
+
+<!-- START AD -->
+<script language="JavaScript">
+<!--
+OAS_url = 'http://mjxads.internet.com/RealMedia/ads/';
+OAS_sitepage = 'intm/webdev/www.webreference.com/programming/ajax_tech';
+OAS_listpos = 'flex,ciu,336x280,imu-right,house_ribbon,125x125-1,125x800,468x60-1,468x60-2,sitetext-1,sitetext-2,cp1,cp10,cp11,cp12,cp13,cp14,cp2,cp3,cp4,cp5,cp6,cp7,cp8,cp9';
+OAS_query = '';
+OAS_target = '_top';
+OAS_version = 10;
+OAS_rn = '001234567890'; OAS_rns = '1234567890';
+OAS_rn = new String (Math.random()); OAS_rns = OAS_rn.substring (2, 11);
+function OAS_NORMAL(pos) {
+var_a=('<A HREF="' + OAS_url + 'click_nx.cgi/' + OAS_sitepage );
+var_b=(var_a + '/1' + OAS_rns + '@' + OAS_listpos + '!' + pos + '?' );
+var_c=(var_b+ OAS_query + '" TARGET=' + OAS_target + '>');
+document.write(var_c);
+var_aa=('<IMG SRC="' + OAS_url + 'adstream_nx.cgi/' + OAS_sitepage );
+var_bb=( var_aa + '/1' + OAS_rns + '@' + OAS_listpos + '!' + pos + '?');
+var_cc=( var_bb + OAS_query + '" BORDER=0></A>');
+document.write(var_cc);
+}
+//-->
+</script><script language="JavaScript1.1">
+<!--
+OAS_version = 11;
+if (navigator.userAgent.indexOf('Mozilla/3') != -1 )
+OAS_version = 10;
+if (navigator.userAgent.indexOf('Mozilla/4.0 WebTV') != -1)
+OAS_version = 10;
+if (OAS_version >= 11) {
+var_aaa=('<SCRIPT LANGUAGE=JavaScript1.1 SRC="' + OAS_url);
+var_bbb=(var_aaa + 'adstream_mjx.ads/' + OAS_sitepage + '/1');
+var_ccc=(var_bbb + OAS_rns + '@' + OAS_listpos + '?' + OAS_query );
+var_ddd=(var_ccc + '"><\/SCRIPT>');
+document.write(var_ddd);
+}
+//-->
+
+</script><script style="display: none;" language="JavaScript1.1" src="2_files/1788871518flexciu336x280imu-righthouse_ribbon125x125-1125x800.js"></script><script language="JavaScript">
+<!--
+document.write('');
+
+function OAS_AD(pos) {
+if (OAS_version >= 11)
+OAS_RICH(pos);
+else
+OAS_NORMAL(pos);
+}
+//-->
+</script><script type="text/javascript">
+<!--
+OAS_AD('house_ribbon');
+//-->
+</script><script type="text/javascript">function closeGhostery(){ var dgf = document.getElementById("__ghosteryfirefox");    document.body.removeChild(dgf); }</script></head><body><script src="2_files/196583736.js" type="text/javascript"></script><div class="WRBannerCenter" align="center">
+
+
+
+
+<br>
+<img src="2_files/t.gif" alt="spacer" width="1" height="4"><br>
+
+<script type="text/javascript">
+<!--
+OAS_AD('468x60-1');
+//-->
+</script>
+<noscript>
+<a
+href="http://63.236.18.118/RealMedia/ads/click_nx.ads/intm/webdev/www.webreference.com/programming/ajax_tech@flex,ciu,336x280,imu-right,house_ribbon,125x125-1,125x800,468x60-1,468x60-2,sitetext-1,sitetext-2,cp1,cp10,cp11,cp12,cp13,cp14,cp2,cp3,cp4,cp5,cp6,cp7,cp8,cp9!468x60-1"
+>
+<img
+src="http://63.236.18.118/RealMedia/ads/adstream_nx.ads/intm/webdev/www.webreference.com/programming/ajax_tech@flex,ciu,336x280,imu-right,house_ribbon,125x125-1,125x800,468x60-1,468x60-2,sitetext-1,sitetext-2,cp1,cp10,cp11,cp12,cp13,cp14,cp2,cp3,cp4,cp5,cp6,cp7,cp8,cp9!468x60-1"
+border='0' alt=''>
+</a>
+</noscript></div>
+
+<!-- END AD -->
+
+<p align="center"></p><center><form method="get" action="/cgi-bin/search.cgi">
+
+
+<table class="twidth" bgcolor="BLACK" border="0" cellpadding="2" cellspacing="0" width="100%">
+
+
+<tbody><tr><td><table bgcolor="#ffcc00" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tbody><tr valign="middle">
+<td width="32"><a href="http://www.webreference.com/"><img src="2_files/l_webref32x16.gif" alt="Webref" border="0" width="32" height="16"></a></td>
+<td class="include" valign="middle"><b><a href="http://www.webreference.com/">WebRef</a>&nbsp;</b></td>
+<td class="include" bgcolor="#ffffff" width="70%">&nbsp;<a href="http://www.webreference.com/index2.html">Sitemap</a> · <a href="http://www.webreference.com/experts/">Experts</a> · <a href="http://www.webreference.com/tools/">Tools</a> · <a href="http://www.webreference.com/services/">Services</a> · <a href="http://www.webreference.com/new/">Newsletters</a> · <a href="http://www.webreference.com/about.html">About</a></td>
+<td align="right" bgcolor="#ffffff" width="1%"><input name="query" size="15" type="text"></td>
+<td align="right" bgcolor="#ffffff" width="1%"><input class="SUBMITTER" value="Search" type="submit"></td>
+<td align="right" bgcolor="#ffffff"><a href="http://internet.com/"><img src="2_files/i.gif" alt="i.com" border="0" width="72" height="11"></a></td>
+</tr></tbody></table>
+</td></tr></tbody></table></form>
+</center>
+<p>
+</p>
+
+<table align="center" border="0" width="100%">
+<tbody><tr valign="top">
+    <td align="left"> <strong><a href="http://www.webreference.com/">home</a> / <a href="http://www.webreference.com/programming/">programming</a> 
+      /  <a href="http://www.webreference.com/programming/ajax_tech">ajax_tech</a> /<a href="http://www.webreference.com/programming/ajax_tech/index.html"> 1</a></strong></td>
+	  
+    <td align="right"><a href="http://www.webreference.com/programming/ajax_tech/index.html"><img src="2_files/b_left.gif" alt="To page 1" border="0" width="18" height="18"></a><img src="2_files/b_center.gif" alt="current page" border="0" width="18" height="18"><br>
+       <a href="http://www.webreference.com/programming/ajax_tech/index.html">[previous]</a></td>
+</tr></tbody></table>
+
+
+
+  
+<div style="margin-left: 30px;">
+
+
+<table style="margin-right: 10px;" bgcolor="#000000" border="0" cellpadding="1" cellspacing="0">
+        <tbody><tr>
+          <td>
+            <table bgcolor="#eeeeee" border="0" cellpadding="1" cellspacing="0">
+
+              <tbody><tr> 
+                <td style="padding: 5px;"><font size="-2" face="Verdana, Arial, Helvetica, sans-serif"><p style="margin-top: 0px; margin-bottom: 5px;">
+            <a class="popinsetlink" href="http://webreference.justtechjobs.com/CBJSViewJob.asp?ID=%7B32F76A08-1912-4BF7-8652-87A774A34C45%7D">Senior Consultant - full-time permanent position (SoCA)</a><br>Next Step Systems<br>US-CA-San Ramon</p>
+<a href="http://webreference.justtechjobs.com/"><img id="img_openings" alt="Justtechjobs.com" src="2_files/webreference.gif" align="absmiddle" border="0" hspace="0"></a> <a title="Post A Job" href="http://www.justtechjobs.com/CBEmpPostJobLogin.asp?CB=webreference.com"> Post A Job</a> | <a title="Post Your Resume" href="http://webreference.justtechjobs.com/CBJSEditResume.asp">Post A Resume</a>
+
+</font></td>
+
+              </tr>
+            </tbody></table>
+          </td>
+        </tr>
+      </tbody></table>
+</div>
+
+<table align="left" border="0" cellpadding="0" cellspacing="0">
+   <tbody><tr><td>
+	<style type="text/css">
+<!--
+#WDinclude {font-size:75%; font-family:verdana, arial, helvetica}
+.WDi {font-family:verdana, arial, helvetica}
+#WDinclude A:link {color: blue}
+.WDi A:link {color:blue}
+#WDinclude A:visited {color: purple}
+.WDi A:visited {color: purple}
+.WRy1{background:#fc0} .WRy2{background:#fff3ac}
+-->
+</style>
+<table class="WRy1" align="center" border="0" cellpadding="1" cellspacing="0" width="120">
+<tbody><tr><td align="center" valign="bottom">
+
+<script type="text/javascript">
+<!--
+OAS_AD('125x125-1');
+//-->
+</script>
+<noscript><a
+href="http://63.236.18.118/RealMedia/ads/click_nx.ads/intm/webdev/www.webreference.com/programming/ajax_tech@flex,ciu,336x280,imu-right,house_ribbon,125x125-1,125x800,468x60-1,468x60-2,sitetext-1,sitetext-2,cp1,cp10,cp11,cp12,cp13,cp14,cp2,cp3,cp4,cp5,cp6,cp7,cp8,cp9!125x125-1"
+>
+<img
+src="http://63.236.18.118/RealMedia/ads/adstream_nx.ads/intm/webdev/www.webreference.com/programming/ajax_tech@flex,ciu,336x280,imu-right,house_ribbon,125x125-1,125x800,468x60-1,468x60-2,sitetext-1,sitetext-2,cp1,cp10,cp11,cp12,cp13,cp14,cp2,cp3,cp4,cp5,cp6,cp7,cp8,cp9!125x125-1"
+border='0' alt=''>
+</a>
+</noscript>
+</td></tr>
+<tr><td>
+<table id="WDinclude" class="WRy2" border="0" cellpadding="3" cellspacing="0">
+<tbody><tr class="WRy1"><td class="WDi" align="center"><a href="http://www.internetnews.com/dev-news/"><b>Developer News</b></a></td></tr>
+<tr><td class="WDi" align="left"><a href="http://redir.internet.com/rss/click/www.internetnews.com/bus-news/article.php/3806706">Smartphone App Success Tied to Easy Discovery</a></td></tr><tr><td class="WDi" align="left"><a href="http://redir.internet.com/rss/click/www.internetnews.com/dev-news/article.php/3806716">Marvell Intros $99  'Plug Computer'</a></td></tr><tr><td class="WDi" align="left"><a href="http://redir.internet.com/rss/click/www.internetnews.com/dev-news/article.php/3806531">Apple: Safari Is Faster and Drives Standards</a></td></tr>
+</tbody></table></td></tr>
+<tr><td align="center">
+<script style="display: none;" type="text/javascript" src="2_files/jsct.js">
+</script>
+<p>
+
+<script type="text/javascript">
+<!--
+OAS_AD('125x800');
+//-->
+</script>
+<noscript><a
+href="http://63.236.18.118/RealMedia/ads/click_nx.ads/intm/webdev/www.webreference.com/programming/ajax_tech@flex,ciu,336x280,imu-right,house_ribbon,125x125-1,125x800,468x60-1,468x60-2,sitetext-1,sitetext-2,cp1,cp10,cp11,cp12,cp13,cp14,cp2,cp3,cp4,cp5,cp6,cp7,cp8,cp9!125x800"
+>
+<img
+src="http://63.236.18.118/RealMedia/ads/adstream_nx.ads/intm/webdev/www.webreference.com/programming/ajax_tech@flex,ciu,336x280,imu-right,house_ribbon,125x125-1,125x800,468x60-1,468x60-2,sitetext-1,sitetext-2,cp1,cp10,cp11,cp12,cp13,cp14,cp2,cp3,cp4,cp5,cp6,cp7,cp8,cp9!125x800"
+border='0' alt=''>
+</a>
+</noscript>
+</p></td></tr></tbody></table>
+<br>
+           <img src="2_files/t.gif" alt="" width="1" height="9"></td>
+       <td><img src="2_files/t.gif" alt="" width="9" height="1"></td></tr>
+</tbody></table>
+
+<!-- content_start -->
+<h3>Alternate Ajax Techniques, Part 1 </h3>
+
+
+
+<p>Next, you need a way to assign the callback function to be used. It's quite 
+  possible that you'll want to access the same information on different pages 
+  and in different ways. Forcing each page to have a callback function named "callback" 
+  isn't very good architectural design. Instead, it would be better to tell the 
+  JavaScript file the name of the callback function to use so that it can be dynamically 
+  inserted. The name of the function can be passed as another parameter for the 
+  query string:</p>
+<p><code>var oParams = {<br>
+  &nbsp;&nbsp;"param1": "value1",<br>
+  &nbsp;&nbsp;"param2": "value2",<br>
+  &nbsp;&nbsp;"callback": "myCallbackFunc"<br>
+  };<br>
+  makeRequest("/path/to/myjs.php", oParams);</code></p>
+<p>The file creating the JavaScript then has to take the name of the callback 
+  function and output it into the code, as below:</p>
+<p><code>&lt;?php<br>
+  &nbsp;&nbsp;&nbsp;header("Content-type: text/javascript");<br>
+  ?&gt;<br>
+  <br>
+  var sMessage = "Hello world!";<br>
+  &lt;?php echo $_GET["callback"] ?&gt;(sMessage);</code></p>
+<p>The first part of this file sets the content type to <code>text/javascript</code> 
+  so that the browser recognizes it as JavaScript (though many browsers don't 
+  check the content type of files loaded using <code>&lt;script/&gt;</code>). 
+  Next, a JavaScript variable called sMessage is defined as a string, "Hello 
+  world!". The last line outputs the name of the callback function that was 
+  passed through the query string, followed by parentheses enclosing <code>sMessage</code>, 
+  effectively making it a function call. If all works as planned, the last line 
+  becomes: </p>
+<p><code>myCallbackFunc(sMessage);</code></p>
+<h3>Example 2</h3>
+<p>This example builds upon the previous one, but this time, you're going to send 
+  some additional information to the server and tell it which callback function 
+  to call. First, take a look at the PHP file that will be outputting the JavaScript:</p>
+<p><code>&lt;?php<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;header("Content-type: text/javascript");<br>
+  ?&gt;</code></p>
+<p><code>var sMessage = "Hello, ";<br>
+  var sName = "&lt;?php echo $_GET['name'] ?&gt;";</code></p>
+<p><code>&lt;?php echo $_GET['callback'] ?&gt;(sMessage + sName);</code></p>
+<p>The JavaScript that will be output defines two variables, <code>sMessage</code> 
+  and <code>sName</code>; the former is filled with "Hello, ", the latter 
+  is assigned the value of the <code>name</code> parameter in the query string. 
+  Then, the name of the callback function is out, passing in the concatenation 
+  of <code>sMessage</code> and <code>sName</code> (combining server-side data 
+  with data passed from the client). </p>
+<p>On the client side, the web page contains a textbox and a button:</p>
+<p><code>&lt;!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"<br>
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"&gt;<br>
+  &lt;html xmlns="http://www.w3.org/1999/xhtml"&gt;<br>
+  &nbsp;&nbsp;&lt;head&gt;<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&lt;title&gt;Example 2&lt;/title&gt;<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&lt;script type="text/javascript"&gt;//&lt;![CDATA[<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;function makeRequest(sUrl, oParams) {<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for (sName in oParams) {<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (sUrl.indexOf("?") 
+  &gt; -1) {<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sUrl 
+  += "&amp;";<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} else {<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sUrl 
+  += "?";<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sUrl += encodeURIComponent(sName) 
+  + "=" + encodeURIComponent(oParams[sName]);<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+  <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var oScript = document.createElement("script");<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;oScript.src = sUrl;<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;document.body.appendChild(oScript);<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+  <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;function messageFromServer(sText) {<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;alert("Loaded from file: 
+  " + sText);<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+  <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;function getInfo() {<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var oParams = {<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"name": 
+  document.getElementById("txtInput").value,<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"callback": 
+  "messageFromServer"<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;makeRequest("example2js.php", 
+  oParams);<br>
+  <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;//]]&gt;<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&lt;/script&gt;<br>
+  &nbsp;&nbsp;&lt;/head&gt;<br>
+  &nbsp;&nbsp;&lt;body&gt;<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&lt;input type="text" id="txtInput" 
+  value="Nicholas" /&gt;<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&lt;input type="button" value="Get Info" 
+  onclick="getInfo()" /&gt;<br>
+  &nbsp;&nbsp;&lt;/body&gt;<br>
+  &lt;/html&gt;</code></p>
+<p>When the button is clicked, the <code>getInfo()</code> method is called, which 
+  loads an object with a <code>name</code> parameter (taken from the textbox) 
+  and a <code>callback</code> parameter. Then, the <code>makeRequest()</code> 
+  function is called, passing in these values. After the script has been loaded, 
+  the <code>messageFromServer()</code> function will be called, popping up a message 
+  displaying what was received from the server. <a href="http://www.webreference.com/programming/ajax_tech/example2.htm" target="_blank">Try 
+  it</a> for yourself or <a href="http://www.webreference.com/programming/ajax_tech/example.zip">download</a> both examples.</p>
+<h3>Drawbacks</h3>
+<p>Though dynamic script loading is a quick and easy way to establish
+client-server communication, it does have some drawbacks. For one,
+there is no feedback once the communication is initiated. If, for
+example, the file you are accessing doesn't exist, there is no way for
+you to receive a 404 error from the server. Your site or application
+may sit, waiting, because the callback function was never called. </p>
+<p>Also, you can't send a POST request using this technique, only a GET, which 
+  limits the amount of data that you can send. This could also be a security issue: 
+  make sure you don't send confidential information such as passwords using dynamic 
+  script loading, as this information can easily be picked up from the query string.</p>
+<h3>Conclusion</h3>
+<p>Though XMLHttp is the most talked-about method for client-server communication 
+  in Ajax, dynamic script loading is a perfectly acceptable and serviceable alternative. 
+  The examples in this article were relatively simple, but it shouldn't be difficult 
+  to extend the techniques presented to accomplish  more interesting results.</p>
+<p>In the next part of this series, you'll learn how to use images and cookies 
+  to establish Ajax functionality that works in nearly every browser that supports 
+  JavaScript. </p>
+<h3>About the Author</h3>
+<p>Nicholas C. Zakas is a user interface designer for Web applications and the 
+  author of <a href="http://books.internet.com/books/0764579088">Professional 
+  JavaScript for Web Developers</a> (Wiley Press, ISBN 0764579088). Nicholas can 
+  be contacted through his Web site, http://www.nczonline.net/, 
+  where he provides open source JavaScript libraries and tools.<br></p>
+  
+
+
+<table align="center" border="0" width="100%">
+<tbody><tr valign="top">
+    <td align="left"> <strong><a href="http://www.webreference.com/">home</a> / <a href="http://www.webreference.com/programming/">programming</a> 
+      /  <a href="http://www.webreference.com/programming/ajax_tech">ajax_tech</a> / <a href="http://www.webreference.com/programming/ajax_tech/index.html">1</a></strong></td>
+    <td align="right"><a href="http://www.webreference.com/programming/ajax_tech/index.html"><img src="2_files/b_left.gif" alt="To page 1" border="0" width="18" height="18"></a><img src="2_files/b_center.gif" alt="current page" border="0" width="18" height="18"><br>
+       <a href="http://www.webreference.com/programming/ajax_tech/index.html">[previous]</a></td>
+</tr></tbody></table>
+
+<!-- START AD -->
+<div class="WRBannerCenter" align="center">
+<script type="text/javascript">
+<!--
+OAS_AD('468x60-2');
+//-->
+</script>
+<noscript>
+<a
+href="http://63.236.18.118/RealMedia/ads/click_nx.ads/intm/webdev/www.webreference.com/programming/ajax_tech@flex,ciu,336x280,imu-right,house_ribbon,125x125-1,125x800,468x60-1,468x60-2,sitetext-1,sitetext-2,cp1,cp10,cp11,cp12,cp13,cp14,cp2,cp3,cp4,cp5,cp6,cp7,cp8,cp9!468x60-2"
+>
+<img
+src="http://63.236.18.118/RealMedia/ads/adstream_nx.ads/intm/webdev/www.webreference.com/programming/ajax_tech@flex,ciu,336x280,imu-right,house_ribbon,125x125-1,125x800,468x60-1,468x60-2,sitetext-1,sitetext-2,cp1,cp10,cp11,cp12,cp13,cp14,cp2,cp3,cp4,cp5,cp6,cp7,cp8,cp9!468x60-2"
+border='0' alt=''>
+</a>
+</noscript></div>
+<script type="text/javascript">
+var dc_UnitID = 14;
+var dc_PublisherID = 7857;
+var dc_AdLinkColor = 'blue';
+var dc_adprod='ADL';
+var dc_open_new_win = 'yes'; 
+</script>
+<script style="display: none;" type="text/javascript" src="2_files/KonaLibInline.js"></script>
+
+<!-- END AD -->
+<p align="center"> 
+  <!-- Google Analytics -->
+<script src="2_files/ga.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+<!--     hide from no js browsers
+delete Array.prototype.itemValidation;
+delete Array.prototype.isArray;
+var superTracker = _gat._getTracker("UA-2838492-1");
+superTracker._initData();
+superTracker._trackPageview();
+
+-->
+</script>
+<script type="text/javascript">
+   var site_name =  location.hostname;
+   if ( site_name.indexOf("www.") != 0 ) {
+     site_name  = "www."+site_name ;
+   }
+   document.write("<SCR" + "IPT LANGUAGE='JavaScript1.2' SRC='/icom_includes/footers/sites/"+ site_name +".js' TYPE='text/javascript'><\/SCR" + "IPT>");
+-->
+</script><script language="JavaScript1.2" src="2_files/www.js" type="text/javascript"></script>
+<script type="text/javascript">
+<!--     hide from no js browsers
+   pageTracker._initData();
+   pageTracker._trackPageview();
+   // -->
+</script>
+<!-- End Google Analytics -->
+
+
+<!-- Revenue Science API -->
+<script src="2_files/gw.js"></script>
+<script>
+  DM_addEncToLoc("pid","INT");
+  DM_tag();
+</script>
+<!-- Revenue Science API -->
+
+
+
+
+<style type="text/css">
+@charset "UTF-8";
+/* CSS Document */
+
+
+/* JOM CSS */
+
+#jomfooter {
+	border: 0;
+	margin: 5px;
+	padding: 5px;
+	}
+
+#jomfooter * {
+	font-family: Arial, Helvetica, sans-serif;
+	padding: 0;
+	margin: 0;
+	}
+
+#jomfooter img {
+	border: 0;
+	behavior: url('/icom_includes/footers/css/iepngfix.htc');
+	padding: 5px;
+	padding: expression('0');
+	}
+
+#jomfooter p {
+	font-size: 11px;
+	line-height: 20px;
+	margin: 10px;
+	}
+
+#jomfooter form b {
+	font-size: 12px;
+	}
+
+#jomfooter a {
+	text-decoration: underline;
+	}
+
+#jomfooter a:hover {
+	text-decoration: none;
+	}
+
+#jomfooter table td {
+	border: 0;
+	}
+
+
+/* GEMS Solutions CSS */
+
+#jomfooter #solsect {
+	margin: 0 auto;
+	padding: 10px 0;
+	width: 720px;
+	}
+
+#jomfooter #solsect .top {
+	background: url('/icom_includes/footers/soltopbg.gif') repeat-x #bbb;
+	height: 26px;
+	margin-bottom: 1px;
+	}
+
+#jomfooter #solsect .top a {
+	font-size: 16px;
+	font-weight: bold;
+	color:#333;
+	text-decoration:none;
+	margin-left: 5px;
+	padding: 0;
+	line-height: 25px;
+	}
+
+#jomfooter #solsect .top a:hover {
+	text-decoration: none;
+	}
+
+#jomfooter #solsect .solsectpad {
+	background: #fff;
+	}
+
+#jomfooter #solsect .solsectpad .main {
+	background:url('/icom_includes/footers/solmidbg.gif') repeat-x #e7e8e3;
+	padding: 5px;
+	margin-bottom: 1px;
+	}
+
+#jomfooter #solsect .solsectpad .main h2 {
+	font-size: 12px;
+	color: #000;
+	font-weight: normal;
+	padding-bottom: 3px;
+	}
+
+#jomfooter #solsect a {
+	color: #333;
+	font-size: 10px;
+	text-decoration: none;
+	line-height: 13px;
+	}
+
+#jomfooter #solsect a:hover {
+	text-decoration: underline;
+	}
+</style>
+
+
+
+<!-- Begin JOM Footer -->
+
+
+</p><div id="jomfooter" align="center">
+
+    <img src="2_files/wmb_footer.png" width="174" height="19" hspace="0">
+    <p align="center"> 
+        <a target="_blank" href="http://www.internet.com/"><img src="2_files/intm_footer.png" alt="internet.com" align="absmiddle" border="0" width="97" height="15" hspace="0"></a><img src="2_files/ruledivide_foot.gif" alt="" align="absmiddle" border="0" width="1" height="25" hspace="10"><a target="_blank" href="http://www.mediabistro.com/"><img src="2_files/mb_footer.png" alt="mediabistro.com" align="absmiddle" border="0" width="102" height="44" hspace="5"></a><img src="2_files/ruledivide_foot.gif" alt="" align="absmiddle" border="0" width="1" height="25" hspace="10"><a target="_blank" href="http://www.justtechjobs.com/"><img src="2_files/jtj_footer.png" alt="Justtechjobs.com" align="absmiddle" border="0" width="99" height="13" hspace="0"></a><img src="2_files/ruledivide_foot.gif" alt="" align="absmiddle" border="0" width="1" height="25" hspace="10"><a target="_blank" href="http://www.graphics.com/"><img src="2_files/gdc_footer.png" alt="Graphics.com" align="absmiddle" border="0" width="108" height="18" hspace="0"></a>
+
+    </p>
+    <form method="post" action="http://search.internet.com/www.jupiterweb.com" target="_top">        
+        <input name="IC_Summary" value="1" type="hidden">
+        <input name="IC_StartNumber" value="0" type="hidden">
+        <input name="IC_BatchSize" value="10" type="hidden">
+        <input name="IC_RelevanceThreshold" value="50" type="hidden">
+        <input name="IC_QueryDatabase" value="all" type="hidden">
+        <b>Search:</b> 
+        <input name="IC_QueryText" size="45" type="text">
+
+        <input value="Find" name="SUBMIT" src="2_files/but_find.gif" align="absmiddle" border="0" type="image" width="41" height="20">
+    </form>
+    <p>
+        <a target="_blank" rel="nofollow" href="http://www.webmediabrands.com/"> WebMediaBrands Corporate Info</a> 
+        <br><script type="text/javascript">
+            document.write(' Copyright ');
+            var today = new Date();
+            document.write(  + today.getFullYear());
+            document.write(' WebMediaBrands Inc. All Rights Reserved.');
+        </script> Copyright 2009 WebMediaBrands Inc. All Rights Reserved.
+        <noscript>Copyright 2009 WebMediaBrands Inc. All Rights Reserved.</noscript>
+    </p>
+       <p> <a target="_blank" rel="nofollow" href="http://www.webmediabrands.com/corporate/legal.html">Legal Notices</a>, <a target="_blank" rel="nofollow" href="http://www.webmediabrands.com/corporate/reprints.html#Licensing1">Licensing</a>, <a target="_blank" rel="nofollow" href="http://www.webmediabrands.com/corporate/reprints.html#Reprints1">Reprints</a>, <a target="_blank" rel="nofollow" href="http://www.webmediabrands.com/corporate/reprints.html#Permissions">Permissions</a>, <a target="_blank" rel="nofollow" href="http://www.webmediabrands.com/corporate/privacy/privacypolicy.html">Privacy  Policy</a>.
+        <br>
+
+        <a target="_blank" rel="nofollow" href="http://www.internet.com/mediakit/">Advertise</a> | <a target="_blank" rel="nofollow" href="http://e-newsletters.internet.com/">Newsletters</a> | <a target="_blank" href="http://www.internetshopper.com/">Shopping</a> | <a target="_blank" rel="nofollow" href="http://e-newsletters.internet.com/announcement_list.html">E-mail Offers</a>
+    </p>
+
+<!-- start solutions links section -->
+    <div id="solsect">
+        <div class="top" align="left"><a href="#">Solutions</a></div>
+        <div class="solsectpad">
+                        <div class="main" align="left">
+				<h2>Whitepapers and eBooks</h2>
+                <table border="0" cellpadding="0" cellspacing="0">
+                    <tbody><tr>
+                        <td align="left" valign="top" width="50%">
+                                                        <a target="_blank" href="http://www.devx.com/SQL_Server/Article/41039">Microsoft Article: Transparent Data Encryption Helps Secure Corporate Data </a><br>
+						   						                              <a target="_blank" href="http://www.devx.com/IBMSC/Door/31521">IBM CXO Whitepaper: The 2008 Global CEO Study - The Enterprise of the Future.</a><br>
+						   						                              <a target="_blank" href="http://www.devx.com/ebook/Article/38087">Internet.com eBook: Becoming a Better Project Manager </a><br>
+						   						                              <a target="_blank" href="http://www.devx.com/MS_Partner/Door/35665">Microsoft Partner Portal:  Partner Marketing Requires a Game Plan </a><br>
+						                               </td>
+                        <td width="10"> </td>
+                        <td align="left" valign="top" width="50%">
+												                              <a target="_blank" href="http://www.devx.com/ebook/Article/40784">Internet.com eBook: Web Development Frameworks for Java</a><br>
+						   						                              <a target="_blank" href="http://www.devx.com/ebook/Article/40319">Internet.com eBook: Developing a Content Management System Strategy</a><br>
+						   						                              <a target="_blank" href="http://www.devx.com/HPSC/Link/34708">HP eBook: Easy Storage for the SMB--Has the Time Come?</a><br>
+						   						                              <a target="_blank" href="http://www.devx.com/solutions">MORE WHITEPAPERS, EBOOKS, AND ARTICLES</a><br>
+						   						                          </td>
+                    </tr>
+                </tbody></table>
+            </div>
+                        <div class="main" align="left">
+				<h2>Webcasts</h2>
+                <table border="0" cellpadding="0" cellspacing="0">
+                    <tbody><tr>
+                        <td align="left" valign="top" width="50%">
+                                                        <a target="_blank" href="http://www.devx.com/MS_Partner/Door/35665">Microsoft Partner Portal Video: Microsoft Gold Certified Partners Build Successful Practices</a><br>
+						   						                              <a target="_blank" href="http://www.devx.com/HPSC/Door/39473">HP On Demand Webcast: Grid Computing Meets Business </a><br>
+						                               </td>
+                        <td width="10"> </td>
+                        <td align="left" valign="top" width="50%">
+												                              <a target="_blank" href="http://www.devx.com/solutions">MORE WEBCASTS, PODCASTS, AND VIDEOS</a><br>
+						   						                          </td>
+                    </tr>
+                </tbody></table>
+            </div>
+                        <div class="main" align="left">
+				<h2>Downloads and eKits</h2>
+                <table border="0" cellpadding="0" cellspacing="0">
+                    <tbody><tr>
+                        <td align="left" valign="top" width="50%">
+                                                        <a target="_blank" href="http://www.devx.com/RIA/Door/35735">Microsoft Download: Silverlight 2 SDK</a><br>
+						   						                              <a target="_blank" href="http://www.devx.com/IronSpeedVS/Door/17479">Iron Speed Designer Application Generator</a><br>
+						   						                              <a target="_blank" href="http://www.devx.com/RIA/Door/35735">Microsoft Download: Silverlight 2 Developer Runtime (Windows)</a><br>
+						                               </td>
+                        <td width="10"> </td>
+                        <td align="left" valign="top" width="50%">
+												                              <a target="_blank" href="http://www.devx.com/Amyuni/Link/39455">Amyuni Download: PDF and XPS Engine for Your .NET and ActiveX Applications</a><br>
+						   						                              <a target="_blank" href="http://www.devx.com/solutions">MORE DOWNLOADS, EKITS, AND FREE TRIALS</a><br>
+						   						                          </td>
+                    </tr>
+                </tbody></table>
+            </div>
+                        <div class="main" align="left">
+				<h2>Tutorials and Demos</h2>
+                <table border="0" cellpadding="0" cellspacing="0">
+                    <tbody><tr>
+                        <td align="left" valign="top" width="50%">
+                                                        <a target="_blank" href="http://www.devx.com/RIA/Article/40806">Microsoft Article: Getting Started with Silverlight for Eclipse</a><br>
+						   						                              <a target="_blank" href="http://www.devx.com/HotList/Link/40644">Internet.com Hot List: Get the Inside Scoop on the Hottest IT and Developer Products</a><br>
+						                               </td>
+                        <td width="10"> </td>
+                        <td align="left" valign="top" width="50%">
+												                              <a target="_blank" href="http://www.devx.com/IBMVS/Link/40252">IBM Cognos 8 BI Reporting Demo</a><br>
+						   						                              <a target="_blank" href="http://www.devx.com/solutions">MORE TUTORIALS, DEMOS AND STEP-BY-STEP GUIDES</a><br>
+						   						                          </td>
+                    </tr>
+                </tbody></table>
+            </div>
+                    </div>
+    </div>
+</div>
+
+<!-- End JOM Footer -->
+
+<center>
+
+<table class="twidth" bgcolor="#000000" border="0" cellpadding="2" cellspacing="0" width="100%">
+
+<tbody><tr><td><table bgcolor="#ffcc00" border="0" cellpadding="2" cellspacing="0" width="100%">
+
+<tbody><tr bgcolor="#ffffff" valign="top">
+
+<td colspan="2" class="includebig" align="left" width="60%"><a href="http://www.webreference.com/"><img src="2_files/l_webref32x16.gif" alt="webref" border="0" width="32" height="16"></a>&nbsp;<b>The latest from <a href="http://www.webreference.com/">WebReference.com</a></b>
+</td>
+
+<td class="include" align="right" bgcolor="#ffffff"><span style="color: blue;"><a href="http://www.webreference.com/index2.html">Browse</a>&nbsp;&gt;</span></td>
+
+<td bgcolor="#ffffff" width="1%"><form class="tb" name="WRmenu" method="post" action="/cgi-bin/redirect.cgi" onsubmit="return false">
+<table border="0" cellpadding="0" cellspacing="0" width="100%"><tbody><tr><td>
+<select class="SUBMITTER" name="WRm" onchange="if(this.form.elements[0].options[this.form.elements[0].selectedIndex].value !='#') {window.location.href=this.form.elements[0].options[this.form.elements[0].selectedIndex].value};">
+<option value="/index2.html" selected="selected">Site Contents
+</option><option value="#">- - - - -
+</option><option value="/experts/">Experts
+</option><option value="/3d/">* 3D Animation
+</option><option value="/dlab/">* Design
+</option><option value="/dhtml/">* DHTML
+</option><option value="/graphics/">* Graphics
+</option><option value="/html/">* HTML
+</option><option value="/js/">* JavaScript
+</option><option value="/perl/">* Perl
+</option><option value="/xml/">* XML
+</option><option value="#">- - - - -
+</option><option value="/index2.html">Web Resources
+</option><option value="/authoring/">* Authoring
+</option><option value="/authoring/design/">* Design
+</option><option value="/internet/">* Internet
+</option><option value="/multimedia/">* Multimedia
+</option><option value="/programming/">* Programming
+</option><option value="/promotion/">* Promotion
+</option><option value="#">- - - - -
+</option><option value="/services/">Services
+</option><option value="/interviews/">* Interviews
+</option><option value="/new/">* Newsletters
+</option><option value="/reviews/">* Reviews
+</option><option value="/cgi-bin/search.cgi">* Search
+</option><option value="/tools/">* Tools
+</option></select></td><td><input class="SUBMITTER" value="Go" onclick="if(this.form.elements[0].options[this.form.elements[0].selectedIndex].value !='#') {window.location.href=this.form.elements[0].options[this.form.elements[0].selectedIndex].value};" type="submit"></td></tr></tbody></table></form></td></tr>
+
+<tr bgcolor="#ffffff">
+<td colspan="4" class="include">
+
+   
+   <a href="http://www.webreference.com/programming/javascript/rg27/">Building a Client-Side Ajax Cache: Caching Algorithms</a>
+
+    · 
+   <a href="http://www.webreference.com/programming/adobe_air/working_with_windows/">Adobe AIR Programming Unleashed: Working with Windows</a>
+
+    · 
+   <a href="http://www.webreference.com/programming/php/user_personalization/index.html">User Personalization with PHP: Beginning the Application</a>
+</td>
+</tr>
+
+<tr bgcolor="#ffffff" valign="top">
+<td colspan="2" class="include"><a href="http://www.webreference.com/index2.html">Sitemap</a> · <a href="http://www.webreference.com/experts/">Experts</a> · <a href="http://www.webreference.com/tools/">Tools</a> · <a href="http://www.webreference.com/services/">Services</a> · <a href="http://www.webreference.com/_email/email_a_colleague.html">Email a Colleague</a> · <a href="http://www.webreference.com/cgi-bin/suggest.cgi">Contact</a>
+</td>
+
+<td class="include" align="right"><a href="http://www.webreference.com/new/"><span style="color: blue;"> FREE&nbsp;Newsletters&nbsp;</span></a>&gt;&nbsp;</td>
+
+<td><form class="tb" method="post" action="http://member.internet.com/subscribe.php" target="_new"><table border="0" cellpadding="0" cellspacing="0" width="100%"><tbody><tr><td><input name="list_names[]" value="webreference-update-html" type="hidden"></td><td><input class="SUBMITTER" name="Submit" value="Signup" type="submit"></td></tr></tbody></table></form></td>
+
+</tr>
+
+<tr bgcolor="#ffffff" valign="top">
+
+<td colspan="4" class="includebig" align="left">&nbsp;<b>The latest from <a href="http://www.internet.com/">internet.com</a></b>
+</td></tr>
+
+<tr bgcolor="#ffffff">
+<td colspan="4" class="include">
+   
+   <a href="http://www.enterpriseitplanet.com/networking/features/article.php/3808936">Getting Started With Subversion</a>
+
+    · 
+   <a href="http://www.voipplanet.com/solutions/article.php/3808451">Vertical Launches Slimmed-down VoIP System for Businesses with Under 50 Seats</a>
+
+    · 
+   <a href="http://www.wi-fiplanet.com/news/article.php/3808011">Wi-Fi Product Watch, March 2009</a>
+
+</td>
+</tr>
+</tbody></table>
+
+</td></tr>
+</tbody></table>
+</center>
+<p align="center">
+
+
+
+  Created: March 27, 2003<br>
+ Revised: February 10, 2006 </p>
+<p align="center"><small>URL: http://webreference.com/programming/ajax_tech/1</small></p>
+</body></html>
