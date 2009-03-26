@@ -242,8 +242,7 @@ class GraphCorrectnessTest(unittest.TestCase):
 
 class GraphPerformanceTest(unittest.TestCase):
 
-	graph_setup = "from graph.base import Graph; g = Graph(('name',), 
-('name',)); n = g.add_node(name='');"
+	graph_setup = "from graph.base import Graph; g = Graph(('name',), ('name',)); n = g.add_node(name='');"
 
 	def testNodeAdditionPerformance(self):
 		setup = self.graph_setup
