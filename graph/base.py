@@ -61,14 +61,14 @@ points. Don't forget them!
 
 To iterate over all the nodes in a graph:
 
-	>>> for node in g.get_all_nodes():
+	>>> for node in g.get_nodes():
 	>>>	print(node)
 	Node(name="bob")
 	Node(name="agamemnon")
 
 And, for edges:
 
-	>>> for edge in g.get_all_edges():
+	>>> for edge in g.get_edges():
 	>>> 	print(edge)
 	Edge(start=1, end=2, weight=5)
 
@@ -85,7 +85,7 @@ Traversals are just as simple:
 and similar for depth first traversals. 
 """
 
-# Copyright (C) 2009 Geremy Condra and OpenMigration, LLC
+# Copyright (C) 2009 Geremy Condra
 #
 # This file is part of Graphine.
 # 
@@ -110,7 +110,17 @@ class Graph(object):
 	"""Base class for all Graph mixins"""
 
 	def __init__(self, node_properties, edge_properties):
-		"""base initializer"""
+		"""Base initializer for Graphs.
+
+		To build a new Graph, just instantiate this with
+		the properties you want your Nodes and Edges to
+		have, eg, if I want named nodes and weighted edges:
+		
+		>>> g = Graph(["name"], ["weight"])
+	
+		I used a list here, but any iterable will suffice,
+		including dictionaries.
+		"""
 		# add required attributes to edges
 		edge_properties =  ("start", "end") + tuple(edge_properties)
 		# instantiate node and edge classes
@@ -158,26 +168,9 @@ class Graph(object):
 		"""deletes the item corresponding to the given uid"""
 		# if its a node
 		if uid > 0:
-			# remove it from node storage
-			n = self.nodes.pop(uid)
-			# remove it from adjacency tracking
-			try:
-				del self.adjacency_list[uid]
-			except:
-				pass
-			# add it to the untracked uids
-			self.unused_node_uids.append(uid)
-			# pass it back to the caller
-			return n
+			return self.remove_node(uid)
 		else:
-			# remove it from edge storage
-			e = self.edges.pop(uid)
-			# remove it from adjacency tracking
-			self.adjacency_list[e.start].remove(e.end)
-			# add it to the untracked uids
-			self.unused_edge_uids.append(uid)
-			# pass it back to the caller
-			return e
+			return self.remove_edge(uid)
 
 	def get_node_uid(self):
 		"""gets a natural number uid for a new node"""
@@ -193,64 +186,151 @@ class Graph(object):
 		except:
 			return -len(self.edges) - 1
 
-	def get_node_uids(self):
+	def node_uids(self):
 		"""Iterates over all node uids"""
 		for uid in self.nodes:
 			yield uid
 
-	def get_edge_uids(self):
+	def edge_uids(self):
 		"""Iterates over all edge uids"""
 		for uid in self.edges:
 			yield uid
 
 	def add_node(self, **kwargs):
-		"""Adds a node to the current graph."""
+		"""Adds a node to the current graph.
+
+		kwargs should include all the fields required to
+		instantiate your Node class, eg:
+		
+		>>> g = Graph(["name"], [])
+		>>> g.add_node(name="bob")
+
+		Giving fewer, more, or differently named fields
+		will throw an error.
+		"""
 		uid = self.get_node_uid()
 		self.nodes[uid] = self.Node(**kwargs)
 		return uid
 
 	def add_edge(self, start, end, **kwargs):
-		"""Adds an edge to the current graph."""
+		"""Adds an edge to the current graph.
+
+		The same notes on adding nodes apply here,
+		eg, make sure that you provide a value for
+		all the properties in your Edge.
+		"""
 		uid = self.get_edge_uid()
 		self.edges[uid] = self.Edge(start=start, end=end, **kwargs)
 		self.adjacency_list[start].add(end)
 		return uid
 
 	def modify_node(self, uid, **kwargs):
-		"""Modifies an existing node according to kwargs"""
+		"""Modifies an existing node.
+		
+		Essentially, this does a dictionary update on the
+		node. Note that you can't add or remove attributes 
+		this way, just set their values, eg:
+
+		>>> bill = g.add_node(name="bill")
+		>>> bob = g.modify_node(name="bob")
+		>>> # bill and bob are uid's, not Nodes
+		>>> bill is bob
+		True
+		>>> g[bob]
+		Node(name="bob")
+		>>> g[bill]
+		Node(name="bob")
+		>>> # trying to turn bob evil...
+		>>> g.modify_node(bob, mustache=True)
+		...stack trace...
+		ValueError: Got unexpected field names: ...
+
+		"""
 		n = self[uid]
 		n = n._replace(**kwargs)
 		self[uid] = n
 		return uid
 
 	def modify_edge(self, uid, **kwargs):
-		"""Modifies an existing edge according to kwargs"""
+		"""Modifies an existing edge.
+
+		See the notes on modify_edges for more information.
+		"""
 		e = self[uid]
 		e = e._replace(**kwargs)
 		self[uid] = e
 		return uid
 
-	def get_all_nodes(self):
+	def remove_node(self, uid):
+		"""Removes a node from the graph.
+
+		Note that this does not remove the edges that
+		had this node as a terminus, it simply removes
+		them from the adjacency listing. It is up
+		to the programmer to ensure that bad things
+		don't happen:
+
+		>>> # ok...
+		>>> bob = g.add_node(name="bob")
+		>>> bill = g.add_node(name="bill")
+		>>> e = g.add_edge(bob, bill)
+		>>> g.remove_node(bob)
+		1
+		>>> # still ok...
+		>>> for node in g.get_adjacent_nodes(bob):
+		>>> 	print(node)
+		>>>
+		>>> # BADBADBAD
+		>>> for edge in g.get_edges_by_properties(start=bob, end=bill):
+			print(edge)
+		Edge(start=1, end=2)
+		>>>
+
+		"""
+		# remove it from node storage
+		n = self.nodes.pop(uid)
+		# remove it from adjacency tracking
+		try:
+			del self.adjacency_list[uid]
+		except:
+			pass
+		# add it to the untracked uids
+		self.unused_node_uids.append(uid)
+		# pass it back to the caller
+		return n
+
+	def remove_edge(self, uid):
+		"""Removes an edge from the graph"""
+		# remove it from edge storage
+		e = self.edges.pop(uid)
+		# remove it from adjacency tracking
+		self.adjacency_list[e.start].remove(e.end)
+		# add it to the untracked uids
+		self.unused_edge_uids.append(uid)
+		# pass it back to the caller
+		return e
+
+	def get_nodes(self):
 		"""Iterates over all the nodes."""
 		for node in self.nodes.values():
 			yield node
 
-	def get_all_edges(self):
+	def get_edges(self):
 		"""Iterates over all the edges."""
 		for edge in self.edges.values():
 			yield edge
 
-	def get_nodes_by_properties(self, **kwargs):
+	def search_nodes(self, **kwargs):
 		"""Convenience function to get nodes based on some properties."""
-		for node in self.get_all_nodes():
+		for node in self.get_nodes():
 			for k, v in kwargs.items():
 				if not v == getattr(node, k):
 						continue
 				yield node
 
-	def get_edges_by_properties(self, **kwargs):	
+	def search_edges(self, **kwargs):	
 		"""Convenience function to get edges based on some properties."""
-		for node in self.get_all_edges():
+		for node in self.get_edges():
 			for k, v in kwargs.items():
 				if not v == getattr(node, k):
 					continue

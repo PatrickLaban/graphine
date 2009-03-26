@@ -137,8 +137,8 @@ class GraphCorrectnessTest(unittest.TestCase):
 		d_to_p = g.add_edge(dan, paul, distance=2850)
 
 		# test for equivalence
-		self.failUnlessEqual(set(g.get_all_nodes()), set((g[jimmy], g[ted], g[dan], g[paul])))
-		self.failUnlessEqual(set(g.get_nodes_by_properties(city="New York")), set((g[jimmy],)))
+		self.failUnlessEqual(set(g.get_nodes()), set((g[jimmy], g[ted], g[dan], g[paul])))
+		self.failUnlessEqual(set(g.search_nodes(city="New York")), set((g[jimmy],)))
 
 	def testEdgeGetting(self):
 		g = self.g
@@ -155,8 +155,8 @@ class GraphCorrectnessTest(unittest.TestCase):
 		d_to_p = g.add_edge(dan, paul, distance=2850)
 
 		# test for equivalence
-		self.failUnlessEqual(set(g.get_all_edges()), set((g[j_to_t], g[t_to_d], g[d_to_p])))
-		self.failUnlessEqual(set(g.get_edges_by_properties(distance=2850)), set((g[d_to_p],)))
+		self.failUnlessEqual(set(g.get_edges()), set((g[j_to_t], g[t_to_d], g[d_to_p])))
+		self.failUnlessEqual(set(g.search_edges(distance=2850)), set((g[d_to_p],)))
 
 	def testNodeAdjacency(self):
 		g = self.g
@@ -258,13 +258,13 @@ class GraphPerformanceTest(unittest.TestCase):
 
 	def testNodeIterationPerformance(self):
 		setup = self.graph_setup + "\nfor i in range(1000): \n\tg.add_node(name=i)"
-		test = "for i in g.get_all_nodes(): pass"
+		test = "for i in g.get_nodes(): pass"
 		t = timeit.timeit(setup=setup, stmt=test, number=1000)
 		self.failUnless(t < 20, msg="Performance check failed: it took %s seconds to iterate through 1M nodes" % t)
 
 	def testNodeSearchPerformance(self):
 		setup = self.graph_setup + "\nfor i in range(1000): \n\tg.add_node(name=i)"
-		test = "[i for i in g.get_nodes_by_properties(name=999)]"
+		test = "[i for i in g.search_nodes(name=999)]"
 		t = timeit.timeit(setup=setup, stmt=test, number=1000)
 		self.failUnless(t < 20, msg="Performance check failed: it took %s seconds to iterate through 1M nodes" % t)
 
@@ -282,13 +282,13 @@ class GraphPerformanceTest(unittest.TestCase):
 
 	def testEdgeIterationPerformance(self):
 		setup = self.graph_setup + "\nfor i in range(1000): \n\tg.add_edge(n, n, name='a')"
-		test = "for i in g.get_all_edges(): pass"
+		test = "for i in g.get_edges(): pass"
 		t = timeit.timeit(setup=setup, stmt=test, number=1000)
 		self.failUnless(t < 20, msg="Performance check failed: it took %s seconds to iterate through 1M edges" % t)
 
 	def testEdgeSearchPerformance(self):
 		setup = self.graph_setup + "\nfor i in range(1000): \n\tg.add_edge(n, n, name='a')"
-		test = "[i for i in g.get_edges_by_properties(start='')]"
+		test = "[i for i in g.search_edges(start='')]"
 		t = timeit.timeit(setup=setup, stmt=test, number=1000)
 		self.failUnless(t < 20, msg="Performance check failed: it took %s seconds to iterate through 1M edges" % t)
 
