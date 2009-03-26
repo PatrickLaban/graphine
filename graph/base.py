@@ -10,6 +10,79 @@ Licensed under the GNU GPLv3
 Released 25 Mar 2009
 
 This module contains Graphine's base graph represenatation.
+
+The goal of Graph is to provide a flexible, easy to use,
+somewhat fast graph implementation. It should be seen as
+a firm foundation for later extension, providing all the
+tools a developer needs to create the appropriate data
+structure for their task with only slight modification.
+
+Interface summary:
+
+To create a new Graph:
+
+	>>> from graph.base import Graph
+	>>> # I need named nodes and weighted edges
+	>>> g = Graph(["name"], ["weight"])
+
+To add nodes:
+
+	>>> node_1 = g.add_node(name="bob")
+	>>> node_2 = g.add_node(name="agamemnon")
+
+To add edges:
+
+	>>> edge_1 = g.add_edge(node_1, node_2, weight=5)
+
+Note that what you're getting back isn't a full
+node or edge, eg:
+
+	>>> node_1
+	1
+	>>> node_2
+	2
+	>>> edge_1
+	-1
+
+As you can see, its just an id used to uniquely
+identify it to the graph. To get the full object,
+just ask nicely:
+
+	>>> g[node_1]
+	Node(name="bob")
+
+The same thing works for edges:
+
+	>>> g[edge_1]
+	Edge(start=1, end=2, weight=5)
+
+Notice again that it uses those uids as reference
+points. Don't forget them!
+
+To iterate over all the nodes in a graph:
+
+	>>> for node in g.get_all_nodes():
+	>>>	print(node)
+	Node(name="bob")
+	Node(name="agamemnon")
+
+And, for edges:
+
+	>>> for edge in g.get_all_edges():
+	>>> 	print(edge)
+	Edge(start=1, end=2, weight=5)
+
+Of course, if you want to get the uids, just use get_node_uids
+or get_edge_uids.
+
+Traversals are just as simple:
+
+	>>> for node_uid in g.depth_first_traversal(node_1):
+	>>> 	print(g[node_uid])
+	Node(name="bob")
+	Node(name="agamemnon")
+
+and similar for depth first traversals. 
 """
 
 # Copyright (C) 2009 Geremy Condra and OpenMigration, LLC
@@ -171,21 +244,15 @@ class Graph(object):
 		"""Convenience function to get nodes based on some properties."""
 		for node in self.get_all_nodes():
 			for k, v in kwargs.items():
-				try:
-					if not v == getattr(node, k):
+				if not v == getattr(node, k):
 						continue
-				except:
-					continue
 				yield node
 
 	def get_edges_by_properties(self, **kwargs):	
 		"""Convenience function to get edges based on some properties."""
 		for node in self.get_all_edges():
 			for k, v in kwargs.items():
-				try:
-					if not v == getattr(node, k):
-						continue
-				except:
+				if not v == getattr(node, k):
 					continue
 				yield node
 
