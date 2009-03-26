@@ -39,7 +39,7 @@ class GraphCorrectnessTest(unittest.TestCase):
 	def setUp(self):
 		node_properties = ["city"]
 		edge_properties = ["distance"]
-		self.g = graph.Graph(node_properties, edge_properties)
+		self.g = Graph(node_properties, edge_properties)
 
 	def testNodeCreation(self):
 		g = self.g
@@ -189,7 +189,7 @@ class GraphCorrectnessTest(unittest.TestCase):
 
 	def testDepthFirstTraversal(self):
 		# setup
-		g = graph.Graph(("name"), tuple())
+		g = Graph(("name"), tuple())
 		nodes = {}
 		edges = []
 		nodes["A"] = g.add_node(name="A")
@@ -217,7 +217,7 @@ class GraphCorrectnessTest(unittest.TestCase):
 
 	def testBreadthFirstTraversal(self):
 		# setup
-		g = graph.Graph(("name"), tuple())
+		g = Graph(("name"), tuple())
 		nodes = {}
 		edges = []
 		nodes["A"] = g.add_node(name="A")
