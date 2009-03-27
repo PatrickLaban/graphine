@@ -104,7 +104,7 @@ and similar for depth first traversals.
 
 
 from collections import deque, defaultdict, namedtuple
-from functools import partial
+from weakref import WeakValueDictionary
 
 
 class Graph(object):
@@ -142,7 +142,8 @@ class Graph(object):
 
 	def __contains__(self, element):
 		"""returns True if the element is a member of the graph"""
-		if element.uid > 0:
+		#XXX ugly way to tell- is there a better one?
+		if element.__class__.__name__ == "Node":
 			return element in self.nodes.values()
 		else:
 			return element in self.edges.values()
@@ -291,7 +292,7 @@ class Graph(object):
 		>>>
 		>>> # BADBADBAD
 		>>> for edge in g.search_edges(start=bob, end=bill):
-			print(edge)
+		>>>	print(edge)
 		Edge(start=1, end=2)
 		>>>
 

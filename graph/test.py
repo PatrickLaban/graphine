@@ -32,7 +32,7 @@ This contains all the test data for Graphine.
 
 import unittest
 import timeit
-from graph.base import Graph
+from base import Graph
 
 class GraphCorrectnessTest(unittest.TestCase):
 
@@ -269,14 +269,14 @@ class GraphCorrectnessTest(unittest.TestCase):
 		wanted_nodes = [nodes["A"], nodes["B"], nodes["E"]]
 		wanted_edges = [edges[0], edges[6]]
 		new_graph = g.generate_subgraph(*wanted_nodes)
-		new_nodes = list(node for node in new_graph.get_nodes())
-		new_edges = list(edge for edge in new_graph.get_edges())
-		self.failUnlessEqual(list((g[n] for n in wanted_nodes)), new_nodes)
-		self.failUnlessEqual(list((g[e] for e in wanted_edges)), new_edges)
+		new_nodes = set(node for node in new_graph.get_nodes())
+		new_edges = set(edge for edge in new_graph.get_edges())
+		self.failUnlessEqual(set((g[n] for n in wanted_nodes)), new_nodes)
+		self.failUnlessEqual(set((g[e] for e in wanted_edges)), new_edges)
 
 class GraphPerformanceTest(unittest.TestCase):
 
-	graph_setup = "from graph.base import Graph; g = Graph(('name',), ('name',)); n = g.add_node(name='');"
+	graph_setup = "from base import Graph; g = Graph(('name',), ('name',)); n = g.add_node(name='');"
 
 	def testNodeAdditionPerformance(self):
 		setup = self.graph_setup
