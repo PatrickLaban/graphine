@@ -104,6 +104,12 @@ class GraphCorrectnessTest(unittest.TestCase):
 		self.failUnlessEqual(t_to_d, -2)
 		self.failUnlessEqual(d_to_p, -3)
 
+		# ensure adjacency list is correct
+		self.failUnlessEqual(g.adjacency_list[jimmy], {j_to_t})
+		self.failUnlessEqual(g.adjacency_list[ted], {t_to_d})
+		self.failUnlessEqual(g.adjacency_list[dan], {d_to_p})
+		self.failUnlessEqual(g.adjacency_list[paul], set())
+
 		# test uid assignment after deletion
 		del g[j_to_t]
 		new_trip = g.add_edge(jimmy, ted, distance=850)

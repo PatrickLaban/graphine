@@ -129,7 +129,7 @@ class Graph(object):
 		# keep track of relevant properties
 		self.nodes = {}
 		self.edges = {}
-		# keep track of all adjacencies
+		# keep track of all adjacencies via start -> edge_uid mappings
 		self.adjacency_list = defaultdict(set)
 		# and of the available uid's
 		self.unused_node_uids = deque()		# these are positive
@@ -156,13 +156,13 @@ class Graph(object):
 			self.nodes[uid] = value
 		else:
 			e = self.edges[uid]
-			if e.start is value.start and e.end is value.end:
+			if e.start is value.start:
 				self.edges[uid] = value
 			else:
 				# disconnect the edge
-				self.adjacency_list[e.start].remove(e.end)
+				self.adjacency_list[e.start].remove(uid)
 				# and reconnect it
-				self.adjacency_list[value.start].add(value.end)
+				self.adjacency_list[value.start].add(uid)
 
 	def __delitem__(self, uid):
 		"""deletes the item corresponding to the given uid"""
@@ -220,8 +220,9 @@ class Graph(object):
 		all the properties in your Edge.
 		"""
 		uid = self.get_edge_uid()
-		self.edges[uid] = self.Edge(start=start, end=end, **kwargs)
-		self.adjacency_list[start].add(end)
+		e = self.Edge(start=start, end=end, **kwargs)
+		self.edges[uid] = e
+		self.adjacency_list[start].add(uid)
 		return uid
 
 	def modify_node(self, uid, **kwargs):
@@ -256,9 +257,12 @@ class Graph(object):
 
 		See the notes on modify_edges for more information.
 		"""
-		e = self[uid]
-		e = e._replace(**kwargs)
+		old_edge = self[uid]
+		e = old_edge._replace(**kwargs)
 		self[uid] = e
+		if old_edge.start != e.start:
+			self.adjacency_list[old_edge.start].remove(uid)
+			self.adjacency_list[e.start].add(uid)
 		return uid
 
 	def remove_node(self, uid):
@@ -304,7 +308,7 @@ class Graph(object):
 		# remove it from edge storage
 		e = self.edges.pop(uid)
 		# remove it from adjacency tracking
-		self.adjacency_list[e.start].remove(e.end)
+		self.adjacency_list[e.start].remove(uid)
 		# add it to the untracked uids
 		self.unused_edge_uids.append(uid)
 		# pass it back to the caller
@@ -321,15 +325,30 @@ class Graph(object):
 			yield edge
 
 	def search_nodes(self, **kwargs):
-		"""Convenience function to get nodes based on some properties."""
+		"""Convenience function to get nodes based on some properties.
+
+		Example:
+		
+		>>> g = Graph(["name"], [])
+		>>> jim = g.add_node(name="jim")
+		>>> bob = g.add_node(name="bob")
+		>>> for node in g.search_nodes(name="jim"):
+		>>> 	print(node)
+		Node(name="jim")
+		>>>
+
+		"""
 		for node in self.get_nodes():
 			for k, v in kwargs.items():
 				if not v == getattr(node, k):
 						continue
 				yield node
 
-	def search_edges(self, **kwargs):	
-		"""Convenience function to get edges based on some properties."""
+	def search_edges(self, **kwargs):
+		"""Convenience function to get edges based on some properties.
+
+		Works identically to search_nodes.
+		"""
 		for node in self.get_edges():
 			for k, v in kwargs.items():
 				if not v == getattr(node, k):
@@ -337,14 +356,15 @@ class Graph(object):
 				yield node
 
 	def get_adjacent_uids(self, uid):
-		"""Convenience function to get uids based on adjacency"""
+		"""Convenience function to get uids based on adjacency."""
 		yield uid
-		for adjacent_uid in self.adjacency_list.get(uid, []):
-			yield adjacent_uid
+		for edge_uid in self.adjacency_list.get(uid, set()):
+			yield self[edge_uid].end
 
 	def get_adjacent_nodes(self, uid):
+		"""Returns the nodes which are adjacent to the given uid."""
 		for uid in self.get_adjacent_uids(uid):
-			yield self[uid]	
+			yield self[uid]
 
 	def a_star_traversal(self, root_uid, selector):
 		"""Traverses the graph using selector as a selection filter on the unvisited nodes."""
@@ -369,6 +389,22 @@ class Graph(object):
 		"""Traverses the graph by visiting a node, then each of its children, then their children"""
 		for node in self.a_star_traversal(root, lambda s: s.popleft()):
 			yield node
+
+	def generate_subgraph(self, *nodes):
+		"""Generate a subgraph that includes only the given nodes and the edges between them."""
+		# get the properties of Nodes and Edges
+		node_properties = self.Node._fields
+		edge_properties = self.Edge._fields
+		# instantiate the new graph
+		g = type(self)(node_properties, edge_properties)
+		# add all the nodes to the new graph
+		for node in nodes:
+			g.add_node(**self[node]._asdict)
+		# find all the edges 
+		node_set = set(nodes)
+		for node in node_set:
+			needed_edges = None
+		raise DeprecatedError
 
 	def size(self):
 		"""Reports the number of edges in the graph"""
