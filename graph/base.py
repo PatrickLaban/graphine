@@ -430,7 +430,8 @@ class Graph(object):
 					if attr in edge_properties:
 						properties[attr] = e[attr]
 				if e["start"] in node_set:
-					g.add_edge(e["start"], e["end"], **properties)
+					if e["end"] in node_set:
+						g.add_edge(e["start"], e["end"], **properties)
 		return g
 
 	def size(self):

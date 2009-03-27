@@ -267,7 +267,7 @@ class GraphCorrectnessTest(unittest.TestCase):
 
 		# generate a subgraph
 		wanted_nodes = [nodes["A"], nodes["B"], nodes["E"]]
-		wanted_edges = [edges[0]]
+		wanted_edges = [edges[0], edges[6]]
 		new_graph = g.generate_subgraph(*wanted_nodes)
 		new_nodes = list(node for node in new_graph.get_nodes())
 		new_edges = list(edge for edge in new_graph.get_edges())
