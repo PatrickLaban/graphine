@@ -195,7 +195,7 @@ class GraphCorrectnessTest(unittest.TestCase):
 
 	def testDepthFirstTraversal(self):
 		# setup
-		g = Graph(("name"), tuple())
+		g = Graph(("name",), tuple())
 		nodes = {}
 		edges = []
 		nodes["A"] = g.add_node(name="A")
@@ -223,7 +223,7 @@ class GraphCorrectnessTest(unittest.TestCase):
 
 	def testBreadthFirstTraversal(self):
 		# setup
-		g = Graph(("name"), tuple())
+		g = Graph(("name",), tuple())
 		nodes = {}
 		edges = []
 		nodes["A"] = g.add_node(name="A")
@@ -245,6 +245,34 @@ class GraphCorrectnessTest(unittest.TestCase):
 		self.failUnless(positions["A"] < min(positions["B"], positions["C"], positions["E"]))
 		self.failUnless(max(positions["B"], positions["C"], positions["E"]) < min(positions["D"], positions["F"], positions["G"]))
 
+	def testGenerateSubgraph(self):
+		# setup
+		g = Graph(("name",), tuple())
+		nodes = {}
+		edges = []
+		nodes["A"] = g.add_node(name="A")
+		nodes["B"] = g.add_node(name="B")
+		nodes["C"] = g.add_node(name="C")
+		nodes["D"] = g.add_node(name="D")
+		nodes["E"] = g.add_node(name="E")
+		nodes["F"] = g.add_node(name="F")
+		nodes["G"] = g.add_node(name="G")
+		edges += [g.add_edge(nodes["A"], nodes["B"])]
+		edges += [g.add_edge(nodes["B"], nodes["D"])]
+		edges += [g.add_edge(nodes["B"], nodes["F"])]
+		edges += [g.add_edge(nodes["F"], nodes["E"])]
+		edges += [g.add_edge(nodes["A"], nodes["C"])]
+		edges += [g.add_edge(nodes["C"], nodes["G"])]
+		edges += [g.add_edge(nodes["A"], nodes["E"])]
+
+		# generate a subgraph
+		wanted_nodes = [nodes["A"], nodes["B"], nodes["E"]]
+		wanted_edges = [edges[0]]
+		new_graph = g.generate_subgraph(*wanted_nodes)
+		new_nodes = list(node for node in new_graph.get_nodes())
+		new_edges = list(edge for edge in new_graph.get_edges())
+		self.failUnlessEqual(list((g[n] for n in wanted_nodes)), new_nodes)
+		self.failUnlessEqual(list((g[e] for e in wanted_edges)), new_edges)
 
 class GraphPerformanceTest(unittest.TestCase):
 

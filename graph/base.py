@@ -104,10 +104,14 @@ and similar for depth first traversals.
 
 
 from collections import deque, defaultdict, namedtuple
+from functools import partial
 
 
 class Graph(object):
 	"""Base class for all Graph mixins"""
+
+	required_node_properties = tuple()
+	required_edge_properties = ("start", "end")
 
 	def __init__(self, node_properties, edge_properties):
 		"""Base initializer for Graphs.
@@ -122,7 +126,8 @@ class Graph(object):
 		including dictionaries.
 		"""
 		# add required attributes to edges
-		edge_properties =  ("start", "end") + tuple(edge_properties)
+		node_properties = self.required_node_properties + tuple(node_properties)
+		edge_properties = self.required_edge_properties + tuple(edge_properties)
 		# instantiate node and edge classes
 		self.Node = namedtuple("Node", node_properties)
 		self.Edge = namedtuple("Edge", edge_properties)
@@ -206,7 +211,7 @@ class Graph(object):
 		>>> g.add_node(name="bob")
 
 		Giving fewer, more, or differently named fields
-		will throw an error.
+		will throw a TypeError.
 		"""
 		uid = self.get_node_uid()
 		self.nodes[uid] = self.Node(**kwargs)
@@ -278,14 +283,14 @@ class Graph(object):
 		>>> bob = g.add_node(name="bob")
 		>>> bill = g.add_node(name="bill")
 		>>> e = g.add_edge(bob, bill)
-		>>> g.remove_node(bob)
-		1
+		>>> g.remove_node(bill)
+		2
 		>>> # still ok...
 		>>> for node in g.get_adjacent_nodes(bob):
 		>>> 	print(node)
 		>>>
 		>>> # BADBADBAD
-		>>> for edge in g.get_edges_by_properties(start=bob, end=bill):
+		>>> for edge in g.search_edges(start=bob, end=bill):
 			print(edge)
 		Edge(start=1, end=2)
 		>>>
@@ -366,6 +371,16 @@ class Graph(object):
 		for uid in self.get_adjacent_uids(uid):
 			yield self[uid]
 
+	def get_outgoing_uids(self, uid):
+		"""Convenience function to get uids based on incidence."""
+		for uid in self.adjacency_list(uid):
+			yield uid
+
+	def get_outgoing_edges(self, uid):
+		"""Gets all the outgoing edges for the given node."""
+		for uid in self.get_outgoing_uids(uid):
+			yield self[uid]
+
 	def a_star_traversal(self, root_uid, selector):
 		"""Traverses the graph using selector as a selection filter on the unvisited nodes."""
 		unvisited = deque()
@@ -393,20 +408,29 @@ class Graph(object):
 	def generate_subgraph(self, *nodes):
 		"""Generate a subgraph that includes only the given nodes and the edges between them."""
 		# get the properties of Nodes and Edges
-		node_properties = self.Node._fields
-		edge_properties = self.Edge._fields
+		node_properties = set(self.Node._fields) - set(self.required_node_properties)
+		edge_properties = set(self.Edge._fields) - set(self.required_edge_properties)
 		# instantiate the new graph
 		g = type(self)(node_properties, edge_properties)
 		# add all the nodes to the new graph
 		for node in nodes:
-			g.add_node(**self[node]._asdict)
+			n = self[node]._asdict()
+			properties = dict()
+			for attr in n:
+				if attr in node_properties:
+					properties[attr] = n[attr]
+			g.add_node(**properties)
 		# find all the edges 
 		node_set = set(nodes)
 		for node in node_set:
-			for edge_id in self.adjacent_list[node]:
-				e = self[edge_id]
-				if e.start in node_set:
-					g.add_edge(**e._asdict)
+			for edge_id in self.adjacency_list[node]:
+				e = self[edge_id]._asdict()
+				properties = dict()
+				for attr in e:
+					if attr in edge_properties:
+						properties[attr] = e[attr]
+				if e["start"] in node_set:
+					g.add_edge(e["start"], e["end"], **properties)
 		return g
 
 	def size(self):
