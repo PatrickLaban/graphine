@@ -403,8 +403,11 @@ class Graph(object):
 		# find all the edges 
 		node_set = set(nodes)
 		for node in node_set:
-			needed_edges = None
-		raise DeprecatedError
+			for edge_id in self.adjacent_list[node]:
+				e = self[edge_id]
+				if e.start in node_set:
+					g.add_edge(**e._asdict)
+		return g
 
 	def size(self):
 		"""Reports the number of edges in the graph"""
