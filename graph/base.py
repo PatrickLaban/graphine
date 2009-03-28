@@ -22,67 +22,82 @@ Interface summary:
 To create a new Graph:
 
 	>>> from graph.base import Graph
-	>>> # I need named nodes and weighted edges
-	>>> g = Graph(["name"], ["weight"])
+	>>> g = Graph()
 
 To add nodes:
 
 	>>> node_1 = g.add_node(name="bob")
-	>>> node_2 = g.add_node(name="agamemnon")
+	>>> node_2 = g.add_node(weight=5)
+	>>> node_3 = g.add_node(color="red", flags=["visited"])
 
 To add edges:
 
-	>>> edge_1 = g.add_edge(node_1, node_2, weight=5)
+	>>> edge_1 = g.add_edge(node_2, node_3)
+	
+Notice that edges can have properties as well:
 
-Note that what you're getting back isn't a full
-node or edge, eg:
+	>>> edge_2 = g.add_edge(node_1, node_2, weight=5)
+	>>> edge_3 = g.add_edge(node_3, node_1, stuff={})
+	
+To remove nodes:
 
-	>>> node_1
-	1
-	>>> node_2
-	2
-	>>> edge_1
-	-1
+	>>> g.remove_node(node_3)
+	Node(color="red", flags=["visited"])
+	
+And edges:
 
-As you can see, its just an id used to uniquely
-identify it to the graph. To get the full object,
-just ask nicely:
-
-	>>> g[node_1]
-	Node(name="bob")
-
-The same thing works for edges:
-
-	>>> g[edge_1]
-	Edge(start=1, end=2, weight=5)
-
-Notice again that it uses those uids as reference
-points. Don't forget them!
+	>>> g.remove_edge(edge_3)
+	Edge(stuff={})
 
 To iterate over all the nodes in a graph:
 
-	>>> for node in g.get_nodes():
+	>>> for node in g.nodes:
 	>>>	print(node)
 	Node(name="bob")
-	Node(name="agamemnon")
+	Node(weight=5)
 
 And, for edges:
 
-	>>> for edge in g.get_edges():
+	>>> for edge in g.edges:
 	>>> 	print(edge)
-	Edge(start=1, end=2, weight=5)
+	Edge()
+	Edge(weight=5)
 
-Of course, if you want to get the uids, just use get_node_uids
-or get_edge_uids.
+If you only want certain nodes, the search
+functions is provided for convenience:
 
-Traversals are just as simple:
-
-	>>> for node_uid in g.depth_first_traversal(node_1):
-	>>> 	print(g[node_uid])
+	>>> for node in g.search_nodes(name="bob"):
+	>>> 	print(node)
 	Node(name="bob")
-	Node(name="agamemnon")
+	
+And for edges:
 
-and similar for depth first traversals. 
+	>>> for edge in g.search_edges(weight=5):
+	>>> 	print(edge)
+	Edge(weight=5)
+
+Three traversals are provided by default- A*,
+depth first, and breadth first.
+
+To do a depth first traversal:
+
+	>>> for node in g.depth_first_traversal(node_1):
+	>>> 	print(node)
+	Node(name="bob")
+	Node(weight=5)
+
+and similar for depth first traversals.
+
+A* traversals require an additional callable argument.
+This callable will be passed a deque of unvisited nodes
+and should select exactly one of them to return.
+
+And to traverse a tree, going to those nodes first:
+
+	>>> for node in g.a_star_traversal(node_1, get_heaviest):
+	>>> 	print(node)
+	Node(weight=5)
+	Node(name="bob")
 """
 
 # Copyright (C) 2009 Geremy Condra
@@ -108,26 +123,25 @@ from collections import deque, namedtuple
 class GraphElement(object):
 	"""Base class for Nodes and Edges."""
 
+	__structure = None
+	
 	def __init__(self, structure, **kwargs):
 		# contains the basic, should-not-be-modified
 		# information the node needs to operate
-		super().__setattr__("_structure", structure)
+		self.__structure = structure
 		# all other values
 		for k, v in kwargs.items():
 			setattr(self, k, v)
 	
 	def __setattr__(self, attr, value):
-		if hasattr(self._structure, attr):
+		if hasattr(self.__structure, attr):
 			msg = "Cannot set attribute '%s'" % attr
-			raise AttributeError(msg)
-		elif attr is "_structure":
-			msg = "Attribute '_structure' is reserved."
 			raise AttributeError(msg)
 		else:
 			super().__setattr__(attr, value)
 
 	def __getattr__(self, attr):
-		return getattr(self._structure, attr)
+		return getattr(self.__structure, attr)
 
 	def __repr__(self):
 		classname = type(self).__name__
@@ -136,7 +150,7 @@ class GraphElement(object):
 
 	@property
 	def data(self):
-		return {k:v for k, v in self.__dict__.items() if k is not "_structure"}
+		return {k:v for k, v in self.__dict__.items() if not k.startswith("_")}
 
 
 class Node(GraphElement):
