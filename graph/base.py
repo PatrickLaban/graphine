@@ -116,15 +116,6 @@ class GraphElement(object):
 		for k, v in kwargs.items():
 			setattr(self, k, v)
 	
-	def __hash__(self):
-		return hash(frozenset(((k,v) for k, v in self.get_properties())))
-
-	def __eq__(self, other):
-		return hash(self) == hash(other)
-
-	def __ne__(self, other):
-		return hash(self) != hash(other)
-
 	def __setattr__(self, attr, value):
 		if hasattr(self._structure, attr):
 			msg = "Cannot set attribute '%s'" % attr
@@ -136,20 +127,16 @@ class GraphElement(object):
 			super().__setattr__(attr, value)
 
 	def __getattr__(self, attr):
-		try:
-			return getattr(self._structure, attr)
-		except AttributeError:
-			return super().__getattr__(attr)
+		return getattr(self._structure, attr)
 
 	def __repr__(self):
 		classname = type(self).__name__
-		attrs = ''.join(("%s=%s, " % (k, v) for k, v in self.get_properties()))[:-2]
+		attrs = ''.join(("%s=%s, " % (k, v) for k, v in self.data.items()))[:-2]
 		return "%s(%s)" % (classname, attrs)
 
-	def get_properties(self):
-		for k, v in self.__dict__.items():
-			if k is not "_structure":
-				yield k, v
+	@property
+	def data(self):
+		return {k:v for k, v in self.__dict__.items() if k is not "_structure"}
 
 
 class Node(GraphElement):
@@ -187,7 +174,7 @@ class Graph(object):
 	def add_node(self, *args, **kwargs):
 		"""Adds a node to the current graph."""
 		# provide sensible defaults- no incoming, no outgoing
-		args = args or ([], [])
+		args = args or (set(), set())
 		# construct the control structure
 		try:
 			structure = self.NodeStructure(*args)
@@ -215,8 +202,8 @@ class Graph(object):
 		edge = self.Edge(structure, **kwargs)
 		self.edges.append(edge)
 		# take care of adjacency tracking
-		structure.start.outgoing.append(edge)
-		structure.end.incoming.append(edge)
+		structure.start.outgoing.add(edge)
+		structure.end.incoming.add(edge)
 		return edge
 
 	def remove_node(self, node):
@@ -243,7 +230,7 @@ class Graph(object):
 		"""Convenience function to get nodes based on some properties."""
 		desired_properties = set(kwargs.items())
 		for node in self.nodes:
-			properties = set(node.get_properties())
+			properties = set(node.data.items())
 			if properties.issuperset(desired_properties):
 				yield node
 
@@ -251,7 +238,7 @@ class Graph(object):
 		"""Convenience function to get edges based on some properties."""
 		desired_properties = set(kwargs.items())
 		for edge in self.edges:
-			properties = set(edge.get_properties())
+			properties = set(edge.data.items())
 			if properties.issuperset(desired_properties):
 				yield edge
 
@@ -267,10 +254,9 @@ class Graph(object):
 			yield next
 			# visit it
 			visited.add(next)
-			# get the nodes we haven't visited from it
-			adjacent = set()
-			for edge in next.outgoing:
-				adjacent.add(edge.end)
+			# get the adjacent nodes
+			adjacent = {edge.end for edge in next.outgoing}
+			# filter it against those we've already visited
 			not_yet_visited = adjacent - visited
 			# make sure we're not double-adding
 			for node in not_yet_visited:

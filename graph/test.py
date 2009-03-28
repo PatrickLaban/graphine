@@ -51,15 +51,15 @@ class GraphCorrectnessTest(unittest.TestCase):
 		# test for equality between elements
 		snowflake = g.add_node(city="Austin")
 		self.failIfEqual(dan, snowflake)
-		self.failUnlessEqual(paul, snowflake)
+		self.failUnlessEqual(paul.data, snowflake.data)
 		
 		# test for non-identity
-		self.failUnless(not paul is snowflake)
+		self.failUnless(not paul.data != snowflake.data)
 
 		# make sure that the nodes are what we want them to be
-		self.failUnlessEqual(dict(jimmy.get_properties()), {"city":"New York"})
-		self.failUnlessEqual(dict(ted.get_properties()), {"city":"Atlanta"})
-		self.failUnlessEqual(dict(paul.get_properties()), {"city":"Austin"})
+		self.failUnlessEqual(jimmy.data, {"city":"New York"})
+		self.failUnlessEqual(ted.data, {"city":"Atlanta"})
+		self.failUnlessEqual(paul.data, {"city":"Austin"})
 	
 		# make sure that change is reflected in the graph's order
 		self.failUnlessEqual(g.order(), 5)
@@ -80,31 +80,30 @@ class GraphCorrectnessTest(unittest.TestCase):
 		d_to_p = g.add_edge(dan, paul, distance=2850)
 
 		# ensure adjacency list is correct
-		self.failUnlessEqual(jimmy.incoming, [])
-		self.failUnlessEqual(jimmy.outgoing, [j_to_t])
-		self.failUnlessEqual(ted.incoming, [j_to_t])
-		self.failUnlessEqual(ted.outgoing, [t_to_d])
-		self.failUnlessEqual(dan.incoming, [t_to_d])
-		self.failUnlessEqual(dan.outgoing, [d_to_p])
-		self.failUnlessEqual(paul.incoming, [d_to_p])
-		self.failUnlessEqual(paul.outgoing, [])
+		self.failUnlessEqual(jimmy.incoming, set())
+		self.failUnlessEqual(jimmy.outgoing, {j_to_t})
+		self.failUnlessEqual(ted.incoming, {j_to_t})
+		self.failUnlessEqual(ted.outgoing, {t_to_d})
+		self.failUnlessEqual(dan.incoming, {t_to_d})
+		self.failUnlessEqual(dan.outgoing, {d_to_p})
+		self.failUnlessEqual(paul.incoming, {d_to_p})
+		self.failUnlessEqual(paul.outgoing, set())
 
 		# and after deletion
 		g.remove_edge(t_to_d)
-		self.failUnlessEqual(ted.outgoing, [])
-		self.failUnlessEqual(dan.incoming, [])
+		self.failUnlessEqual(ted.outgoing, set())
+		self.failUnlessEqual(dan.incoming, set())
 		new_trip = g.add_edge(ted, dan, distance=850)
-		self.failUnlessEqual(ted.outgoing, [new_trip])
-		self.failUnlessEqual(dan.incoming, [new_trip])
+		self.failUnlessEqual(ted.outgoing, {new_trip})
+		self.failUnlessEqual(dan.incoming, {new_trip})
 
 		# equivalence test
 		lame_trip = g.add_edge(jimmy, ted, distance=850)
-		self.failUnlessEqual(new_trip, lame_trip)
-		self.failUnless(not new_trip is lame_trip)
+		self.failUnlessEqual(new_trip.data, lame_trip.data)
 
 		# ensure that the edges properties are being set properly
-		self.failUnlessEqual(dict(lame_trip.get_properties()), {"distance": 850})
-		self.failUnlessEqual(dict(d_to_p.get_properties()), {"distance": 2850})
+		self.failUnlessEqual(dict(lame_trip.data), {"distance": 850})
+		self.failUnlessEqual(dict(d_to_p.data), {"distance": 2850})
 
 		# make sure that the change is reflected in the graph's size
 		self.failUnlessEqual(g.size(), 4)
@@ -144,8 +143,8 @@ class GraphCorrectnessTest(unittest.TestCase):
 		d_to_p = g.add_edge(dan, paul, distance=2850)
 
 		# test for equivalence
-		self.failUnless(all(edge in [j_to_t, t_to_d, d_to_p] for edge in g.edges))
-		self.failUnless(all(edge in g.edges for edge in [j_to_t, t_to_d, d_to_p]))
+		self.failUnless(all(edge in {j_to_t, t_to_d, d_to_p} for edge in g.edges))
+		self.failUnless(all(edge in g.edges for edge in {j_to_t, t_to_d, d_to_p}))
 		self.failUnlessEqual([e for e in g.search_edges(distance=2850)], [d_to_p])
 
 	def testDepthFirstTraversal(self):
@@ -175,6 +174,19 @@ class GraphCorrectnessTest(unittest.TestCase):
 		self.failUnless(positions["B"] < positions["D"])
 		self.failUnless(positions["C"] < positions["G"])
 		self.failUnless(positions["F"] > min(positions["B"], positions["E"]))
+
+		# test for the equivalence problem
+		g = Graph()
+		a = g.add_node(name="A")
+		b1 = g.add_node(name="B")
+		b2 = g.add_node(name="B")
+		c = g.add_node(name="C")
+		d = g.add_node(name="D")
+		g.add_edge(a, b1)
+		g.add_edge(a, b2)
+		g.add_edge(b1, c)
+		g.add_edge(b2, d)
+		self.failUnlessEqual(set((node for node in g.depth_first_traversal(a))), {a, b1, b2, c, d})
 
 	def testBreadthFirstTraversal(self):
 		# setup
@@ -209,12 +221,12 @@ class GraphPerformanceTest(unittest.TestCase):
 		setup = self.graph_setup
 		test = "for i in range(1000): g.add_node(name=i)"
 		t1 = timeit.timeit(setup=setup, stmt=test, number=1000)
-		self.failUnless(t1 < 20, msg="Performance check failed: it took %s seconds to add 1M nodes" % t1)
 		test = "for i in range(1000000): g.add_node(name=i)"
 		t2 = timeit.timeit(setup=setup, stmt=test, number=1)
-		self.failUnless(t2 < 20, msg="Performance check failed: it took %s seconds to add 1M nodes" % t2)
 		tdiff = max(t1, t2) - min(t1, t2)
 		self.failUnless(tdiff < max(t1, t2)/10, msg="Performance check failed: nonlinear performance (%s, %s)" % (t1, t2))
+		self.failUnless(t1 < 20, msg="Performance check failed: it took %s seconds to add 1M nodes" % t1)
+		self.failUnless(t2 < 20, msg="Performance check failed: it took %s seconds to add 1M nodes" % t2)
 
 	def testNodeIterationPerformance(self):
 		setup = self.graph_setup + "\nfor i in range(1000): \n\tg.add_node(name=i)"
