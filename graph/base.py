@@ -127,7 +127,7 @@ class GraphElement(object):
 
 	def __setattr__(self, attr, value):
 		if hasattr(self._structure, attr):
-			msg = "Cannot set attribute %s" % attr
+			msg = "Cannot set attribute '%s'" % attr
 			raise AttributeError(msg)
 		elif attr is "_structure":
 			msg = "Attribute '_structure' is reserved."
@@ -140,6 +140,11 @@ class GraphElement(object):
 			return getattr(self._structure, attr)
 		except AttributeError:
 			return super().__getattr__(attr)
+
+	def __repr__(self):
+		classname = type(self).__name__
+		attrs = ''.join(("%s=%s, " % (k, v) for k, v in self.get_properties()))[:-2]
+		return "%s(%s)" % (classname, attrs)
 
 	def get_properties(self):
 		for k, v in self.__dict__.items():
