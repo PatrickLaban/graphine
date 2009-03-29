@@ -14,8 +14,9 @@ Graph- a flexible, easy-to-use graph implementation.
 This module contains the base GraphElement, Node, Edge,
 and Graph implementations for Graphine. Graphs generated
 using this representation are characterized by the use of
-directed edges and the ability to attach arbitrary 
-properties on Node and Edge objects.
+directed edges, the ability to attach arbitrary properties
+to Node and Edge objects, and the ability to represent
+loops and parallel edges.
 
 Interface summary:
 
@@ -218,6 +219,10 @@ class GraphElement(object):
 		classname = type(self).__name__
 		attrs = ''.join(("%s=%s, " % (k, v) for k, v in self.data.items()))[:-2]
 		return "%s(%s)" % (classname, attrs)
+
+	@property
+	def structure(self):
+		return self.__structure._asdict()
 
 	@property
 	def data(self):

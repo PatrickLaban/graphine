@@ -1,0 +1,902 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>graph.base.Graph</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="graph-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="graph-module.html">Package&nbsp;graph</a> ::
+        <a href="graph.base-module.html">Module&nbsp;base</a> ::
+        Class&nbsp;Graph
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="graph.base.Graph-class.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS DESCRIPTION ==================== -->
+<h1 class="epydoc">Class Graph</h1><span class="codelink"><a href="graph.base-pysrc.html#Graph">source&nbsp;code</a></span><br /><br />
+<pre class="base-tree">
+object --+
+         |
+        <strong class="uidshort">Graph</strong>
+</pre>
+
+<hr />
+<p>A basic graph class, and base for all Graph mixins.</p>
+  <p>In graph theoretic terms, this represents a directed multigraph.</p>
+  <p>Graph is designed to have a simple, easy-to-use, easy-to-extend 
+  architecture, which allows for easy and intuitive graph construction and 
+  traversal, as well as making it relatively simple to add and remove graph
+  properties as needed.</p>
+  <p>Internally, nodes and edges are maintained in lists, each element of 
+  which is of the type specified by Graph.Node or Graph.Edge, as 
+  appropriate. Each of those types should support at a minimum the 
+  attributes specified by Graph.node_attributes and Graph.edge_attributes, 
+  and the property Element.data.</p>
+  <p>Because Graph's internal data representation is an adjacency list, the
+  attributes given in node_attributes and edge_attributes should generally 
+  be taken as a solid baseline for those extending this class- and should 
+  probably only be removed by those quite determined to change the way that
+  the Graph is stored.</p>
+  The Graph.NodeStructure and Graph.EdgeStructure types are used in the 
+  construction of Node and Edge types for the storage of the structural 
+  data required by the Graph to operate. Again, care should be exercised in
+  changing these attributes, and it should virtually never be done while in
+  operation.<br /><br />
+
+<!-- ==================== NESTED CLASSES ==================== -->
+<a name="section-NestedClasses"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Nested Classes</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-NestedClasses"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="graph.base.Node-class.html" class="summary-name">Node</a><br />
+      Base node representation.
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="graph.base.Edge-class.html" class="summary-name">Edge</a><br />
+      Base edge representation.
+    </td>
+  </tr>
+</table>
+<!-- ==================== INSTANCE METHODS ==================== -->
+<a name="section-InstanceMethods"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Instance Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="graph.base.Graph-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Base initializer for Graphs.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="graph.base-pysrc.html#Graph.__init__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="graph.base.Graph-class.html#__contains__" class="summary-sig-name">__contains__</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">element</span>)</span><br />
+      Returns True if the element is a member of the graph.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="graph.base-pysrc.html#Graph.__contains__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="graph.base.Graph-class.html#add_node" class="summary-sig-name">add_node</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">*args</span>,
+        <span class="summary-sig-arg">**kwargs</span>)</span><br />
+      Adds a node to the current graph.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="graph.base-pysrc.html#Graph.add_node">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="graph.base.Graph-class.html#add_edge" class="summary-sig-name">add_edge</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">*args</span>,
+        <span class="summary-sig-arg">**kwargs</span>)</span><br />
+      Adds an edge to the current graph.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="graph.base-pysrc.html#Graph.add_edge">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="graph.base.Graph-class.html#remove_node" class="summary-sig-name">remove_node</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">node</span>)</span><br />
+      Removes a node from the graph.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="graph.base-pysrc.html#Graph.remove_node">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="graph.base.Graph-class.html#remove_edge" class="summary-sig-name">remove_edge</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">edge</span>)</span><br />
+      Removes an edge from the graph.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="graph.base-pysrc.html#Graph.remove_edge">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="graph.base.Graph-class.html#search_nodes" class="summary-sig-name">search_nodes</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">**kwargs</span>)</span><br />
+      Convenience function to get nodes based on some properties.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="graph.base-pysrc.html#Graph.search_nodes">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="graph.base.Graph-class.html#search_edges" class="summary-sig-name">search_edges</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">**kwargs</span>)</span><br />
+      Convenience function to get edges based on some properties.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="graph.base-pysrc.html#Graph.search_edges">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="graph.base.Graph-class.html#a_star_traversal" class="summary-sig-name">a_star_traversal</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">root</span>,
+        <span class="summary-sig-arg">selector</span>)</span><br />
+      Traverses the graph using selector as a selection filter on the 
+      unvisited nodes.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="graph.base-pysrc.html#Graph.a_star_traversal">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="graph.base.Graph-class.html#depth_first_traversal" class="summary-sig-name">depth_first_traversal</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">root</span>)</span><br />
+      Traverses the graph by visiting a node, then a child of that node,
+      and so on.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="graph.base-pysrc.html#Graph.depth_first_traversal">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="graph.base.Graph-class.html#breadth_first_traversal" class="summary-sig-name">breadth_first_traversal</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">root</span>)</span><br />
+      Traverses the graph by visiting a node, then each of its children,
+      then their children.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="graph.base-pysrc.html#Graph.breadth_first_traversal">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="graph.base.Graph-class.html#size" class="summary-sig-name">size</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Reports the number of edges in the graph.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="graph.base-pysrc.html#Graph.size">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="graph.base.Graph-class.html#order" class="summary-sig-name">order</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Reports the number of nodes in the graph.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="graph.base-pysrc.html#Graph.order">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__delattr__</code>,
+      <code>__getattribute__</code>,
+      <code>__hash__</code>,
+      <code>__new__</code>,
+      <code>__reduce__</code>,
+      <code>__reduce_ex__</code>,
+      <code>__repr__</code>,
+      <code>__setattr__</code>,
+      <code>__str__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS VARIABLES ==================== -->
+<a name="section-ClassVariables"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Class Variables</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-ClassVariables"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="node_attributes"></a><span class="summary-name">node_attributes</span> = <code title="&quot;incoming&quot;, &quot;outgoing&quot;">&quot;incoming&quot;, &quot;outgoing&quot;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="edge_attributes"></a><span class="summary-name">edge_attributes</span> = <code title="&quot;start&quot;, &quot;end&quot;">&quot;start&quot;, &quot;end&quot;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="NodeStructure"></a><span class="summary-name">NodeStructure</span> = <code title="namedtuple(&quot;NodeStructure&quot;, node_attributes)">namedtuple(&quot;NodeStructure&quot;, node_attributes)</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="EdgeStructure"></a><span class="summary-name">EdgeStructure</span> = <code title="namedtuple(&quot;EdgeStructure&quot;, edge_attributes)">namedtuple(&quot;EdgeStructure&quot;, edge_attributes)</code>
+    </td>
+  </tr>
+</table>
+<!-- ==================== PROPERTIES ==================== -->
+<a name="section-Properties"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Properties</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Properties"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__class__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== METHOD DETAILS ==================== -->
+<a name="section-MethodDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Method Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-MethodDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="__init__"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="graph.base-pysrc.html#Graph.__init__">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  <p>Base initializer for Graphs.</p>
+  Usage:
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span>g = Graph()</pre>
+  <dl class="fields">
+    <dt>Overrides:
+      object.__init__
+    </dt>
+  </dl>
+</td></tr></table>
+</div>
+<a name="__contains__"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__contains__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">element</span>)</span>
+    <br /><em class="fname">(In operator)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="graph.base-pysrc.html#Graph.__contains__">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  <p>Returns True if the element is a member of the graph.</p>
+  Usage:
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span>g = Graph()
+<span class="py-prompt">&gt;&gt;&gt; </span>n = g.add_node()
+<span class="py-prompt">&gt;&gt;&gt; </span>n <span class="py-keyword">in</span> g
+<span class="py-output">True</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="add_node"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">add_node</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">*args</span>,
+        <span class="sig-arg">**kwargs</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="graph.base-pysrc.html#Graph.add_node">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  <p>Adds a node to the current graph.</p>
+  Usage:
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span>g = Graph()
+<span class="py-prompt">&gt;&gt;&gt; </span>n = g.add_node(weight=5)
+<span class="py-prompt">&gt;&gt;&gt; </span>n
+<span class="py-output">Node(weight=5)</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="add_edge"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">add_edge</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">*args</span>,
+        <span class="sig-arg">**kwargs</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="graph.base-pysrc.html#Graph.add_edge">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  <p>Adds an edge to the current graph.</p>
+  Usage:
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span>g = Graph()
+<span class="py-prompt">&gt;&gt;&gt; </span>n1, n2 = g.add_node(), g.add_node()
+<span class="py-prompt">&gt;&gt;&gt; </span>e = g.add_edge(n1, n2, weight=5)
+<span class="py-prompt">&gt;&gt;&gt; </span>e
+<span class="py-output">Edge(weight=5)</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="remove_node"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">remove_node</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">node</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="graph.base-pysrc.html#Graph.remove_node">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  <p>Removes a node from the graph.</p>
+  Usage:
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span>g = Graph()
+<span class="py-prompt">&gt;&gt;&gt; </span>n = g.add_node()
+<span class="py-prompt">&gt;&gt;&gt; </span>g.remove_node(n)
+<span class="py-prompt">&gt;&gt;&gt; </span>n <span class="py-keyword">in</span> g
+<span class="py-output">False</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="remove_edge"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">remove_edge</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">edge</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="graph.base-pysrc.html#Graph.remove_edge">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  <p>Removes an edge from the graph.</p>
+  Usage:
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span>g = Graph()
+<span class="py-prompt">&gt;&gt;&gt; </span>n1, n2 = g.add_node(), g.add_node()
+<span class="py-prompt">&gt;&gt;&gt; </span>e = g.add_edge(n1, n2)
+<span class="py-prompt">&gt;&gt;&gt; </span>g.remove_edge(e)
+<span class="py-prompt">&gt;&gt;&gt; </span>e <span class="py-keyword">in</span> g
+<span class="py-output">False</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="search_nodes"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">search_nodes</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">**kwargs</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="graph.base-pysrc.html#Graph.search_nodes">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  <p>Convenience function to get nodes based on some properties.</p>
+  Usage:
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span>g = Graph()
+<span class="py-prompt">&gt;&gt;&gt; </span>n1 = g.add_node(name=<span class="py-string">&quot;bob&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span>n2 = g.add_node(name=<span class="py-string">&quot;bill&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">for</span> node <span class="py-keyword">in</span> g.search_nodes(name=<span class="py-string">&quot;bob&quot;</span>):
+<span class="py-prompt">&gt;&gt;&gt; </span>    <span class="py-keyword">print</span>(node)
+<span class="py-output">Node(name=&quot;bob&quot;)</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="search_edges"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">search_edges</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">**kwargs</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="graph.base-pysrc.html#Graph.search_edges">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  <p>Convenience function to get edges based on some properties.</p>
+  Usage:
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span>g = Graph()
+<span class="py-prompt">&gt;&gt;&gt; </span>n1, n2 = g.add_node(), g.add_node()
+<span class="py-prompt">&gt;&gt;&gt; </span>e1 = g.add_edge(n1, n2, weight=4)
+<span class="py-prompt">&gt;&gt;&gt; </span>e2 = g.add_edge(n1, n2, weight=5)
+<span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">for</span> edge <span class="py-keyword">in</span> g.search_edges(weight=5):
+<span class="py-prompt">&gt;&gt;&gt; </span>    <span class="py-keyword">print</span>(edge)
+<span class="py-output">Edge(weight=5)</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="a_star_traversal"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">a_star_traversal</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">root</span>,
+        <span class="sig-arg">selector</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="graph.base-pysrc.html#Graph.a_star_traversal">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  <p>Traverses the graph using selector as a selection filter on the 
+  unvisited nodes.</p>
+  Usage:
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span>g = Graph()
+<span class="py-prompt">&gt;&gt;&gt; </span>n1, n2 = g.add_node(name=<span class="py-string">&quot;A&quot;</span>), g.add_node(name=<span class="py-string">&quot;B&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span>e = g.add_edge(n1, n2)
+<span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">for</span> node <span class="py-keyword">in</span> g.a_star_traversal(n1, <span class="py-keyword">lambda</span> s: s.pop()):
+<span class="py-prompt">&gt;&gt;&gt; </span>    <span class="py-keyword">print</span>(node)
+<span class="py-output">Node(name=&quot;A&quot;)</span>
+<span class="py-output">Node(name=&quot;B&quot;)</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="depth_first_traversal"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">depth_first_traversal</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">root</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="graph.base-pysrc.html#Graph.depth_first_traversal">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  <p>Traverses the graph by visiting a node, then a child of that node, and
+  so on.</p>
+  Usage:
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span>g = Graph()
+<span class="py-prompt">&gt;&gt;&gt; </span>a, b = g.add_node(name=<span class="py-string">&quot;A&quot;</span>), g.add_node(name=<span class="py-string">&quot;B&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span>c, d = g.add_node(name=<span class="py-string">&quot;C&quot;</span>), g.add_node(name=<span class="py-string">&quot;D&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span>e1, e2 = g.add_edge(a, b), g.add_edge(a, c)
+<span class="py-prompt">&gt;&gt;&gt; </span>e3, e4 = g.add_edge(b, d), g.add_edge(c, d)
+<span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">for</span> node <span class="py-keyword">in</span> g.depth_first_traversal(a):
+<span class="py-prompt">&gt;&gt;&gt; </span>    <span class="py-keyword">print</span>(node)
+<span class="py-output">Node(name=&quot;A&quot;)</span>
+<span class="py-output">Node(name=&quot;B&quot;)</span>
+<span class="py-output">Node(name=&quot;D&quot;)</span>
+<span class="py-output">Node(name=&quot;C&quot;)</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="breadth_first_traversal"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">breadth_first_traversal</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">root</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="graph.base-pysrc.html#Graph.breadth_first_traversal">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  <p>Traverses the graph by visiting a node, then each of its children, 
+  then their children.</p>
+  Usage:
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span>g = Graph()
+<span class="py-prompt">&gt;&gt;&gt; </span>a, b = g.add_node(name=<span class="py-string">&quot;A&quot;</span>), g.add_node(name=<span class="py-string">&quot;B&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span>c, d = g.add_node(name=<span class="py-string">&quot;C&quot;</span>), g.add_node(name=<span class="py-string">&quot;D&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span>e1, e2 = g.add_edge(a, b), g.add_edge(a, c)
+<span class="py-prompt">&gt;&gt;&gt; </span>e3, e4 = g.add_edge(b, d), g.add_edge(c, d)
+<span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">for</span> node <span class="py-keyword">in</span> g.depth_first_traversal(a):
+<span class="py-prompt">&gt;&gt;&gt; </span>    <span class="py-keyword">print</span>(node)
+<span class="py-output">Node(name=&quot;A&quot;)</span>
+<span class="py-output">Node(name=&quot;B&quot;)</span>
+<span class="py-output">Node(name=&quot;C&quot;)</span>
+<span class="py-output">Node(name=&quot;D&quot;)</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="size"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">size</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="graph.base-pysrc.html#Graph.size">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  <p>Reports the number of edges in the graph.</p>
+  Usage:
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span>g = Graph()
+<span class="py-prompt">&gt;&gt;&gt; </span>n1, n2 = g.add_node(), g.add_node()
+<span class="py-prompt">&gt;&gt;&gt; </span>g.size()
+<span class="py-output">0</span>
+<span class="py-output"></span><span class="py-prompt">&gt;&gt;&gt; </span>e = g.add_edge(n1, n2)
+<span class="py-prompt">&gt;&gt;&gt; </span>g.size()
+<span class="py-output">1</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="order"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">order</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="graph.base-pysrc.html#Graph.order">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  <p>Reports the number of nodes in the graph.</p>
+  Usage:
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span>g = Graph()
+<span class="py-prompt">&gt;&gt;&gt; </span>g.order()
+<span class="py-output">0</span>
+<span class="py-output"></span><span class="py-prompt">&gt;&gt;&gt; </span>n = g.add_node()
+<span class="py-prompt">&gt;&gt;&gt; </span>g.order()
+<span class="py-output">1</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="graph-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0beta1 on Sun Mar 29 04:52:14 2009
+    </td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>
