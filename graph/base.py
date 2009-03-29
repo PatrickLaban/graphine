@@ -9,13 +9,13 @@ Licensed under the GNU GPLv3
 
 Released 25 Mar 2009
 
-This module contains Graphine's base graph represenatation.
+Graph- a flexible, easy-to-use graph implementation.
 
-The goal of Graph is to provide a flexible, easy to use,
-somewhat fast graph implementation. It should be seen as
-a firm foundation for later extension, providing all the
-tools a developer needs to create the appropriate data
-structure for their task with only slight modification.
+This module contains the base GraphElement, Node, Edge,
+and Graph implementations for Graphine. Graphs generated
+using this representation are characterized by the use of
+directed edges and the ability to attach arbitrary 
+properties on Node and Edge objects.
 
 Interface summary:
 
@@ -42,12 +42,45 @@ Notice that edges can have properties as well:
 To remove nodes:
 
 	>>> g.remove_node(node_3)
-	Node(color="red", flags=["visited"])
 	
 And edges:
 
 	>>> g.remove_edge(edge_3)
-	Edge(stuff={})
+
+In addition to storing your data, Nodes and Edges have
+a few other special properties by default. For Nodes,
+these properties are "incoming" and "outgoing", and
+they contain the incoming and outgoing edges attached
+to that node. For Edges, these properties are (again,
+by default) "start" and "end".
+
+To get all the outgoing edges of a particular node:
+
+	>>> n1.outgoing
+	[Edge(weight=5)]
+
+And to get the incoming edges:
+
+	>>> n2.incoming
+	[Edge(weight=5)]
+
+You can use this to get all the nodes adjacent to
+an interesting Node:
+
+	>>> adjacent = [edge.end for edge in node1.outgoing]
+	
+You can combine this with Edges' "start" and "end" properties
+to navigate your graph, if you know how your data is related
+structurally. For example, to get the oldest outgoing edge attached
+to the oldest node attached to node_1, I could do the following:
+
+	>>> interesting_node = node_1.outgoing[0].end.outgoing[0]
+
+Of course, there are scenarios in which you don't know how to
+navigate your graph, or need to find a starting point that isn't
+easily determined based on a given element's properties. For that,
+Graph supports Node and Edge iteration for the simple cases, and
+traversals for more complex behavior.
 
 To iterate over all the nodes in a graph:
 
@@ -56,7 +89,7 @@ To iterate over all the nodes in a graph:
 	Node(name="bob")
 	Node(weight=5)
 
-And, for edges:
+To do the same for edges:
 
 	>>> for edge in g.edges:
 	>>> 	print(edge)
@@ -64,7 +97,7 @@ And, for edges:
 	Edge(weight=5)
 
 If you only want certain nodes, the search
-functions is provided for convenience:
+functions are provided for convenience:
 
 	>>> for node in g.search_nodes(name="bob"):
 	>>> 	print(node)
@@ -86,13 +119,27 @@ To do a depth first traversal:
 	Node(name="bob")
 	Node(weight=5)
 
-and similar for depth first traversals.
+Depth first traversals are similar in usage, simply
+substituting "depth_first_traversal" for "breadth_first_traversal".
 
 A* traversals require an additional callable argument.
-This callable will be passed a deque of unvisited nodes
-and should select exactly one of them to return.
+This callable will be passed a list of unvisited nodes
+and should select and remove exactly one of them to return.
 
-And to traverse a tree, going to those nodes first:
+For example, to navigate a graph by visiting the most
+popular (ie, most incoming edges) nodes first, I could
+write a getter function as follows:
+
+	>>> def get_popularity(node):
+	>>> 	return len(node.incoming)
+
+A selector function:
+
+	>>> def get_most_popular(nodes):
+	>>> 	nodes.sort(nodes, key=get_popularity)
+	>>>	return nodes.pop()
+
+And traverse the tree:
 
 	>>> for node in g.a_star_traversal(node_1, get_heaviest):
 	>>> 	print(node)
@@ -121,7 +168,27 @@ And to traverse a tree, going to those nodes first:
 from collections import deque, namedtuple
 
 class GraphElement(object):
-	"""Base class for Nodes and Edges."""
+	"""Base class for Nodes and Edges.
+
+	GraphElement is designed to provide two layers of data
+	in a single container:
+
+	1/ a set of arbitrary name-value mappings, accessible
+	   as normal attributes, and
+	2/ GraphElement.__structure, which is a namedtuple
+	   designed to hold those parts of the element's data
+	   which should not be user-modifiable.
+
+	GraphElement is designed to provide direct attribute
+	access to the first type of data, and provides a kind
+	of passthrough access to the second, allowing its
+	values to be read as normal but neither overwritten
+	nor deleted without considerable and misguided
+	determination.
+
+	It also provides an __repr__ member function to make
+	easier work of analyzing your graphs.
+	"""
 
 	__structure = None
 	
@@ -188,7 +255,7 @@ class Graph(object):
 	def add_node(self, *args, **kwargs):
 		"""Adds a node to the current graph."""
 		# provide sensible defaults- no incoming, no outgoing
-		args = args or (set(), set())
+		args = args or ([], [])
 		# construct the control structure
 		try:
 			structure = self.NodeStructure(*args)
@@ -216,8 +283,8 @@ class Graph(object):
 		edge = self.Edge(structure, **kwargs)
 		self.edges.append(edge)
 		# take care of adjacency tracking
-		structure.start.outgoing.add(edge)
-		structure.end.incoming.add(edge)
+		structure.start.outgoing.append(edge)
+		structure.end.incoming.append(edge)
 		return edge
 
 	def remove_node(self, node):
@@ -258,7 +325,7 @@ class Graph(object):
 
 	def a_star_traversal(self, root, selector):
 		"""Traverses the graph using selector as a selection filter on the unvisited nodes."""
-		discovered = deque()
+		discovered = []
 		visited = set()
 		discovered.append(root)
 		# while there are unprocessed nodes
@@ -284,7 +351,7 @@ class Graph(object):
 		
 	def breadth_first_traversal(self, root):
 		"""Traverses the graph by visiting a node, then each of its children, then their children"""
-		for node in self.a_star_traversal(root, lambda s: s.popleft()):
+		for node in self.a_star_traversal(root, lambda s: s.pop(0)):
 			yield node
 
 	def size(self):

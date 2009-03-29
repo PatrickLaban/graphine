@@ -80,22 +80,22 @@ class GraphCorrectnessTest(unittest.TestCase):
 		d_to_p = g.add_edge(dan, paul, distance=2850)
 
 		# ensure adjacency list is correct
-		self.failUnlessEqual(jimmy.incoming, set())
-		self.failUnlessEqual(jimmy.outgoing, {j_to_t})
-		self.failUnlessEqual(ted.incoming, {j_to_t})
-		self.failUnlessEqual(ted.outgoing, {t_to_d})
-		self.failUnlessEqual(dan.incoming, {t_to_d})
-		self.failUnlessEqual(dan.outgoing, {d_to_p})
-		self.failUnlessEqual(paul.incoming, {d_to_p})
-		self.failUnlessEqual(paul.outgoing, set())
+		self.failUnlessEqual(jimmy.incoming, [])
+		self.failUnlessEqual(jimmy.outgoing, [j_to_t])
+		self.failUnlessEqual(ted.incoming, [j_to_t])
+		self.failUnlessEqual(ted.outgoing, [t_to_d])
+		self.failUnlessEqual(dan.incoming, [t_to_d])
+		self.failUnlessEqual(dan.outgoing, [d_to_p])
+		self.failUnlessEqual(paul.incoming, [d_to_p])
+		self.failUnlessEqual(paul.outgoing, [])
 
 		# and after deletion
 		g.remove_edge(t_to_d)
-		self.failUnlessEqual(ted.outgoing, set())
-		self.failUnlessEqual(dan.incoming, set())
+		self.failUnlessEqual(ted.outgoing, [])
+		self.failUnlessEqual(dan.incoming, [])
 		new_trip = g.add_edge(ted, dan, distance=850)
-		self.failUnlessEqual(ted.outgoing, {new_trip})
-		self.failUnlessEqual(dan.incoming, {new_trip})
+		self.failUnlessEqual(ted.outgoing, [new_trip])
+		self.failUnlessEqual(dan.incoming, [new_trip])
 
 		# equivalence test
 		lame_trip = g.add_edge(jimmy, ted, distance=850)
