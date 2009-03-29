@@ -3,7 +3,7 @@
           "DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>graph.base</title>
+  <title>graph.graph</title>
   <link rel="stylesheet" href="epydoc.css" type="text/css" />
   <script type="text/javascript" src="epydoc.js"></script>
 </head>
@@ -38,7 +38,7 @@
     <td width="100%">
       <span class="breadcrumbs">
         <a href="graph-module.html">Package&nbsp;graph</a> ::
-        Module&nbsp;base
+        Module&nbsp;graph
       </span>
     </td>
     <td>
@@ -48,76 +48,19 @@
     onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
         <tr><td align="right"><span class="options"
             >[<a href="frames.html" target="_top">frames</a
-            >]&nbsp;|&nbsp;<a href="graph.base-module.html"
+            >]&nbsp;|&nbsp;<a href="graph.graph-module.html"
             target="_top">no&nbsp;frames</a>]</span></td></tr>
       </table>
     </td>
   </tr>
 </table>
 <!-- ==================== MODULE DESCRIPTION ==================== -->
-<h1 class="epydoc">Module base</h1><span class="codelink"><a href="graph.base-pysrc.html">source&nbsp;code</a></span><br /><br />
-<p>base.py</p>
+<h1 class="epydoc">Module graph</h1><span class="codelink"><a href="graph.graph-pysrc.html">source&nbsp;code</a></span><br /><br />
+<p>graph.py</p>
   <p>Written by Geremy Condra</p>
   <p>Licensed under the GNU GPLv3</p>
   <p>Released 25 Mar 2009</p>
-  <p>This module contains Graphine's base graph represenatation.</p>
-  <p>The goal of Graph is to provide a flexible, easy to use, somewhat fast
-  graph implementation. It should be seen as a firm foundation for later 
-  extension, providing all the tools a developer needs to create the 
-  appropriate data structure for their task with only slight 
-  modification.</p>
-  <p>Interface summary:</p>
-  To create a new Graph:
-<pre class="py-doctest">
-<span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">from</span> graph.base <span class="py-keyword">import</span> Graph
-<span class="py-prompt">&gt;&gt;&gt; </span><span class="py-comment"># I need named nodes and weighted edges</span>
-<span class="py-prompt">&gt;&gt;&gt; </span>g = Graph([<span class="py-string">&quot;name&quot;</span>], [<span class="py-string">&quot;weight&quot;</span>])</pre>
-  To add nodes:
-<pre class="py-doctest">
-<span class="py-prompt">&gt;&gt;&gt; </span>node_1 = g.add_node(name=<span class="py-string">&quot;bob&quot;</span>)
-<span class="py-prompt">&gt;&gt;&gt; </span>node_2 = g.add_node(name=<span class="py-string">&quot;agamemnon&quot;</span>)</pre>
-  To add edges:
-<pre class="py-doctest">
-<span class="py-prompt">&gt;&gt;&gt; </span>edge_1 = g.add_edge(node_1, node_2, weight=5)</pre>
-  Note that what you're getting back isn't a full node or edge, eg:
-<pre class="py-doctest">
-<span class="py-prompt">&gt;&gt;&gt; </span>node_1
-<span class="py-output">1</span>
-<span class="py-output"></span><span class="py-prompt">&gt;&gt;&gt; </span>node_2
-<span class="py-output">2</span>
-<span class="py-output"></span><span class="py-prompt">&gt;&gt;&gt; </span>edge_1
-<span class="py-output">-1</span></pre>
-  As you can see, its just an id used to uniquely identify it to the 
-  graph. To get the full object, just ask nicely:
-<pre class="py-doctest">
-<span class="py-prompt">&gt;&gt;&gt; </span>g[node_1]
-<span class="py-output">Node(name=&quot;bob&quot;)</span></pre>
-  The same thing works for edges:
-<pre class="py-doctest">
-<span class="py-prompt">&gt;&gt;&gt; </span>g[edge_1]
-<span class="py-output">Edge(start=1, end=2, weight=5)</span></pre>
-  <p>Notice again that it uses those uids as reference points. Don't forget
-  them!</p>
-  To iterate over all the nodes in a graph:
-<pre class="py-doctest">
-<span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">for</span> node <span class="py-keyword">in</span> g.get_nodes():
-<span class="py-prompt">&gt;&gt;&gt; </span>    <span class="py-keyword">print</span>(node)
-<span class="py-output">Node(name=&quot;bob&quot;)</span>
-<span class="py-output">Node(name=&quot;agamemnon&quot;)</span></pre>
-  And, for edges:
-<pre class="py-doctest">
-<span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">for</span> edge <span class="py-keyword">in</span> g.get_edges():
-<span class="py-prompt">&gt;&gt;&gt; </span>    <span class="py-keyword">print</span>(edge)
-<span class="py-output">Edge(start=1, end=2, weight=5)</span></pre>
-  <p>Of course, if you want to get the uids, just use get_node_uids or 
-  get_edge_uids.</p>
-  Traversals are just as simple:
-<pre class="py-doctest">
-<span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">for</span> node_uid <span class="py-keyword">in</span> g.depth_first_traversal(node_1):
-<span class="py-prompt">&gt;&gt;&gt; </span>    <span class="py-keyword">print</span>(g[node_uid])
-<span class="py-output">Node(name=&quot;bob&quot;)</span>
-<span class="py-output">Node(name=&quot;agamemnon&quot;)</span></pre>
-  and similar for depth first traversals.<br /><br />
+  This module contains Graphine's base graph represenatation.<br /><br />
 
 <!-- ==================== CLASSES ==================== -->
 <a name="section-Classes"></a>
@@ -140,7 +83,7 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a href="graph.base.Graph-class.html" class="summary-name">Graph</a><br />
+        <a href="graph.graph.Graph-class.html" class="summary-name">Graph</a><br />
       Base class for all Graph mixins
     </td>
   </tr>
@@ -171,7 +114,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0beta1 on Fri Mar 27 02:18:53 2009
+    Generated by Epydoc 3.0beta1 on Sun Mar 29 01:58:47 2009
     </td>
     <td align="right" class="footer">
       <a href="http://epydoc.sourceforge.net">http://epydoc.sourceforge.net</a>

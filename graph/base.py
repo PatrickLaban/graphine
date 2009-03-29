@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#! /usr/bin/env python3.0
 
 """
 base.py
@@ -139,7 +139,7 @@ A selector function:
 	>>> 	nodes.sort(nodes, key=get_popularity)
 	>>>	return nodes.pop()
 
-And traverse the tree:
+And traverse the graph:
 
 	>>> for node in g.a_star_traversal(node_1, get_heaviest):
 	>>> 	print(node)
@@ -186,6 +186,10 @@ class GraphElement(object):
 	nor deleted without considerable and misguided
 	determination.
 
+	A GraphEdge.data property is provided to give easier
+	access to all of the element's non-structural member
+	variables. It returns a dictionary.
+
 	It also provides an __repr__ member function to make
 	easier work of analyzing your graphs.
 	"""
@@ -231,7 +235,34 @@ class Edge(GraphElement):
 
 
 class Graph(object):
-	"""Base class for all Graph mixins"""
+
+	"""A basic graph class, and base for all Graph mixins.
+
+	In graph theoretic terms, this represents a directed multigraph.
+
+	Graph is designed to have a simple, easy-to-use, easy-to-extend
+	architecture, which allows for easy and intuitive graph construction
+	and traversal, as well as making it relatively simple to add and
+	remove graph properties as needed.
+
+	Internally, nodes and edges are maintained in lists, each element of
+	which is of the type specified by Graph.Node or Graph.Edge, as
+	appropriate. Each of those types should support at a minimum the
+	attributes specified by Graph.node_attributes and Graph.edge_attributes,
+	and the property Element.data.
+
+	Because Graph's internal data representation is an adjacency list,
+	the attributes given in node_attributes and edge_attributes should
+	generally be taken as a solid baseline for those extending this class-
+	and should probably only be removed by those quite determined to change
+	the way that the Graph is stored.
+
+	The Graph.NodeStructure and Graph.EdgeStructure types are used in the
+	construction of Node and Edge types for the storage of the structural
+	data required by the Graph to operate. Again, care should be exercised
+	in changing these attributes, and it should virtually never be done
+	while in operation.
+	"""
 
 	Node = Node
 	Edge = Edge
@@ -241,19 +272,37 @@ class Graph(object):
 	EdgeStructure = namedtuple("EdgeStructure", edge_attributes)
 
 	def __init__(self):
-		"""Base initializer for Graphs"""
+		"""Base initializer for Graphs.
+
+		Usage:
+			>>> g = Graph()
+		"""
 		self.nodes = []
 		self.edges = []
 
 	def __contains__(self, element):
-		"""returns True if the element is a member of the graph"""
+		"""Returns True if the element is a member of the graph.
+
+		Usage:
+			>>> g = Graph()
+			>>> n = g.add_node()
+			>>> n in g
+			True
+		"""
 		if isinstance(element, self.Node):
 			return element in self.nodes
 		else:
 			return element in self.edges
 
 	def add_node(self, *args, **kwargs):
-		"""Adds a node to the current graph."""
+		"""Adds a node to the current graph.
+
+		Usage:
+			>>> g = Graph()
+			>>> n = g.add_node(weight=5)
+			>>> n
+			Node(weight=5)
+		"""
 		# provide sensible defaults- no incoming, no outgoing
 		args = args or ([], [])
 		# construct the control structure
@@ -270,7 +319,15 @@ class Graph(object):
 		return node
 
 	def add_edge(self, *args, **kwargs):
-		"""Adds an edge to the current graph."""
+		"""Adds an edge to the current graph.
+
+		Usage:	
+			>>> g = Graph()
+			>>> n1, n2 = g.add_node(), g.add_node()
+			>>> e = g.add_edge(n1, n2, weight=5)
+			>>> e
+			Edge(weight=5)			
+		"""
 		# construct the control structure
 		try:
 			structure = self.EdgeStructure(*args)
@@ -288,7 +345,15 @@ class Graph(object):
 		return edge
 
 	def remove_node(self, node):
-		"""Removes a node from the graph."""
+		"""Removes a node from the graph.
+
+		Usage:
+			>>> g = Graph()
+			>>> n = g.add_node()
+			>>> g.remove_node(n)
+			>>> n in g
+			False
+		"""
 		# remove it from adjacency tracking
 		for edge in node.incoming:
 			edges.pop(edge)
@@ -299,7 +364,16 @@ class Graph(object):
 		return n
 
 	def remove_edge(self, edge):
-		"""Removes an edge from the graph."""
+		"""Removes an edge from the graph.
+
+		Usage:
+			>>> g = Graph()
+			>>> n1, n2 = g.add_node(), g.add_node()
+			>>> e = g.add_edge(n1, n2)
+			>>> g.remove_edge(e)
+			>>> e in g
+			False
+		"""
 		# remove it from adjacency tracking
 		edge.start.outgoing.remove(edge)
 		edge.end.incoming.remove(edge)
@@ -308,7 +382,16 @@ class Graph(object):
 		return e
 
 	def search_nodes(self, **kwargs):
-		"""Convenience function to get nodes based on some properties."""
+		"""Convenience function to get nodes based on some properties.
+
+		Usage:
+			>>> g = Graph()
+			>>> n1 = g.add_node(name="bob")
+			>>> n2 = g.add_node(name="bill")
+			>>> for node in g.search_nodes(name="bob"):
+			>>> 	print(node)
+			Node(name="bob")
+		"""
 		desired_properties = set(kwargs.items())
 		for node in self.nodes:
 			properties = set(node.data.items())
@@ -316,7 +399,17 @@ class Graph(object):
 				yield node
 
 	def search_edges(self, **kwargs):
-		"""Convenience function to get edges based on some properties."""
+		"""Convenience function to get edges based on some properties.
+
+		Usage:
+			>>> g = Graph()
+			>>> n1, n2 = g.add_node(), g.add_node()
+			>>> e1 = g.add_edge(n1, n2, weight=4)
+			>>> e2 = g.add_edge(n1, n2, weight=5)
+			>>> for edge in g.search_edges(weight=5):
+			>>> 	print(edge)
+			Edge(weight=5)
+		"""
 		desired_properties = set(kwargs.items())
 		for edge in self.edges:
 			properties = set(edge.data.items())
@@ -324,7 +417,17 @@ class Graph(object):
 				yield edge
 
 	def a_star_traversal(self, root, selector):
-		"""Traverses the graph using selector as a selection filter on the unvisited nodes."""
+		"""Traverses the graph using selector as a selection filter on the unvisited nodes.
+
+		Usage:
+			>>> g = Graph()
+			>>> n1, n2 = g.add_node(name="A"), g.add_node(name="B")
+			>>> e = g.add_edge(n1, n2)
+			>>> for node in g.a_star_traversal(n1, lambda s: s.pop()):
+			>>> 	print(node)
+			Node(name="A")
+			Node(name="B")
+		"""
 		discovered = []
 		visited = set()
 		discovered.append(root)
@@ -345,19 +448,66 @@ class Graph(object):
 					discovered.append(node)
 
 	def depth_first_traversal(self, root):
-		"""Traverses the graph by visiting a node, then a child of that node, and so on."""
+		"""Traverses the graph by visiting a node, then a child of that node, and so on.
+
+		Usage:
+			>>> g = Graph()
+			>>> a, b = g.add_node(name="A"), g.add_node(name="B")
+			>>> c, d = g.add_node(name="C"), g.add_node(name="D")
+			>>> e1, e2 = g.add_edge(a, b), g.add_edge(a, c)
+			>>> e3, e4 = g.add_edge(b, d), g.add_edge(c, d)
+			>>> for node in g.depth_first_traversal(a):
+			>>> 	print(node)
+			Node(name="A")
+			Node(name="B")
+			Node(name="D")
+			Node(name="C")
+		"""
 		for node in self.a_star_traversal(root, lambda s: s.pop()):
 			yield node
 		
 	def breadth_first_traversal(self, root):
-		"""Traverses the graph by visiting a node, then each of its children, then their children"""
+		"""Traverses the graph by visiting a node, then each of its children, then their children.
+
+		Usage:
+			>>> g = Graph()
+			>>> a, b = g.add_node(name="A"), g.add_node(name="B")
+			>>> c, d = g.add_node(name="C"), g.add_node(name="D")
+			>>> e1, e2 = g.add_edge(a, b), g.add_edge(a, c)
+			>>> e3, e4 = g.add_edge(b, d), g.add_edge(c, d)
+			>>> for node in g.depth_first_traversal(a):
+			>>> 	print(node)
+			Node(name="A")
+			Node(name="B")
+			Node(name="C")
+			Node(name="D")
+		"""
 		for node in self.a_star_traversal(root, lambda s: s.pop(0)):
 			yield node
 
 	def size(self):
-		"""Reports the number of edges in the graph"""
+		"""Reports the number of edges in the graph.
+
+		Usage:
+			>>> g = Graph()
+			>>> n1, n2 = g.add_node(), g.add_node()
+			>>> g.size()
+			0
+			>>> e = g.add_edge(n1, n2)
+			>>> g.size()
+			1
+		"""
 		return len(self.edges)
 
 	def order(self):
-		"""Reports the number of nodes in the graph"""
+		"""Reports the number of nodes in the graph.
+
+		Usage:
+			>>> g = Graph()
+			>>> g.order()
+			0
+			>>> n = g.add_node()
+			>>> g.order()
+			1
+		"""
 		return len(self.nodes)
