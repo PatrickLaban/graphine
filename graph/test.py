@@ -233,6 +233,9 @@ class GraphCorrectnessTest(unittest.TestCase):
 		self.failUnlessEqual(uhura.outgoing[0].end.name, "spock")
 		self.failUnlessEqual(uhura.outgoing[1].end.name, "bones")
 
+	def testMerge(self):
+		pass
+
 class GraphPerformanceTest(unittest.TestCase):
 
 	graph_setup = "from base import Graph; g = Graph(); n = g.add_node(name='');"

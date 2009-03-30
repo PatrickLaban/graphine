@@ -202,6 +202,9 @@ class Node(GraphElement):
 	Nodes have two properties, incoming and outgoing, which are
 	tuples of the edges which are incident to the node.
 
+	Nodes also provide the is_equivalent property, which tests
+	to ensure that this node and the other node are data equivalent.
+
 	They also inheirit the data property, which provides dictionary
 	access to all the non-private portions of the node.
 	"""
@@ -212,12 +215,26 @@ class Node(GraphElement):
 		for k, v in kwargs.items():
 			setattr(self, k, v)
 
+	def is_equivalent(self, other):
+		"""Tests for data equivalence between the given nodes."""
+		return self.data == other.data
+
 	@property
 	def incoming(self):
+		"""Returns a list of all the incoming edges for this node.
+
+		Note that the list returned is a copy, so modifying it doesn't
+		impact the structure of the graph.
+		"""
 		return copy.copy(self._incoming)
 
 	@property
 	def outgoing(self):
+		"""Returns a list of all the outgoing edges for this node.
+
+		Note that the list returned is a copy, so modifying it doesn't
+		impact the structure of the graph.
+		"""
 		return copy.copy(self._outgoing)
 
 
@@ -226,6 +243,10 @@ class Edge(GraphElement):
 
 	Edges have two properties, start and end, which are
 	Node objects incident to the edge.
+
+	Edges also provide the is_equivalent function, which
+	test for data equivalent between this edge, another
+	edge, and their endpoints.
 
 	They also inhierit the data property, which provides
 	dictionary access to all the non-private portions of
@@ -238,18 +259,31 @@ class Edge(GraphElement):
 		for k, v in kwargs.items():
 			setattr(self, k, v)
 
+	def is_equivalent(self, other):
+		"""Tests whether the two edges are data-equivalent."""
+		if self.data == other.data:
+			if self.start.is_equivalent(other.start):
+				if self.end.is_equivalent(other.end):
+					return True
+		return False
+
 	@property
 	def start(self):
+		"""Returns the starting point for this edge."""
 		return self._start
 
 	@property
 	def end(self):
+		"""Returns the ending point for this edge."""
 		return self._end
 
 
 class Graph(object):
 
 	"""A basic graph class, and base for all Graph mixins.
+
+	Details
+	=======
 
 	In graph theoretic terms, this represents a directed multigraph.
 
@@ -265,16 +299,30 @@ class Graph(object):
 	well as writable private properties by the names "_incoming" and 
 	"_outgoing". Edges should provide similarly conventioned "start"
 	and "end" properties.
+
+	Todo
+	====
+
+	- Add set operations
+		- disjoint union
+		- intersection
+		- difference
+	- Add graph analysis tools
+		- get_connected_components
+		- all_pairs_shortest_paths
+		- shortest_path
+		- minimum_spanning_tree	
 	"""
 
-	def __init__(self, node_type=Node, edge_type=Edge):
+	Node = Node
+	Edge = Edge
+
+	def __init__(self):
 		"""Base initializer for Graphs.
 
 		Usage:
 			>>> g = Graph()
 		"""
-		self.Node = node_type
-		self.Edge = edge_type
 		self.nodes = []
 		self.edges = []
 
@@ -290,7 +338,7 @@ class Graph(object):
 		if isinstance(element, self.Node):
 			return element in self.nodes
 		else:
-			return element in self.edges
+			return element in self.edges 
 
 	def add_node(self, **kwargs):
 		"""Adds a node with no edges to the current graph.
@@ -514,6 +562,105 @@ class Graph(object):
 					g.add_edge(start, end, **node.data)
 		return g
 
+	def union(self, other):
+		"""Returns a new graph with all nodes and edges in either or both of its parents."""
+		# create the graph
+		g = type(self)()
+		# add all of our nodes and edges
+		translation_table = {}
+		for node in self.nodes + other.nodes:
+			n = g.add_node(**node.data)
+			translation_table[node] = n
+		for edge in self.edges + other.edges:
+			start = translation_table[edge.start]
+			end = translation_table[edge.end]
+			g.add_edge(start, end, **edge.data)
+		return g
+
+	def intersection(self, other):
+		"""Returns a new graph with all of the nodes that are in both of its parents.
+
+		Note that as Edges must have two endpoints, only complete edges will be added.
+		"""
+		# create the graph
+		g = type(self)()
+		# create the node translators
+		translation_table = {}
+		# populate it with nodes
+		for n1 in self.nodes:
+			for n2 in other.nodes:
+				if n1.is_equivalent(n2):
+					n = g.add_node(**n1.data)
+					translation_table[n1] = n
+		# populate it with edges
+		for e1 in self.edges:
+			for e2 in other.edges:
+				if e1.is_equivalent(e2):
+					if e1.start in translation_table:
+						if e1.end in translation_table:
+							start = translation_table[e1.start]
+							end = translation_table[e1.end]
+							e.add_edge(start, end, **e1.data)
+		# and return the new graph
+		return g
+	
+	def difference(self, other):
+		"""Return a graph composed of the nodes and edges not in the other."""
+		# XXX DOES NOT WORK
+		# create the new graph
+		g = type(self)()
+		# node translator
+		translation_table = {}
+		# add nodes
+		for n1 in self.nodes:
+			for n2 in other.nodes:
+				if n1.is_equivalent(n2):
+					continue
+			translation_table[n1] = g.add_node(**n1.data)
+		# add edges
+		for e1 in self.edges:
+			for e2 in other.edges:
+				if e1.is_equivalent(e2):
+					continue
+			if e1.start in translation_table:
+				if e1.end in translation_table:
+					start = translation_table[e1.start]
+					end = translation_table[e1.end]
+					g.add_edge(start, end, **e1.data)
+		# return the new graph
+		return g
+
+	def merge(self, other):
+		"""Returns a new graph with its nodes and edges merged by data equality."""
+		# create the new graph
+		g = type(self)()
+		# set of all unique node properties
+		node_data = set()
+		# maps data to new nodes
+		node_map = {}
+		# add all nodes to the new graph
+		for node in self.nodes + other.nodes:
+			data = tuple(sorted(node.data.items()))
+			if data not in node_data:
+				node_data.add(tuple(sorted(node.data.items())))
+				new_node = g.add_node(**dict(data))
+				node_map[data] = new_node
+		# now do it with edges
+		for edge in self.edges + other.edges:
+			start_data = tuple(sorted(edge.start.data.items()))
+			end_data = tuple(sorted(edge.end.data.items()))
+			new_start = node_map[start_data]
+			new_end = node_map[end_data]
+			data = edge.data
+			is_duplicate = False
+			for existing_edge in new_start.outgoing:
+				if existing_edge.data == data:
+					if existing_edge.end == new_end:
+						is_duplicate = True
+			if not is_duplicate:
+				g.add_edge(new_start, new_end, **data)
+		return g
+			
 	def size(self):
 		"""Reports the number of edges in the graph.
 
