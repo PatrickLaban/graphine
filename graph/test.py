@@ -212,6 +212,26 @@ class GraphCorrectnessTest(unittest.TestCase):
 		self.failUnless(positions["A"] < min(positions["B"], positions["C"], positions["E"]))
 		self.failUnless(max(positions["B"], positions["C"], positions["E"]) < min(positions["D"], positions["F"], positions["G"]))
 
+	def testInduceSubgraph(self):
+		# setup
+		g = Graph()
+		kirk = g.add_node(name="kirk")
+		spock = g.add_node(name="spock")
+		bones = g.add_node(name="bones")
+		uhura = g.add_node(name="uhura")
+		e1 = g.add_edge(kirk, spock)
+		e2 = g.add_edge(kirk, bones)
+		e3 = g.add_edge(kirk, uhura)
+		e4 = g.add_edge(uhura, spock)
+		e5 = g.add_edge(uhura, bones)
+		
+		new_mission = g.induce_subgraph(spock, bones, uhura)
+		self.failUnlessEqual([node.name for node in new_mission.nodes], ["spock", "bones", "uhura"])
+		spock = new_mission.nodes[0]
+		bones = new_mission.nodes[1]
+		uhura = new_mission.nodes[2]
+		self.failUnlessEqual(uhura.outgoing[0].end.name, "spock")
+		self.failUnlessEqual(uhura.outgoing[1].end.name, "bones")
 
 class GraphPerformanceTest(unittest.TestCase):
 

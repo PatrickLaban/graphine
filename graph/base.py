@@ -9,16 +9,19 @@ Licensed under the GNU GPLv3
 
 Released 25 Mar 2009
 
-Graph- a flexible, easy-to-use graph implementation.
-
 This module contains the base GraphElement, Node, Edge,
-and Graph implementations for Graphine. Graphs generated
-using this representation are characterized by the use of
-directed edges, the ability to attach arbitrary properties
-to Node and Edge objects, and the ability to represent
-loops and parallel edges.
+and Graph implementations for Graphine, an easy-to-use,
+easy-to-extend Graph library.
 
-Interface summary:
+Graphs generated using this representation have directed 
+edges, the ability to represent loops and parallel edges,
+and can attach arbitrary data to nodes and edges.
+
+Interface summary
+=================
+
+Building Graphs
+---------------
 
 To create a new Graph:
 
@@ -47,6 +50,9 @@ To remove nodes:
 And edges:
 
 	>>> g.remove_edge(edge_3)
+
+Navigating Graphs
+-----------------
 
 In addition to storing your data, Nodes and Edges have
 a few other special properties by default. For Nodes,
@@ -110,8 +116,8 @@ And for edges:
 	>>> 	print(edge)
 	Edge(weight=5)
 
-Three traversals are provided by default- A*,
-depth first, and breadth first.
+Three traversals are provided by default- A*, depth first,
+and breadth first.
 
 To do a depth first traversal:
 
@@ -167,25 +173,10 @@ And traverse the graph:
 
 
 from collections import deque, namedtuple
+import copy
 
 class GraphElement(object):
 	"""Base class for Nodes and Edges.
-
-	GraphElement is designed to provide two layers of data
-	in a single container:
-
-	1/ a set of arbitrary name-value mappings, accessible
-	   as normal attributes, and
-	2/ GraphElement.__structure, which is a namedtuple
-	   designed to hold those parts of the element's data
-	   which should not be user-modifiable.
-
-	GraphElement is designed to provide direct attribute
-	access to the first type of data, and provides a kind
-	of passthrough access to the second, allowing its
-	values to be read as normal but neither overwritten
-	nor deleted without considerable and misguided
-	determination.
 
 	A GraphEdge.data property is provided to give easier
 	access to all of the element's non-structural member
@@ -195,34 +186,10 @@ class GraphElement(object):
 	easier work of analyzing your graphs.
 	"""
 
-	__structure = None
-	
-	def __init__(self, structure, **kwargs):
-		# contains the basic, should-not-be-modified
-		# information the node needs to operate
-		self.__structure = structure
-		# all other values
-		for k, v in kwargs.items():
-			setattr(self, k, v)
-	
-	def __setattr__(self, attr, value):
-		if hasattr(self.__structure, attr):
-			msg = "Cannot set attribute '%s'" % attr
-			raise AttributeError(msg)
-		else:
-			super().__setattr__(attr, value)
-
-	def __getattr__(self, attr):
-		return getattr(self.__structure, attr)
-
 	def __repr__(self):
 		classname = type(self).__name__
 		attrs = ''.join(("%s=%s, " % (k, v) for k, v in self.data.items()))[:-2]
 		return "%s(%s)" % (classname, attrs)
-
-	@property
-	def structure(self):
-		return self.__structure._asdict()
 
 	@property
 	def data(self):
@@ -230,13 +197,54 @@ class GraphElement(object):
 
 
 class Node(GraphElement):
-	"""Base node representation."""
-	pass
+	"""Base node representation.
+
+	Nodes have two properties, incoming and outgoing, which are
+	tuples of the edges which are incident to the node.
+
+	They also inheirit the data property, which provides dictionary
+	access to all the non-private portions of the node.
+	"""
+
+	def __init__(self, incoming=None, outgoing=None, **kwargs):
+		self._incoming = incoming or []
+		self._outgoing = outgoing or []
+		for k, v in kwargs.items():
+			setattr(self, k, v)
+
+	@property
+	def incoming(self):
+		return copy.copy(self._incoming)
+
+	@property
+	def outgoing(self):
+		return copy.copy(self._outgoing)
 
 
 class Edge(GraphElement):
-	"""Base edge representation."""
-	pass
+	"""Base edge representation.
+
+	Edges have two properties, start and end, which are
+	Node objects incident to the edge.
+
+	They also inhierit the data property, which provides
+	dictionary access to all the non-private portions of
+	the edge.
+	"""
+
+	def __init__(self, start, end, **kwargs):
+		self._start = start
+		self._end = end
+		for k, v in kwargs.items():
+			setattr(self, k, v)
+
+	@property
+	def start(self):
+		return self._start
+
+	@property
+	def end(self):
+		return self._end
 
 
 class Graph(object):
@@ -247,41 +255,26 @@ class Graph(object):
 
 	Graph is designed to have a simple, easy-to-use, easy-to-extend
 	architecture, which allows for easy and intuitive graph construction
-	and traversal, as well as making it relatively simple to add and
-	remove graph properties as needed.
+	and traversal.
 
 	Internally, nodes and edges are maintained in lists, each element of
 	which is of the type specified by Graph.Node or Graph.Edge, as
-	appropriate. Each of those types should support at a minimum the
-	attributes specified by Graph.node_attributes and Graph.edge_attributes,
-	and the property Element.data.
-
-	Because Graph's internal data representation is an adjacency list,
-	the attributes given in node_attributes and edge_attributes should
-	generally be taken as a solid baseline for those extending this class-
-	and should probably only be removed by those quite determined to change
-	the way that the Graph is stored.
-
-	The Graph.NodeStructure and Graph.EdgeStructure types are used in the
-	construction of Node and Edge types for the storage of the structural
-	data required by the Graph to operate. Again, care should be exercised
-	in changing these attributes, and it should virtually never be done
-	while in operation.
+	appropriate. Both types should have the property "data", which
+	should return a dictionary represenation of its optional attributes,
+	while nodes should provide "incoming" and "outgoing" properties, as
+	well as writable private properties by the names "_incoming" and 
+	"_outgoing". Edges should provide similarly conventioned "start"
+	and "end" properties.
 	"""
 
-	Node = Node
-	Edge = Edge
-	node_attributes = ("incoming", "outgoing")
-	edge_attributes = ("start", "end")
-	NodeStructure = namedtuple("NodeStructure", node_attributes)
-	EdgeStructure = namedtuple("EdgeStructure", edge_attributes)
-
-	def __init__(self):
+	def __init__(self, node_type=Node, edge_type=Edge):
 		"""Base initializer for Graphs.
 
 		Usage:
 			>>> g = Graph()
 		"""
+		self.Node = node_type
+		self.Edge = edge_type
 		self.nodes = []
 		self.edges = []
 
@@ -299,8 +292,8 @@ class Graph(object):
 		else:
 			return element in self.edges
 
-	def add_node(self, *args, **kwargs):
-		"""Adds a node to the current graph.
+	def add_node(self, **kwargs):
+		"""Adds a node with no edges to the current graph.
 
 		Usage:
 			>>> g = Graph()
@@ -308,22 +301,11 @@ class Graph(object):
 			>>> n
 			Node(weight=5)
 		"""
-		# provide sensible defaults- no incoming, no outgoing
-		args = args or ([], [])
-		# construct the control structure
-		try:
-			structure = self.NodeStructure(*args)
-		except TypeError as error:
-			msg = "Nodes require at least %d positional arguments (%d given)"
-			num_required = len(self.node_attributes)
-			num_recieved = len(args)
-			raise TypeError(msg % (num_required, num_recieved)) from error
-		# build the actual node
-		node = self.Node(structure, **kwargs)
+		node = self.Node(**kwargs)
 		self.nodes.append(node)
 		return node
 
-	def add_edge(self, *args, **kwargs):
+	def add_edge(self, start, end, **kwargs):
 		"""Adds an edge to the current graph.
 
 		Usage:	
@@ -333,20 +315,12 @@ class Graph(object):
 			>>> e
 			Edge(weight=5)			
 		"""
-		# construct the control structure
-		try:
-			structure = self.EdgeStructure(*args)
-		except TypeError as error:
-			msg = "Edges require at least %d positional arguments (%d given)"
-			num_required = len(self.node_attributes)
-			num_recieved = len(args)
-			raise TypeError(msg % (num_required, num_recieved)) from error
 		# build the edge
-		edge = self.Edge(structure, **kwargs)
+		edge = self.Edge(start, end, **kwargs)
 		self.edges.append(edge)
 		# take care of adjacency tracking
-		structure.start.outgoing.append(edge)
-		structure.end.incoming.append(edge)
+		start._outgoing.append(edge)
+		end._incoming.append(edge)
 		return edge
 
 	def remove_node(self, node):
@@ -380,8 +354,10 @@ class Graph(object):
 			False
 		"""
 		# remove it from adjacency tracking
-		edge.start.outgoing.remove(edge)
-		edge.end.incoming.remove(edge)
+		start = edge.start
+		end = edge.end
+		start._outgoing.remove(edge)
+		end._incoming.remove(edge)
 		# remove it from storage
 		e = self.edges.remove(edge)
 		return e
@@ -489,6 +465,54 @@ class Graph(object):
 		"""
 		for node in self.a_star_traversal(root, lambda s: s.pop(0)):
 			yield node
+
+	def induce_subgraph(self, *nodes):
+		"""Returns a new graph composed of only the specified nodes and their mutual edges.
+
+		Usage:
+		
+		Set up your graph:
+
+			>>> enterprise = Graph()
+			>>> kirk = enterprise.add_node(name="kirk")
+			>>> spock = enterprise.add_node(name="spock")
+			>>> bones = enterprise.add_node(name="mccoy")
+			>>> enterprise.add_edge(kirk, spock)
+			>>> enterprise.add_edge(kirk, bones)
+
+		As you can see, it has 3 nodes and two edges:
+
+			>>> enterprise.order()
+			3
+			>>> enterprise.size()
+			2
+
+		Now we induce a subgraph that includes spock and bones but
+		not the captain:
+
+			>>> new_mission = enterprise.induce_subgraph(spock, bones)
+
+		And can see that it has two nodes- spock and bones- but no edges:
+
+			>>> new_mission.order()
+			2
+			>>> new_mission.size()
+			0			
+		"""
+		g = type(self)()
+		node_translator = {}
+		for node in nodes:
+			# copies node data
+			n = g.add_node(**node.data)
+			node_translator[node] = n
+		for edge in self.edges:
+			if edge.start in nodes:
+				if edge.end in nodes:
+					start = node_translator[edge.start]
+					end = node_translator[edge.end]
+					# copies edge data
+					g.add_edge(start, end, **node.data)
+		return g
 
 	def size(self):
 		"""Reports the number of edges in the graph.
