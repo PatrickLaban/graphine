@@ -60,112 +60,116 @@
   <p>Written by Geremy Condra</p>
   <p>Licensed under the GNU GPLv3</p>
   <p>Released 25 Mar 2009</p>
-  <p>Graph- a flexible, easy-to-use graph implementation.</p>
   <p>This module contains the base GraphElement, Node, Edge, and Graph 
-  implementations for Graphine. Graphs generated using this representation 
-  are characterized by the use of directed edges and the ability to attach 
-  arbitrary properties on Node and Edge objects.</p>
-  <p>Interface summary:</p>
-  To create a new Graph:
+  implementations for Graphine, an easy-to-use, easy-to-extend Graph 
+  library.</p>
+  Graphs generated using this representation have directed edges, the 
+  ability to represent loops and parallel edges, and can attach arbitrary 
+  data to nodes and edges.
+  <h1 class="heading">Interface summary</h1>
+    <h2 class="heading">Building Graphs</h2>
+      To create a new Graph:
 <pre class="py-doctest">
 <span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">from</span> graph.base <span class="py-keyword">import</span> Graph
 <span class="py-prompt">&gt;&gt;&gt; </span>g = Graph()</pre>
-  To add nodes:
+      To add nodes:
 <pre class="py-doctest">
 <span class="py-prompt">&gt;&gt;&gt; </span>node_1 = g.add_node(name=<span class="py-string">&quot;bob&quot;</span>)
 <span class="py-prompt">&gt;&gt;&gt; </span>node_2 = g.add_node(weight=5)
 <span class="py-prompt">&gt;&gt;&gt; </span>node_3 = g.add_node(color=<span class="py-string">&quot;red&quot;</span>, flags=[<span class="py-string">&quot;visited&quot;</span>])</pre>
-  To add edges:
+      To add edges:
 <pre class="py-doctest">
 <span class="py-prompt">&gt;&gt;&gt; </span>edge_1 = g.add_edge(node_2, node_3)</pre>
-  Notice that edges can have properties as well:
+      Notice that edges can have properties as well:
 <pre class="py-doctest">
 <span class="py-prompt">&gt;&gt;&gt; </span>edge_2 = g.add_edge(node_1, node_2, weight=5)
 <span class="py-prompt">&gt;&gt;&gt; </span>edge_3 = g.add_edge(node_3, node_1, stuff={})</pre>
-  To remove nodes:
+      To remove nodes:
 <pre class="py-doctest">
 <span class="py-prompt">&gt;&gt;&gt; </span>g.remove_node(node_3)</pre>
-  And edges:
+      And edges:
 <pre class="py-doctest">
 <span class="py-prompt">&gt;&gt;&gt; </span>g.remove_edge(edge_3)</pre>
-  <p>In addition to storing your data, Nodes and Edges have a few other 
-  special properties by default. For Nodes, these properties are 
-  &quot;incoming&quot; and &quot;outgoing&quot;, and they contain the 
-  incoming and outgoing edges attached to that node. For Edges, these 
-  properties are (again, by default) &quot;start&quot; and 
-  &quot;end&quot;.</p>
-  To get all the outgoing edges of a particular node:
+    <h2 class="heading">Navigating Graphs</h2>
+      <p>In addition to storing your data, Nodes and Edges have a few other
+      special properties by default. For Nodes, these properties are 
+      &quot;incoming&quot; and &quot;outgoing&quot;, and they contain the 
+      incoming and outgoing edges attached to that node. For Edges, these 
+      properties are (again, by default) &quot;start&quot; and 
+      &quot;end&quot;.</p>
+      To get all the outgoing edges of a particular node:
 <pre class="py-doctest">
 <span class="py-prompt">&gt;&gt;&gt; </span>n1.outgoing
 <span class="py-output">[Edge(weight=5)]</span></pre>
-  And to get the incoming edges:
+      And to get the incoming edges:
 <pre class="py-doctest">
 <span class="py-prompt">&gt;&gt;&gt; </span>n2.incoming
 <span class="py-output">[Edge(weight=5)]</span></pre>
-  You can use this to get all the nodes adjacent to an interesting 
-  Node:
+      You can use this to get all the nodes adjacent to an interesting 
+      Node:
 <pre class="py-doctest">
 <span class="py-prompt">&gt;&gt;&gt; </span>adjacent = [edge.end <span class="py-keyword">for</span> edge <span class="py-keyword">in</span> node1.outgoing]</pre>
-  You can combine this with Edges' &quot;start&quot; and &quot;end&quot;
-  properties to navigate your graph, if you know how your data is related 
-  structurally. For example, to get the oldest outgoing edge attached to 
-  the oldest node attached to node_1, I could do the following:
+      You can combine this with Edges' &quot;start&quot; and 
+      &quot;end&quot; properties to navigate your graph, if you know how 
+      your data is related structurally. For example, to get the oldest 
+      outgoing edge attached to the oldest node attached to node_1, I could
+      do the following:
 <pre class="py-doctest">
 <span class="py-prompt">&gt;&gt;&gt; </span>interesting_node = node_1.outgoing[0].end.outgoing[0]</pre>
-  <p>Of course, there are scenarios in which you don't know how to navigate
-  your graph, or need to find a starting point that isn't easily determined
-  based on a given element's properties. For that, Graph supports Node and 
-  Edge iteration for the simple cases, and traversals for more complex 
-  behavior.</p>
-  To iterate over all the nodes in a graph:
+      <p>Of course, there are scenarios in which you don't know how to 
+      navigate your graph, or need to find a starting point that isn't 
+      easily determined based on a given element's properties. For that, 
+      Graph supports Node and Edge iteration for the simple cases, and 
+      traversals for more complex behavior.</p>
+      To iterate over all the nodes in a graph:
 <pre class="py-doctest">
 <span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">for</span> node <span class="py-keyword">in</span> g.nodes:
 <span class="py-prompt">&gt;&gt;&gt; </span>    <span class="py-keyword">print</span>(node)
 <span class="py-output">Node(name=&quot;bob&quot;)</span>
 <span class="py-output">Node(weight=5)</span></pre>
-  To do the same for edges:
+      To do the same for edges:
 <pre class="py-doctest">
 <span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">for</span> edge <span class="py-keyword">in</span> g.edges:
 <span class="py-prompt">&gt;&gt;&gt; </span>    <span class="py-keyword">print</span>(edge)
 <span class="py-output">Edge()</span>
 <span class="py-output">Edge(weight=5)</span></pre>
-  If you only want certain nodes, the search functions are provided for 
-  convenience:
+      If you only want certain nodes, the search functions are provided 
+      for convenience:
 <pre class="py-doctest">
 <span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">for</span> node <span class="py-keyword">in</span> g.search_nodes(name=<span class="py-string">&quot;bob&quot;</span>):
 <span class="py-prompt">&gt;&gt;&gt; </span>    <span class="py-keyword">print</span>(node)
 <span class="py-output">Node(name=&quot;bob&quot;)</span></pre>
-  And for edges:
+      And for edges:
 <pre class="py-doctest">
 <span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">for</span> edge <span class="py-keyword">in</span> g.search_edges(weight=5):
 <span class="py-prompt">&gt;&gt;&gt; </span>    <span class="py-keyword">print</span>(edge)
 <span class="py-output">Edge(weight=5)</span></pre>
-  <p>Three traversals are provided by default- A*, depth first, and breadth
-  first.</p>
-  To do a depth first traversal:
+      <p>Three traversals are provided by default- A*, depth first, and 
+      breadth first.</p>
+      To do a depth first traversal:
 <pre class="py-doctest">
 <span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">for</span> node <span class="py-keyword">in</span> g.depth_first_traversal(node_1):
 <span class="py-prompt">&gt;&gt;&gt; </span>    <span class="py-keyword">print</span>(node)
 <span class="py-output">Node(name=&quot;bob&quot;)</span>
 <span class="py-output">Node(weight=5)</span></pre>
-  <p>Depth first traversals are similar in usage, simply substituting 
-  &quot;depth_first_traversal&quot; for 
-  &quot;breadth_first_traversal&quot;.</p>
-  <p>A* traversals require an additional callable argument. This callable 
-  will be passed a list of unvisited nodes and should select and remove 
-  exactly one of them to return.</p>
-  For example, to navigate a graph by visiting the most popular (ie, 
-  most incoming edges) nodes first, I could write a getter function as 
-  follows:
+      <p>Depth first traversals are similar in usage, simply substituting 
+      &quot;depth_first_traversal&quot; for 
+      &quot;breadth_first_traversal&quot;.</p>
+      <p>A* traversals require an additional callable argument. This 
+      callable will be passed a list of unvisited nodes and should select 
+      and remove exactly one of them to return.</p>
+      For example, to navigate a graph by visiting the most popular (ie,
+      most incoming edges) nodes first, I could write a getter function as 
+      follows:
 <pre class="py-doctest">
 <span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">def</span> <span class="py-defname">get_popularity</span>(node):
 <span class="py-prompt">&gt;&gt;&gt; </span>    return len(node.incoming)</pre>
-  A selector function:
+      A selector function:
 <pre class="py-doctest">
 <span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">def</span> <span class="py-defname">get_most_popular</span>(nodes):
 <span class="py-prompt">&gt;&gt;&gt; </span>    nodes.sort(nodes, key=get_popularity)
 <span class="py-prompt">&gt;&gt;&gt; </span>    return nodes.pop()</pre>
-  And traverse the graph:
+      And traverse the graph:
 <pre class="py-doctest">
 <span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">for</span> node <span class="py-keyword">in</span> g.a_star_traversal(node_1, get_heaviest):
 <span class="py-prompt">&gt;&gt;&gt; </span>    <span class="py-keyword">print</span>(node)
@@ -248,7 +252,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0beta1 on Sun Mar 29 04:52:14 2009
+    Generated by Epydoc 3.0beta1 on Sun Mar 29 20:08:05 2009
     </td>
     <td align="right" class="footer">
       <a href="http://epydoc.sourceforge.net">http://epydoc.sourceforge.net</a>

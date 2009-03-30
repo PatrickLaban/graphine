@@ -68,58 +68,17 @@ object --+
   <p>In graph theoretic terms, this represents a directed multigraph.</p>
   <p>Graph is designed to have a simple, easy-to-use, easy-to-extend 
   architecture, which allows for easy and intuitive graph construction and 
-  traversal, as well as making it relatively simple to add and remove graph
-  properties as needed.</p>
-  <p>Internally, nodes and edges are maintained in lists, each element of 
+  traversal.</p>
+  Internally, nodes and edges are maintained in lists, each element of 
   which is of the type specified by Graph.Node or Graph.Edge, as 
-  appropriate. Each of those types should support at a minimum the 
-  attributes specified by Graph.node_attributes and Graph.edge_attributes, 
-  and the property Element.data.</p>
-  <p>Because Graph's internal data representation is an adjacency list, the
-  attributes given in node_attributes and edge_attributes should generally 
-  be taken as a solid baseline for those extending this class- and should 
-  probably only be removed by those quite determined to change the way that
-  the Graph is stored.</p>
-  The Graph.NodeStructure and Graph.EdgeStructure types are used in the 
-  construction of Node and Edge types for the storage of the structural 
-  data required by the Graph to operate. Again, care should be exercised in
-  changing these attributes, and it should virtually never be done while in
-  operation.<br /><br />
+  appropriate. Both types should have the property &quot;data&quot;, which 
+  should return a dictionary represenation of its optional attributes, 
+  while nodes should provide &quot;incoming&quot; and &quot;outgoing&quot; 
+  properties, as well as writable private properties by the names 
+  &quot;_incoming&quot; and &quot;_outgoing&quot;. Edges should provide 
+  similarly conventioned &quot;start&quot; and &quot;end&quot; 
+  properties.<br /><br />
 
-<!-- ==================== NESTED CLASSES ==================== -->
-<a name="section-NestedClasses"></a>
-<table class="summary" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr bgcolor="#70b0f0" class="table-header">
-  <td colspan="2" class="table-header">
-    <table border="0" cellpadding="0" cellspacing="0" width="100%">
-      <tr valign="top">
-        <td align="left"><span class="table-header">Nested Classes</span></td>
-        <td align="right" valign="top"
-         ><span class="options">[<a href="#section-NestedClasses"
-         class="privatelink" onclick="toggle_private();"
-         >hide private</a>]</span></td>
-      </tr>
-    </table>
-  </td>
-</tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a href="graph.base.Node-class.html" class="summary-name">Node</a><br />
-      Base node representation.
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a href="graph.base.Edge-class.html" class="summary-name">Edge</a><br />
-      Base edge representation.
-    </td>
-  </tr>
-</table>
 <!-- ==================== INSTANCE METHODS ==================== -->
 <a name="section-InstanceMethods"></a>
 <table class="summary" border="1" cellpadding="3"
@@ -143,7 +102,9 @@ object --+
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a href="graph.base.Graph-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>)</span><br />
+          <td><span class="summary-sig"><a href="graph.base.Graph-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">node_type</span>=<span class="summary-sig-default">Node</span>,
+        <span class="summary-sig-arg">edge_type</span>=<span class="summary-sig-default">Edge</span>)</span><br />
       Base initializer for Graphs.</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="graph.base-pysrc.html#Graph.__init__">source&nbsp;code</a></span>
@@ -179,9 +140,8 @@ object --+
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td><span class="summary-sig"><a href="graph.base.Graph-class.html#add_node" class="summary-sig-name">add_node</a>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">*args</span>,
         <span class="summary-sig-arg">**kwargs</span>)</span><br />
-      Adds a node to the current graph.</td>
+      Adds a node with no edges to the current graph.</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="graph.base-pysrc.html#Graph.add_node">source&nbsp;code</a></span>
             
@@ -198,7 +158,8 @@ object --+
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td><span class="summary-sig"><a href="graph.base.Graph-class.html#add_edge" class="summary-sig-name">add_edge</a>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">*args</span>,
+        <span class="summary-sig-arg">start</span>,
+        <span class="summary-sig-arg">end</span>,
         <span class="summary-sig-arg">**kwargs</span>)</span><br />
       Adds an edge to the current graph.</td>
           <td align="right" valign="top">
@@ -346,6 +307,25 @@ object --+
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
+          <td><span class="summary-sig"><a href="graph.base.Graph-class.html#induce_subgraph" class="summary-sig-name">induce_subgraph</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">*nodes</span>)</span><br />
+      Returns a new graph composed of only the specified nodes and their
+      mutual edges.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="graph.base-pysrc.html#Graph.induce_subgraph">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
           <td><span class="summary-sig"><a href="graph.base.Graph-class.html#size" class="summary-sig-name">size</a>(<span class="summary-sig-arg">self</span>)</span><br />
       Reports the number of edges in the graph.</td>
           <td align="right" valign="top">
@@ -387,52 +367,6 @@ object --+
       <code>__setattr__</code>,
       <code>__str__</code>
       </p>
-    </td>
-  </tr>
-</table>
-<!-- ==================== CLASS VARIABLES ==================== -->
-<a name="section-ClassVariables"></a>
-<table class="summary" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr bgcolor="#70b0f0" class="table-header">
-  <td colspan="2" class="table-header">
-    <table border="0" cellpadding="0" cellspacing="0" width="100%">
-      <tr valign="top">
-        <td align="left"><span class="table-header">Class Variables</span></td>
-        <td align="right" valign="top"
-         ><span class="options">[<a href="#section-ClassVariables"
-         class="privatelink" onclick="toggle_private();"
-         >hide private</a>]</span></td>
-      </tr>
-    </table>
-  </td>
-</tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="node_attributes"></a><span class="summary-name">node_attributes</span> = <code title="&quot;incoming&quot;, &quot;outgoing&quot;">&quot;incoming&quot;, &quot;outgoing&quot;</code>
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="edge_attributes"></a><span class="summary-name">edge_attributes</span> = <code title="&quot;start&quot;, &quot;end&quot;">&quot;start&quot;, &quot;end&quot;</code>
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="NodeStructure"></a><span class="summary-name">NodeStructure</span> = <code title="namedtuple(&quot;NodeStructure&quot;, node_attributes)">namedtuple(&quot;NodeStructure&quot;, node_attributes)</code>
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="EdgeStructure"></a><span class="summary-name">EdgeStructure</span> = <code title="namedtuple(&quot;EdgeStructure&quot;, edge_attributes)">namedtuple(&quot;EdgeStructure&quot;, edge_attributes)</code>
     </td>
   </tr>
 </table>
@@ -486,7 +420,9 @@ object --+
 <tr><td>
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>)</span>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">node_type</span>=<span class="sig-default">Node</span>,
+        <span class="sig-arg">edge_type</span>=<span class="sig-default">Edge</span>)</span>
     <br /><em class="fname">(Constructor)</em>
   </h3>
   </td><td align="right" valign="top"
@@ -540,7 +476,6 @@ object --+
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr valign="top"><td>
   <h3 class="epydoc"><span class="sig"><span class="sig-name">add_node</span>(<span class="sig-arg">self</span>,
-        <span class="sig-arg">*args</span>,
         <span class="sig-arg">**kwargs</span>)</span>
   </h3>
   </td><td align="right" valign="top"
@@ -548,7 +483,7 @@ object --+
     </td>
   </table>
   
-  <p>Adds a node to the current graph.</p>
+  <p>Adds a node with no edges to the current graph.</p>
   Usage:
 <pre class="py-doctest">
 <span class="py-prompt">&gt;&gt;&gt; </span>g = Graph()
@@ -567,7 +502,8 @@ object --+
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr valign="top"><td>
   <h3 class="epydoc"><span class="sig"><span class="sig-name">add_edge</span>(<span class="sig-arg">self</span>,
-        <span class="sig-arg">*args</span>,
+        <span class="sig-arg">start</span>,
+        <span class="sig-arg">end</span>,
         <span class="sig-arg">**kwargs</span>)</span>
   </h3>
   </td><td align="right" valign="top"
@@ -798,6 +734,52 @@ object --+
   </dl>
 </td></tr></table>
 </div>
+<a name="induce_subgraph"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">induce_subgraph</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">*nodes</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="graph.base-pysrc.html#Graph.induce_subgraph">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  <p>Returns a new graph composed of only the specified nodes and their 
+  mutual edges.</p>
+  <p>Usage:</p>
+  Set up your graph:
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span>enterprise = Graph()
+<span class="py-prompt">&gt;&gt;&gt; </span>kirk = enterprise.add_node(name=<span class="py-string">&quot;kirk&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span>spock = enterprise.add_node(name=<span class="py-string">&quot;spock&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span>bones = enterprise.add_node(name=<span class="py-string">&quot;mccoy&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span>enterprise.add_edge(kirk, spock)
+<span class="py-prompt">&gt;&gt;&gt; </span>enterprise.add_edge(kirk, bones)</pre>
+  As you can see, it has 3 nodes and two edges:
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span>enterprise.order()
+<span class="py-output">3</span>
+<span class="py-output"></span><span class="py-prompt">&gt;&gt;&gt; </span>enterprise.size()
+<span class="py-output">2</span></pre>
+  Now we induce a subgraph that includes spock and bones but not the 
+  captain:
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span>new_mission = enterprise.induce_subgraph(spock, bones)</pre>
+  And can see that it has two nodes- spock and bones- but no edges:
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span>new_mission.order()
+<span class="py-output">2</span>
+<span class="py-output"></span><span class="py-prompt">&gt;&gt;&gt; </span>new_mission.size()
+<span class="py-output">0</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
 <a name="size"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
@@ -880,7 +862,7 @@ object --+
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0beta1 on Sun Mar 29 04:52:14 2009
+    Generated by Epydoc 3.0beta1 on Sun Mar 29 20:08:05 2009
     </td>
     <td align="right" class="footer">
       <a href="http://epydoc.sourceforge.net">http://epydoc.sourceforge.net</a>
