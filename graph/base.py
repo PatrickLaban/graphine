@@ -396,12 +396,12 @@ class Graph(object):
 			return element in self.edges
 
 	def __and__(self, other):
-		"""Maps the & operator to the union operation."""
-		return self.union(other)
+		"""Maps the & operator to the intersection operation."""
+		return self.intersection(other)
 
 	def __or__(self, other):
-		"""Maps the | operator to the intersection operation."""
-		return self.intersection(other)
+		"""Maps the | operator to the union operation."""
+		return self.union(other)
 
 	def __sub__(self, other):
 		"""Maps the - operator to the difference operation."""
@@ -757,31 +757,32 @@ class Graph(object):
 		"""Returns a new graph with its nodes and edges merged by data equality."""
 		# create the new graph
 		g = type(self)()
-		# set of all unique node properties
-		node_data = set()
-		# maps data to new nodes
-		node_map = {}
-		# add all nodes to the new graph
-		for node in set(self.nodes) & set(other.nodes):
-			data = tuple(sorted(node.data.items()))
-			if data not in node_data:
-				node_data.add(tuple(sorted(node.data.items())))
-				new_node = g.add_node(**dict(data))
-				node_map[data] = new_node
-		# now do it with edges
-		for edge in set(self.edges) & set(other.edges):
-			start_data = tuple(sorted(edge.start.data.items()))
-			end_data = tuple(sorted(edge.end.data.items()))
-			new_start = node_map[start_data]
-			new_end = node_map[end_data]
-			data = edge.data
-			is_duplicate = False
-			for existing_edge in new_start.outgoing:
-				if existing_edge.data == data:
-					if existing_edge.end == new_end:
-						is_duplicate = True
-			if not is_duplicate:
-				g.add_edge(new_start, new_end, **data)
+		# create duplicate sets
+		duplicate_nodes = set()
+		duplicate_edges = set()
+		# create unified lists
+		all_nodes = self.nodes + other.nodes
+		all_edges = self.edges + other.edges
+		# create the translation table
+		translate = {}
+		# iterate over the nodes in both sets
+		for node in all_nodes:
+			if node not in duplicate_nodes:
+				duplicates = self.get_equivalent_elements(node, all_nodes)
+				duplicate_nodes |= duplicates
+				translate[node] = g.add_node(**node.data)
+			else:
+				duplicate = g.get_equivalent_nodes(node)
+				translate[node] = duplicate.pop()
+		# iterate over all the edges in both sets
+		for edge in all_edges:
+			if edge not in duplicate_edges:
+				duplicates = self.get_equivalent_elements(edge, all_edges, flatten=True)
+				duplicate_edges &= duplicates
+				start = translate.get(edge.start, False)
+				end = translate.get(edge.end, False)
+				if start and end:
+					g.add_edge(start, end, **edge.data)
 		return g
 			
 	def size(self):

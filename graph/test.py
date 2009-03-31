@@ -272,7 +272,7 @@ class GraphCorrectnessTest(unittest.TestCase):
 		for i in range(1, 10, 2):
 			for j in range(1, 10, 2):
 				odds.add_edge(odds_table[i], odds_table[j], weight=i-j+1)
-		digits = evens & odds
+		digits = evens | odds
 		numerals = {node.label for node in digits.nodes}
 		self.failUnlessEqual(numerals, {i for i in range(10)})
 		difference = [edge.weight for edge in digits.edges]
@@ -295,7 +295,7 @@ class GraphCorrectnessTest(unittest.TestCase):
 		g2.add_edge(one_2, five)
 		g2.add_edge(five, three_2)
 		g2.add_edge(three_2, one_2)
-		one_and_three = g1 | g2
+		one_and_three = g1 & g2
 		self.failUnlessEqual({1, 3}, {node.name for node in one_and_three.nodes})
 		self.failUnlessEqual(one_and_three.edges[0].start.name, 3)
 		self.failUnlessEqual(one_and_three.edges[0].end.name, 1)
@@ -328,8 +328,25 @@ class GraphCorrectnessTest(unittest.TestCase):
 
 	def testMerge(self):
 		# setup
-		g = Graph()
-		
+		g1 = Graph()
+		g2 = Graph()
+		bob1 = g1.add_node(name="Bob")
+		dan = g1.add_node(name="Dan")
+		doug = g1.add_node(name="Doug")
+		g1.add_edge(bob1, dan)
+		g1.add_edge(bob1, doug)
+		g1.add_edge(dan, doug)
+		bob2 = g2.add_node(name="Bob")
+		jeff = g2.add_node(name="Jeff")
+		paul = g2.add_node(name="Paul")
+		g2.add_edge(bob2, jeff)
+		g2.add_edge(bob2, paul)
+		g2.add_edge(jeff, paul)
+		g3 = g1 + g2
+		self.failUnlessEqual(g3.order(), 5)
+		self.failUnlessEqual(g3.size(), 6)
+		self.failUnlessEqual([node.name for node in g3.nodes], ["Bob", "Dan", "Doug", "Jeff", "Paul"])
+		self.failUnlessEqual([g3.nodes[0].outgoing[i].end.name for i in range(4)], ["Dan", "Doug", "Jeff", "Paul"])
 
 class GraphPerformanceTest(unittest.TestCase):
 
