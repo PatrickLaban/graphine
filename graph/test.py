@@ -64,6 +64,25 @@ class GraphCorrectnessTest(unittest.TestCase):
 		# make sure that change is reflected in the graph's order
 		self.failUnlessEqual(g.order(), 5)
 
+		# test to make sure that unlinking works
+		# if they should be equal
+		self.failUnlessEqual(paul.flatten(), snowflake.flatten())
+		# if their data is the same, but their edges are
+		# in the wrong place
+		e1 = g.add_edge(paul, snowflake, distance=0)
+		self.failIfEqual(paul.flatten(), snowflake.flatten())
+		g.remove_edge(e1)
+		# if their data is the same, and they have different
+		# edges
+		e1 = g.add_edge(paul, ted)
+		e2 = g.add_edge(snowflake, jimmy)
+		self.failIfEqual(paul.flatten(), snowflake.flatten())
+		# if their data is the same and their edges go
+		# to the same place
+		g.remove_edge(e2)
+		g.add_edge(snowflake, ted)
+		self.failUnlessEqual(paul.flatten(), snowflake.flatten())
+
 	def testEdgeCreation(self):
 
 		g = self.g
@@ -107,6 +126,13 @@ class GraphCorrectnessTest(unittest.TestCase):
 
 		# make sure that the change is reflected in the graph's size
 		self.failUnlessEqual(g.size(), 4)
+
+		# test to ensure that equal edges unlink equally
+		new_lame_trip = g.add_edge(jimmy, ted, distance=850)
+		self.failUnlessEqual(new_lame_trip.flatten(), lame_trip.flatten())
+
+		# test to ensure that non-equal edges unlink unequally
+		self.failIfEqual(j_to_t.flatten(), t_to_d.flatten())
 
 		
 	def testNodeGetting(self):
@@ -233,8 +259,77 @@ class GraphCorrectnessTest(unittest.TestCase):
 		self.failUnlessEqual(uhura.outgoing[0].end.name, "spock")
 		self.failUnlessEqual(uhura.outgoing[1].end.name, "bones")
 
+	def testUnion(self):
+		evens = Graph()
+		odds = Graph()
+		evens_table = {}
+		odds_table = {}
+		for i in range(0, 10, 2): evens_table[i] = evens.add_node(label=i)
+		for i in range(1, 10, 2): odds_table[i] = odds.add_node(label=i)
+		for i in range(0, 10, 2):
+			for j in range(0, 10, 2):
+				evens.add_edge(evens_table[i], evens_table[j], weight=i-j)
+		for i in range(1, 10, 2):
+			for j in range(1, 10, 2):
+				odds.add_edge(odds_table[i], odds_table[j], weight=i-j+1)
+		digits = evens.union(odds)
+		numerals = {node.label for node in digits.nodes}
+		self.failUnlessEqual(numerals, {i for i in range(10)})
+		difference = [edge.weight for edge in digits.edges]
+		differences = {diff for diff in difference}
+		self.failUnlessEqual(len(difference), 50)
+		self.failUnlessEqual(differences, {d for d in range(-8, 10, 1)})
+
+	def testIntersection(self):
+		g1 = Graph()
+		g2 = Graph()
+		one = g1.add_node(name=1)
+		two = g1.add_node(name=2)
+		three = g1.add_node(name=3)
+		g1.add_edge(one, two)
+		g1.add_edge(two, three)
+		g1.add_edge(three, one)
+		one_2 = g2.add_node(name=1)
+		three_2 = g2.add_node(name=3)
+		five = g2.add_node(name=5)
+		g2.add_edge(one_2, five)
+		g2.add_edge(five, three_2)
+		g2.add_edge(three_2, one_2)
+		one_and_three = g1.intersection(g2)
+		self.failUnlessEqual({1, 3}, {node.name for node in one_and_three.nodes})
+		self.failUnlessEqual(one_and_three.edges[0].start.name, 3)
+		self.failUnlessEqual(one_and_three.edges[0].end.name, 1)
+		self.failUnlessEqual(one_and_three.order(), 2)
+		self.failUnlessEqual(one_and_three.size(), 1)
+
+	def testDifference(self):
+		g1 = Graph()
+		g2 = Graph()
+		zero = g1.add_node(name=0)
+		one = g1.add_node(name=1)
+		two = g1.add_node(name=2)
+		three = g1.add_node(name=3)
+		g1.add_edge(zero, two)
+		g1.add_edge(one, two)
+		g1.add_edge(two, three)
+		g1.add_edge(three, one)
+		one_2 = g2.add_node(name=1)
+		three_2 = g2.add_node(name=3)
+		five = g2.add_node(name=5)
+		g2.add_edge(one_2, five)
+		g2.add_edge(five, three_2)
+		g2.add_edge(three_2, one_2)
+		diff = g1.difference(g2)
+		self.failUnlessEqual({0, 2}, {node.name for node in diff.nodes})
+		self.failUnlessEqual(diff.order(), 2)
+		self.failUnlessEqual(diff.size(), 1)
+		self.failUnlessEqual(diff.edges[0].start.name, 0)
+		self.failUnlessEqual(diff.edges[0].end.name, 2)
+
 	def testMerge(self):
-		pass
+		# setup
+		g = Graph()
+		
 
 class GraphPerformanceTest(unittest.TestCase):
 

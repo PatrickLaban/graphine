@@ -202,8 +202,8 @@ class Node(GraphElement):
 	Nodes have two properties, incoming and outgoing, which are
 	tuples of the edges which are incident to the node.
 
-	Nodes also provide the is_equivalent property, which tests
-	to ensure that this node and the other node are data equivalent.
+	Nodes also provide the unlinked property, which provides a view
+	of the node suitable for comparison with nodes from other graphs.
 
 	They also inheirit the data property, which provides dictionary
 	access to all the non-private portions of the node.
@@ -215,9 +215,13 @@ class Node(GraphElement):
 		for k, v in kwargs.items():
 			setattr(self, k, v)
 
-	def is_equivalent(self, other):
-		"""Tests for data equivalence between the given nodes."""
-		return self.data == other.data
+	def flatten(self):
+		"""Returns a view of this node useful for comparison to nodes
+		in other graphs.
+		"""
+		outgoing_data = [edge.flatten() for edge in self.outgoing]
+		incoming_data = [edge.flatten() for edge in self.incoming]
+		return (self.data, incoming_data, outgoing_data)
 
 	@property
 	def incoming(self):
@@ -244,9 +248,9 @@ class Edge(GraphElement):
 	Edges have two properties, start and end, which are
 	Node objects incident to the edge.
 
-	Edges also provide the is_equivalent function, which
-	test for data equivalent between this edge, another
-	edge, and their endpoints.
+	Edges also provide the unlinked property, which gives
+	a view of the edge suitable for comparison to edges in
+	other graphs. 
 
 	They also inhierit the data property, which provides
 	dictionary access to all the non-private portions of
@@ -259,13 +263,16 @@ class Edge(GraphElement):
 		for k, v in kwargs.items():
 			setattr(self, k, v)
 
-	def is_equivalent(self, other):
-		"""Tests whether the two edges are data-equivalent."""
-		if self.data == other.data:
-			if self.start.is_equivalent(other.start):
-				if self.end.is_equivalent(other.end):
-					return True
-		return False
+	def flatten(self):
+		"""Returns a representation of this suitable for
+		comparison to edges in other graphs.
+
+		It returns a threeple of this Edge's data, its
+		starting node's data, and its endpoint's data.
+		"""
+		start_data = self.start.data
+		end_data = self.end.data
+		return (self.data, start_data, end_data)
 
 	@property
 	def start(self):
@@ -445,6 +452,24 @@ class Graph(object):
 			if properties.issuperset(desired_properties):
 				yield edge
 
+	def get_equivalent_elements(self, element, container, flatten=False):
+		equivalent = set()
+		if flatten:
+			get_data = lambda e: e.flatten()
+		else:
+			get_data = lambda e: e.data
+		data = get_data(element)
+		for e2 in container:
+			if get_data(e2) == data:
+				equivalent.add(e2)
+		return equivalent
+
+	def get_equivalent_nodes(self, n1, flatten=False):
+		return self.get_equivalent_elements(n1, self.nodes, flatten=flatten)
+
+	def get_equivalent_edges(self, e1, flatten=False):
+		return self.get_equivalent_elements(e1, self.edges, flatten=flatten)
+
 	def a_star_traversal(self, root, selector):
 		"""Traverses the graph using selector as a selection filter on the unvisited nodes.
 
@@ -578,56 +603,52 @@ class Graph(object):
 		return g
 
 	def intersection(self, other):
-		"""Returns a new graph with all of the nodes that are in both of its parents.
+		"""Returns a graph containing only the nodes and edges in both of its parents.
 
-		Note that as Edges must have two endpoints, only complete edges will be added.
+		Because nodes and edges have no general meaning external to the graph in which
+		they reside, this operation tests data equivalence for nodes and data and
+		structural equivalence for edges. The net result of that is that this operation
+		produces a graph containing all of the edges from this graph which have a
+		structural equivalent in the other graph, and all the endpoints required for
+		those edges to exist. It then tests all nodes without edges from this graph to
+		ensure that the zero edge case is caught.
 		"""
 		# create the graph
 		g = type(self)()
-		# create the node translators
-		translation_table = {}
-		# populate it with nodes
-		for n1 in self.nodes:
-			for n2 in other.nodes:
-				if n1.is_equivalent(n2):
-					n = g.add_node(**n1.data)
-					translation_table[n1] = n
-		# populate it with edges
-		for e1 in self.edges:
-			for e2 in other.edges:
-				if e1.is_equivalent(e2):
-					if e1.start in translation_table:
-						if e1.end in translation_table:
-							start = translation_table[e1.start]
-							end = translation_table[e1.end]
-							e.add_edge(start, end, **e1.data)
-		# and return the new graph
+		added = {}
+		# add all the edges and their endpoints
+		for edge in self.edges:
+			if other.get_equivalent_edges(edge, flatten=True):
+				start = added.get(edge.start, False) or g.add_node(**edge.start.data)
+				end = added.get(edge.end, False) or g.add_node(**edge.end.data)
+				g.add_edge(start, end, **edge.data)
+				added[edge.start] = start
+				added[edge.end] = end
+		# add all the zero degree nodes	
+		for node in self.nodes:
+			if len(node.incoming) + len(node.outgoing) == 0:
+				if node not in added:
+					if other.get_equivalent_nodes(node):
+						added[node] = g.add_node(**node.data)
 		return g
 	
 	def difference(self, other):
 		"""Return a graph composed of the nodes and edges not in the other."""
-		# XXX DOES NOT WORK
 		# create the new graph
 		g = type(self)()
-		# node translator
-		translation_table = {}
-		# add nodes
-		for n1 in self.nodes:
-			for n2 in other.nodes:
-				if n1.is_equivalent(n2):
-					continue
-			translation_table[n1] = g.add_node(**n1.data)
-		# add edges
-		for e1 in self.edges:
-			for e2 in other.edges:
-				if e1.is_equivalent(e2):
-					continue
-			if e1.start in translation_table:
-				if e1.end in translation_table:
-					start = translation_table[e1.start]
-					end = translation_table[e1.end]
-					g.add_edge(start, end, **e1.data)
-		# return the new graph
+		added = {}
+		for node in self.nodes:
+			if node not in added:
+				if not other.get_equivalent_nodes(node):
+					added[node] = g.add_node(**node.data)
+		# iterate over all the nodes
+		for edge in self.edges:
+			if not other.get_equivalent_edges(edge, flatten=True):	
+				if edge.start in added:
+					if edge.end in added:
+						start = added[edge.start]
+						end = added[edge.end]
+						g.add_edge(start, end, **edge.data)
 		return g
 
 	def merge(self, other):
@@ -639,14 +660,14 @@ class Graph(object):
 		# maps data to new nodes
 		node_map = {}
 		# add all nodes to the new graph
-		for node in self.nodes + other.nodes:
+		for node in set(self.nodes) & set(other.nodes):
 			data = tuple(sorted(node.data.items()))
 			if data not in node_data:
 				node_data.add(tuple(sorted(node.data.items())))
 				new_node = g.add_node(**dict(data))
 				node_map[data] = new_node
 		# now do it with edges
-		for edge in self.edges + other.edges:
+		for edge in set(self.edges) & set(other.edges):
 			start_data = tuple(sorted(edge.start.data.items()))
 			end_data = tuple(sorted(edge.end.data.items()))
 			new_start = node_map[start_data]
