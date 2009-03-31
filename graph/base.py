@@ -183,23 +183,23 @@ And traverse the graph:
 Binary Graph Operations
 -----------------------
 
-Three basic set operations are provided for the comparison
+Four basic operations are provided for the comparison
 of graphs: 
 
-1. union, which creates a new graph containing all
+1. union (|), which creates a new graph containing all
    the nodes and edges of its parents,
 
-2. intersection, which creates a new graph containing
+2. intersection (&), which creates a new graph containing
    all the nodes and edges not in both
 
-3. difference, which creates a new graph containing
+3. difference (-), which creates a new graph containing
    all the nodes and edges in the first parent but
    not in the second.
 
-In addition, the merge operation is provided, which
-creates a new graph with all the data-unique nodes
-from both parent graphs plus all their structurally and
-data unique edges.
+4. merge (+), which creates a new graph with all the 
+   data-unique nodes from both parent graphs plus all 
+   their structurally and data unique edges.
+
 """
 
 # Copyright (C) 2009 Geremy Condra
@@ -358,10 +358,6 @@ class Graph(object):
 	Todo
 	====
 
-	- Add set operations
-		- disjoint union
-		- intersection
-		- difference
 	- Add graph analysis tools
 		- get_connected_components
 		- all_pairs_shortest_paths
