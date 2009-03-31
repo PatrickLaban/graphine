@@ -64,21 +64,76 @@ object --+
 </pre>
 
 <hr />
-<p>A basic graph class, and base for all Graph mixins.</p>
-  <p>In graph theoretic terms, this represents a directed multigraph.</p>
-  <p>Graph is designed to have a simple, easy-to-use, easy-to-extend 
-  architecture, which allows for easy and intuitive graph construction and 
-  traversal.</p>
-  Internally, nodes and edges are maintained in lists, each element of 
-  which is of the type specified by Graph.Node or Graph.Edge, as 
-  appropriate. Both types should have the property &quot;data&quot;, which 
-  should return a dictionary represenation of its optional attributes, 
-  while nodes should provide &quot;incoming&quot; and &quot;outgoing&quot; 
-  properties, as well as writable private properties by the names 
-  &quot;_incoming&quot; and &quot;_outgoing&quot;. Edges should provide 
-  similarly conventioned &quot;start&quot; and &quot;end&quot; 
-  properties.<br /><br />
+A basic graph class, and base for all Graph mixins.
+  <h1 class="heading">Details</h1>
+    <p>In graph theoretic terms, this represents a directed multigraph.</p>
+    <p>Graph is designed to have a simple, easy-to-use, easy-to-extend 
+    architecture, which allows for easy and intuitive graph construction 
+    and traversal.</p>
+    Internally, nodes and edges are maintained in lists, each element of
+    which is of the type specified by Graph.Node or Graph.Edge, as 
+    appropriate. Both types should have the property &quot;data&quot;, 
+    which should return a dictionary represenation of its optional 
+    attributes, while nodes should provide &quot;incoming&quot; and 
+    &quot;outgoing&quot; properties, as well as writable private properties
+    by the names &quot;_incoming&quot; and &quot;_outgoing&quot;. Edges 
+    should provide similarly conventioned &quot;start&quot; and 
+    &quot;end&quot; properties.
+  <h1 class="heading">Todo</h1>
+    <ul>
+      <li>
+        Add graph analysis tools
+        <ul>
+          <li>
+            get_connected_components
+          </li>
+          <li>
+            all_pairs_shortest_paths
+          </li>
+          <li>
+            shortest_path
+          </li>
+          <li>
+            minimum_spanning_tree
+          </li>
+        </ul>
+      </li>
+    </ul><br /><br />
 
+<!-- ==================== NESTED CLASSES ==================== -->
+<a name="section-NestedClasses"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Nested Classes</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-NestedClasses"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="graph.base.Node-class.html" class="summary-name">Node</a><br />
+      Base node representation.
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="graph.base.Edge-class.html" class="summary-name">Edge</a><br />
+      Base edge representation.
+    </td>
+  </tr>
+</table>
 <!-- ==================== INSTANCE METHODS ==================== -->
 <a name="section-InstanceMethods"></a>
 <table class="summary" border="1" cellpadding="3"
@@ -102,9 +157,7 @@ object --+
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a href="graph.base.Graph-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">node_type</span>=<span class="summary-sig-default">Node</span>,
-        <span class="summary-sig-arg">edge_type</span>=<span class="summary-sig-default">Edge</span>)</span><br />
+          <td><span class="summary-sig"><a href="graph.base.Graph-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>)</span><br />
       Base initializer for Graphs.</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="graph.base-pysrc.html#Graph.__init__">source&nbsp;code</a></span>
@@ -126,6 +179,78 @@ object --+
       Returns True if the element is a member of the graph.</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="graph.base-pysrc.html#Graph.__contains__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="__and__"></a><span class="summary-sig-name">__and__</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">other</span>)</span><br />
+      Maps the &amp; operator to the intersection operation.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="graph.base-pysrc.html#Graph.__and__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="__or__"></a><span class="summary-sig-name">__or__</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">other</span>)</span><br />
+      Maps the | operator to the union operation.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="graph.base-pysrc.html#Graph.__or__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="__sub__"></a><span class="summary-sig-name">__sub__</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">other</span>)</span><br />
+      Maps the - operator to the difference operation.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="graph.base-pysrc.html#Graph.__sub__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="__add__"></a><span class="summary-sig-name">__add__</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">other</span>)</span><br />
+      Maps the + operator to the merge operation.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="graph.base-pysrc.html#Graph.__add__">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -249,6 +374,67 @@ object --+
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
+          <td><span class="summary-sig"><a href="graph.base.Graph-class.html#get_equivalent_elements" class="summary-sig-name">get_equivalent_elements</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">element</span>,
+        <span class="summary-sig-arg">container</span>,
+        <span class="summary-sig-arg">flatten</span>=<span class="summary-sig-default">False</span>)</span><br />
+      Gets all the elements from container that are datawise equal to 
+      element.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="graph.base-pysrc.html#Graph.get_equivalent_elements">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="graph.base.Graph-class.html#get_equivalent_nodes" class="summary-sig-name">get_equivalent_nodes</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">n1</span>,
+        <span class="summary-sig-arg">flatten</span>=<span class="summary-sig-default">False</span>)</span><br />
+      Convenience function to find all equivalent nodes from this 
+      graph.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="graph.base-pysrc.html#Graph.get_equivalent_nodes">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="graph.base.Graph-class.html#get_equivalent_edges" class="summary-sig-name">get_equivalent_edges</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">e1</span>,
+        <span class="summary-sig-arg">flatten</span>=<span class="summary-sig-default">False</span>)</span><br />
+      Convenience function to find all equivalent edges from this 
+      graph.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="graph.base-pysrc.html#Graph.get_equivalent_edges">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
           <td><span class="summary-sig"><a href="graph.base.Graph-class.html#a_star_traversal" class="summary-sig-name">a_star_traversal</a>(<span class="summary-sig-arg">self</span>,
         <span class="summary-sig-arg">root</span>,
         <span class="summary-sig-arg">selector</span>)</span><br />
@@ -313,6 +499,82 @@ object --+
       mutual edges.</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="graph.base-pysrc.html#Graph.induce_subgraph">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="union"></a><span class="summary-sig-name">union</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">other</span>)</span><br />
+      Returns a new graph with all nodes and edges in either or both of 
+      its parents.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="graph.base-pysrc.html#Graph.union">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="graph.base.Graph-class.html#intersection" class="summary-sig-name">intersection</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">other</span>)</span><br />
+      Returns a graph containing only the nodes and edges in both of its
+      parents.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="graph.base-pysrc.html#Graph.intersection">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="difference"></a><span class="summary-sig-name">difference</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">other</span>)</span><br />
+      Return a graph composed of the nodes and edges not in the 
+      other.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="graph.base-pysrc.html#Graph.difference">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="merge"></a><span class="summary-sig-name">merge</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">other</span>)</span><br />
+      Returns a new graph with its nodes and edges merged by data 
+      equality.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="graph.base-pysrc.html#Graph.merge">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -420,9 +682,7 @@ object --+
 <tr><td>
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
-        <span class="sig-arg">node_type</span>=<span class="sig-default">Node</span>,
-        <span class="sig-arg">edge_type</span>=<span class="sig-default">Edge</span>)</span>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>)</span>
     <br /><em class="fname">(Constructor)</em>
   </h3>
   </td><td align="right" valign="top"
@@ -635,6 +895,98 @@ object --+
   </dl>
 </td></tr></table>
 </div>
+<a name="get_equivalent_elements"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">get_equivalent_elements</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">element</span>,
+        <span class="sig-arg">container</span>,
+        <span class="sig-arg">flatten</span>=<span class="sig-default">False</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="graph.base-pysrc.html#Graph.get_equivalent_elements">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  <p>Gets all the elements from container that are datawise equal to 
+  element.</p>
+  <p>The optional argument &quot;flatten&quot; indicates whether to use 
+  element.data or element.flatten() for comparisons.</p>
+  <p>Generally speaking, end users will be more interested in the 
+  convenience functions get_equivalent_nodes and get_equivalent edges, 
+  which omit the container argument.</p>
+  Usage:
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span>g1 = Graph()
+<span class="py-prompt">&gt;&gt;&gt; </span>g2 = Graph()
+<span class="py-prompt">&gt;&gt;&gt; </span>n1 = g1.add_node(name=<span class="py-string">&quot;Geremy&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span>n2 = g2.add_node(name=<span class="py-string">&quot;Geremy&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span>g2.get_equivalent_elements(n1, g2.nodes)
+<span class="py-output">{Node(name=&quot;Geremy&quot;)}</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="get_equivalent_nodes"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">get_equivalent_nodes</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">n1</span>,
+        <span class="sig-arg">flatten</span>=<span class="sig-default">False</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="graph.base-pysrc.html#Graph.get_equivalent_nodes">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  <p>Convenience function to find all equivalent nodes from this graph.</p>
+  <p>The &quot;flatten&quot; argument indicates whether to use node.data or
+  node.flatten() for comparison.</p>
+  Usage:
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span>g1 = Graph()
+<span class="py-prompt">&gt;&gt;&gt; </span>g2 = Graph()
+<span class="py-prompt">&gt;&gt;&gt; </span>n1 = g1.add_node(name=<span class="py-string">&quot;Geremy&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span>n2 = g2.add_node(name=<span class="py-string">&quot;Geremy&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span>g2.get_equivalent_nodes(n1)
+<span class="py-output">{Node(name=&quot;Geremy&quot;)}</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="get_equivalent_edges"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">get_equivalent_edges</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">e1</span>,
+        <span class="sig-arg">flatten</span>=<span class="sig-default">False</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="graph.base-pysrc.html#Graph.get_equivalent_edges">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  <p>Convenience function to find all equivalent edges from this graph.</p>
+  <p>The &quot;flatten&quot; argument indicates whether to use edge.data or
+  edge.flatten() for comparison.</p>
+  Usage is identical to get_equivalent_elements except for omitting the 
+  container argument.
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
 <a name="a_star_traversal"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
@@ -780,6 +1132,35 @@ object --+
   </dl>
 </td></tr></table>
 </div>
+<a name="intersection"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">intersection</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">other</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="graph.base-pysrc.html#Graph.intersection">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  <p>Returns a graph containing only the nodes and edges in both of its 
+  parents.</p>
+  Because nodes and edges have no general meaning external to the graph 
+  in which they reside, this operation tests data equivalence for nodes and
+  data and structural equivalence for edges. The net result of that is that
+  this operation produces a graph containing all of the edges from this 
+  graph which have a structural equivalent in the other graph, and all the 
+  endpoints required for those edges to exist. It then tests all nodes 
+  without edges from this graph to ensure that the zero edge case is 
+  caught.
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
 <a name="size"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
@@ -862,7 +1243,7 @@ object --+
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0beta1 on Sun Mar 29 20:08:05 2009
+    Generated by Epydoc 3.0beta1 on Tue Mar 31 03:05:46 2009
     </td>
     <td align="right" class="footer">
       <a href="http://epydoc.sourceforge.net">http://epydoc.sourceforge.net</a>

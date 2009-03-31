@@ -186,19 +186,19 @@ Binary Graph Operations
 Four basic operations are provided for the comparison
 of graphs: 
 
-1. union (|), which creates a new graph containing all
-   the nodes and edges of its parents,
+	1. union (|), which creates a new graph containing all
+	   the nodes and edges of its parents,
 
-2. intersection (&), which creates a new graph containing
-   all the nodes and edges not in both
+	2. intersection (&), which creates a new graph containing
+	   all the nodes and edges not in both
 
-3. difference (-), which creates a new graph containing
-   all the nodes and edges in the first parent but
-   not in the second.
+	3. difference (-), which creates a new graph containing
+	   all the nodes and edges in the first parent but
+	   not in the second.
 
-4. merge (+), which creates a new graph with all the 
-   data-unique nodes from both parent graphs plus all 
-   their structurally and data unique edges.
+	4. merge (+), which creates a new graph with all the 
+	   data-unique nodes from both parent graphs plus all 
+	   their structurally and data unique edges.
 
 """
 
@@ -735,11 +735,12 @@ class Graph(object):
 		# create the new graph
 		g = type(self)()
 		added = {}
+		# iterate over all the nodes
 		for node in self.nodes:
 			if node not in added:
 				if not other.get_equivalent_nodes(node):
 					added[node] = g.add_node(**node.data)
-		# iterate over all the nodes
+		# iterate over all the edges
 		for edge in self.edges:
 			if not other.get_equivalent_edges(edge, flatten=True):	
 				if edge.start in added:
