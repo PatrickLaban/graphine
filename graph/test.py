@@ -272,7 +272,7 @@ class GraphCorrectnessTest(unittest.TestCase):
 		for i in range(1, 10, 2):
 			for j in range(1, 10, 2):
 				odds.add_edge(odds_table[i], odds_table[j], weight=i-j+1)
-		digits = evens.union(odds)
+		digits = evens & odds
 		numerals = {node.label for node in digits.nodes}
 		self.failUnlessEqual(numerals, {i for i in range(10)})
 		difference = [edge.weight for edge in digits.edges]
@@ -295,7 +295,7 @@ class GraphCorrectnessTest(unittest.TestCase):
 		g2.add_edge(one_2, five)
 		g2.add_edge(five, three_2)
 		g2.add_edge(three_2, one_2)
-		one_and_three = g1.intersection(g2)
+		one_and_three = g1 | g2
 		self.failUnlessEqual({1, 3}, {node.name for node in one_and_three.nodes})
 		self.failUnlessEqual(one_and_three.edges[0].start.name, 3)
 		self.failUnlessEqual(one_and_three.edges[0].end.name, 1)
@@ -319,7 +319,7 @@ class GraphCorrectnessTest(unittest.TestCase):
 		g2.add_edge(one_2, five)
 		g2.add_edge(five, three_2)
 		g2.add_edge(three_2, one_2)
-		diff = g1.difference(g2)
+		diff = g1 - g2
 		self.failUnlessEqual({0, 2}, {node.name for node in diff.nodes})
 		self.failUnlessEqual(diff.order(), 2)
 		self.failUnlessEqual(diff.size(), 1)

@@ -20,9 +20,6 @@ and can attach arbitrary data to nodes and edges.
 Interface summary
 =================
 
-Building Graphs
----------------
-
 To create a new Graph:
 
 	>>> from graph.base import Graph
@@ -75,6 +72,10 @@ You can use this to get all the nodes adjacent to
 an interesting Node:
 
 	>>> adjacent = [edge.end for edge in node1.outgoing]
+
+Or to get the degree of the given node:
+
+	>>> degree = len(node1.outgoing) + len(node2.incoming)
 	
 You can combine this with Edges' "start" and "end" properties
 to navigate your graph, if you know how your data is related
@@ -116,6 +117,32 @@ And for edges:
 	>>> 	print(edge)
 	Edge(weight=5)
 
+You can also search for elements which demonstrate data
+equality with a given element. This is often useful when
+comparing elements from different graphs.
+
+To get all equivalent nodes:
+
+	>>> n = Node(name="bob")
+	>>> g.get_equivalent_nodes(n)
+	{Node(name="bob")}
+
+And its edge-comparing equivalent
+
+	>>> e = Edge(node_2, node_3, weight=5)
+	>>> g.get_equivalent_edges(e)
+	{Node(weight=5)}
+
+Of course, the edge returned by this function *is* datawise
+equivalent to the edge we just created. But more likely,
+when you're looking at edges you're interested in the nodes
+around them as much as you are the node itself. In the
+example above, the edge returned is attached at different
+points than the edge given. To solve this, you can use the 
+optional "flatten" argument, which causes it to also compare
+the data in edges incident to the node given or nodes 
+incident to the edge given.
+
 Three traversals are provided by default- A*, depth first,
 and breadth first.
 
@@ -152,6 +179,27 @@ And traverse the graph:
 	>>> 	print(node)
 	Node(weight=5)
 	Node(name="bob")
+
+Binary Graph Operations
+-----------------------
+
+Three basic set operations are provided for the comparison
+of graphs: 
+
+1. union, which creates a new graph containing all
+   the nodes and edges of its parents,
+
+2. intersection, which creates a new graph containing
+   all the nodes and edges not in both
+
+3. difference, which creates a new graph containing
+   all the nodes and edges in the first parent but
+   not in the second.
+
+In addition, the merge operation is provided, which
+creates a new graph with all the data-unique nodes
+from both parent graphs plus all their structurally and
+data unique edges.
 """
 
 # Copyright (C) 2009 Geremy Condra
@@ -202,7 +250,7 @@ class Node(GraphElement):
 	Nodes have two properties, incoming and outgoing, which are
 	tuples of the edges which are incident to the node.
 
-	Nodes also provide the unlinked property, which provides a view
+	Nodes also have the flatten function, which provides a view
 	of the node suitable for comparison with nodes from other graphs.
 
 	They also inheirit the data property, which provides dictionary
@@ -248,7 +296,7 @@ class Edge(GraphElement):
 	Edges have two properties, start and end, which are
 	Node objects incident to the edge.
 
-	Edges also provide the unlinked property, which gives
+	Edges also provide the flatten function, which gives
 	a view of the edge suitable for comparison to edges in
 	other graphs. 
 
@@ -345,7 +393,23 @@ class Graph(object):
 		if isinstance(element, self.Node):
 			return element in self.nodes
 		else:
-			return element in self.edges 
+			return element in self.edges
+
+	def __and__(self, other):
+		"""Maps the & operator to the union operation."""
+		return self.union(other)
+
+	def __or__(self, other):
+		"""Maps the | operator to the intersection operation."""
+		return self.intersection(other)
+
+	def __sub__(self, other):
+		"""Maps the - operator to the difference operation."""
+		return self.difference(other)
+
+	def __add__(self, other):
+		"""Maps the + operator to the merge operation."""
+		return self.merge(other)
 
 	def add_node(self, **kwargs):
 		"""Adds a node with no edges to the current graph.
@@ -453,6 +517,23 @@ class Graph(object):
 				yield edge
 
 	def get_equivalent_elements(self, element, container, flatten=False):
+		"""Gets all the elements from container that are datawise equal to element.
+
+		The optional argument "flatten" indicates whether to use element.data or
+		element.flatten() for comparisons.
+
+		Generally speaking, end users will be more interested in the convenience
+		functions get_equivalent_nodes and get_equivalent edges, which omit the
+		container argument.
+
+		Usage:
+			>>> g1 = Graph()
+			>>> g2 = Graph()
+			>>> n1 = g1.add_node(name="Geremy")
+			>>> n2 = g2.add_node(name="Geremy")
+			>>> g2.get_equivalent_elements(n1, g2.nodes)
+			{Node(name="Geremy")}
+		"""
 		equivalent = set()
 		if flatten:
 			get_data = lambda e: e.flatten()
@@ -465,9 +546,30 @@ class Graph(object):
 		return equivalent
 
 	def get_equivalent_nodes(self, n1, flatten=False):
+		"""Convenience function to find all equivalent nodes from this graph.
+
+		The "flatten" argument indicates whether to use node.data or node.flatten()
+		for comparison.
+
+		Usage:
+			>>> g1 = Graph()
+			>>> g2 = Graph()
+			>>> n1 = g1.add_node(name="Geremy")
+			>>> n2 = g2.add_node(name="Geremy")
+			>>> g2.get_equivalent_nodes(n1)
+			{Node(name="Geremy")}
+		"""
 		return self.get_equivalent_elements(n1, self.nodes, flatten=flatten)
 
 	def get_equivalent_edges(self, e1, flatten=False):
+		"""Convenience function to find all equivalent edges from this graph.
+
+		The "flatten" argument indicates whether to use edge.data or edge.flatten()
+		for comparison.
+
+		Usage is identical to get_equivalent_elements except for omitting the
+		container argument.
+		"""
 		return self.get_equivalent_elements(e1, self.edges, flatten=flatten)
 
 	def a_star_traversal(self, root, selector):
