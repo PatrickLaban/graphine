@@ -348,6 +348,48 @@ class GraphCorrectnessTest(unittest.TestCase):
 		self.failUnlessEqual([node.name for node in g3.nodes], ["Bob", "Dan", "Doug", "Jeff", "Paul"])
 		self.failUnlessEqual([g3.nodes[0].outgoing[i].end.name for i in range(4)], ["Dan", "Doug", "Jeff", "Paul"])
 
+	def testGetAllConnected(self):
+		# setup
+		g = Graph()
+		# one connected component
+		n1 = g.add_node(name="Bob")
+		n2 = g.add_node(name="Bill")
+		g.add_edge(n1, n2)
+		component_1 = frozenset((n1, n2))
+		# one solitary component
+		n3 = g.add_node(name="Dan")
+		component_2 = frozenset((n3,))
+		# one looped component
+		n4 = g.add_node(name="John")
+		g.add_edge(n4, n4)
+		component_3 = frozenset((n4,))
+		# and test
+		components = {component_1, component_2, component_3}
+		self.failUnlessEqual(g.get_connected_components(), components)
+
+	def testGetMinimumSpanningTree(self):
+		g = Graph()
+		# create a 3 node complete graph with 2 loops
+		# and one unconnected vertex
+		n1 = g.add_node()
+		n2 = g.add_node()
+		n3 = g.add_node()
+		n4 = g.add_node()
+		e1 = g.add_edge(n1, n1, weight=3)
+		e2 = g.add_edge(n2, n2, weight=5)
+		e3 = g.add_edge(n1, n2, weight=4)
+		e4 = g.add_edge(n1, n3, weight=3)
+		e5 = g.add_edge(n2, n1, weight=5)
+		e6 = g.add_edge(n2, n3, weight=1)
+		e7 = g.add_edge(n3, n1, weight=7)
+		e8 = g.add_edge(n3, n2, weight=1)
+		# the get_weight function
+		f = lambda e: e.weight
+		# get the minimum spanning tree
+		minspan = g.minimum_spanning_tree(n1, get_weight=f)
+		self.failUnlessEqual({edge.flatten() for edge in minspan.edges}, {edge.flatten() for edge in (e4, e8)})
+		self.failUnlessEqual(minspan.order(), 3)
+
 class GraphPerformanceTest(unittest.TestCase):
 
 	graph_setup = "from base import Graph; g = Graph(); n = g.add_node(name='');"

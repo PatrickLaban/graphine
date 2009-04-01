@@ -359,7 +359,6 @@ class Graph(object):
 	====
 
 	- Add graph analysis tools
-		- get_connected_components
 		- all_pairs_shortest_paths
 		- shortest_path
 		- minimum_spanning_tree	
@@ -781,6 +780,44 @@ class Graph(object):
 				if start and end:
 					g.add_edge(start, end, **edge.data)
 		return g
+
+	def get_connected_components(self):
+		"""Gets all the connected components from the graph."""
+		# set of all connected components
+		connected = set((frozenset(),))
+		# iterate over the nodes
+		for node in self.nodes:
+			discovered = frozenset(self.depth_first_traversal(node))
+			add_this = True
+			for component in connected:
+				if discovered.issubset(component):
+					add_this = False
+					break
+				elif discovered.issuperset(component):
+					add_this = False
+					connected.remove(component)
+					connected.add(discovered)
+					continue
+			if add_this:
+				connected.add(discovered)
+		return connected
+
+	# XXX does not work
+	def minimum_spanning_tree(self, root, get_weight=lambda e: 1):
+		"""Finds the minimum spanning tree of the graph rooted at root.
+
+		Note that if the graph is not fully connected, this will only
+		return the elements which are connected to root.
+
+		The optional argument "get_weight" should be a callable
+		that evaluates the weight for a given edge.
+		"""
+		# set the distances to all nodes except root as infinite
+		inf = float("inf")
+		distance_from_root = {n: inf for n in self.depth_first_traversal(root)}
+		del distance_from_root[root]
+		# get all the edges in the tree		
+		pass
 			
 	def size(self):
 		"""Reports the number of edges in the graph.
