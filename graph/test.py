@@ -367,6 +367,33 @@ class GraphCorrectnessTest(unittest.TestCase):
 		components = {component_1, component_2, component_3}
 		self.failUnlessEqual(g.get_connected_components(), components)
 
+	def testGetShortestPaths(self):
+		# trivial graph
+		g = Graph()
+		n1 = g.add_node(name="Geremy")
+		paths = g.get_shortest_paths(n1)
+		self.failUnlessEqual(paths, {n1: (0, [])})
+		# less trivial graph
+		g = Graph()
+		n1 = g.add_node(name="Geremy")
+		n2 = g.add_node(name="Bob")
+		n3 = g.add_node(name="Snowflake")
+		e1 = g.add_edge(n1, n2, weight=4)
+		e2 = g.add_edge(n1, n3, weight=5)
+		paths = g.get_shortest_paths(n1, get_weight=lambda e: e.weight)
+		self.failUnlessEqual(paths, {n1: (0, []), n2: (4, [e1]), n3: (5, [e2])})
+		# tricksy graph
+		g = Graph()
+		n1 = g.add_node(name="Geremy")
+		n2 = g.add_node(name="Bob")
+		n3 = g.add_node(name="Snowflake")
+		e1 = g.add_edge(n1, n2, weight=5)
+		e2 = g.add_edge(n2, n3, weight=1)
+		e3 = g.add_edge(n1, n3, weight=7)
+		e4 = g.add_edge(n1, n1, weight=1)
+		paths = g.get_shortest_paths(n1, get_weight=lambda e: e.weight)
+		self.failUnlessEqual(paths, {n1: (0, []), n2: (5, [e1]), n3: (6, [e1, e2])})
+
 	def testGetMinimumSpanningTree(self):
 		g = Graph()
 		# create a 3 node complete graph with 2 loops

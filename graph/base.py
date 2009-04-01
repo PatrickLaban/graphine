@@ -220,7 +220,8 @@ of graphs:
 # along with Graphine.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from collections import deque, namedtuple
+from collections import deque, namedtuple, defaultdict
+import heapq
 import copy
 
 class GraphElement(object):
@@ -636,6 +637,54 @@ class Graph(object):
 		for node in self.a_star_traversal(root, lambda s: s.pop(0)):
 			yield node
 
+	def get_shortest_paths(self, source, target=None, get_weight=lambda e: 1):
+		"""Finds the shortest path to all connected nodes from source.
+
+		If the optional target is specified, this will return only
+		the distance to that node.
+
+		The optional get_weight argument should be a callable that
+		accepts an edge and returns its weight.
+		"""
+		# create the paths table
+		paths = defaultdict(lambda: (float("inf"), []))
+		paths[source] = (0, [])
+		# create the minimum distance heap
+		unoptomized = [(0, source)]
+		# main loop
+		while unoptomized:
+			# pop the minimum distanced node
+			distance, current = heapq.heappop(unoptomized)
+			# iterate over its outgoing edges
+			for edge in current.outgoing:
+				# get the old path the the endpoint
+				old_weight, old_path = paths[edge.end]
+				# get the weight of this path to the edge's end
+				weight, path = paths[current]
+				weight += get_weight(edge)
+				# relax
+				if weight < old_weight:
+					paths[edge.end] = (weight, path + [edge])
+					heapq.heappush(unoptomized, (weight, edge.end))
+		return paths
+
+	# XXX does not work
+	def minimum_spanning_tree(self, root, get_weight=lambda e: 1):
+		"""Finds the minimum spanning tree of the graph rooted at root.
+
+		Note that if the graph is not fully connected, this will only
+		return the elements which are connected to root.
+
+		The optional argument "get_weight" should be a callable
+		that evaluates the weight for a given edge.
+		"""
+		# set the distances to all nodes except root as infinite
+		inf = float("inf")
+		distance_from_root = {n: inf for n in self.depth_first_traversal(root)}
+		del distance_from_root[root]
+		# get all the edges in the tree		
+		pass
+
 	def induce_subgraph(self, *nodes):
 		"""Returns a new graph composed of only the specified nodes and their mutual edges.
 
@@ -802,23 +851,6 @@ class Graph(object):
 				connected.add(discovered)
 		return connected
 
-	# XXX does not work
-	def minimum_spanning_tree(self, root, get_weight=lambda e: 1):
-		"""Finds the minimum spanning tree of the graph rooted at root.
-
-		Note that if the graph is not fully connected, this will only
-		return the elements which are connected to root.
-
-		The optional argument "get_weight" should be a callable
-		that evaluates the weight for a given edge.
-		"""
-		# set the distances to all nodes except root as infinite
-		inf = float("inf")
-		distance_from_root = {n: inf for n in self.depth_first_traversal(root)}
-		del distance_from_root[root]
-		# get all the edges in the tree		
-		pass
-			
 	def size(self):
 		"""Reports the number of edges in the graph.
 
