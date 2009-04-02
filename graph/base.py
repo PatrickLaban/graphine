@@ -361,7 +361,6 @@ class Graph(object):
 
 	- Add graph analysis tools
 		- all_pairs_shortest_paths
-		- shortest_path
 		- minimum_spanning_tree	
 	"""
 
@@ -376,6 +375,10 @@ class Graph(object):
 		"""
 		self.nodes = []
 		self.edges = []
+
+	#################################################################
+	#			Operators				#
+	#################################################################
 
 	def __contains__(self, element):
 		"""Returns True if the element is a member of the graph.
@@ -406,6 +409,10 @@ class Graph(object):
 	def __add__(self, other):
 		"""Maps the + operator to the merge operation."""
 		return self.merge(other)
+
+	#################################################################
+	#		    Graph Construction Tools			#
+	#################################################################
 
 	def add_node(self, **kwargs):
 		"""Adds a node with no edges to the current graph.
@@ -476,6 +483,10 @@ class Graph(object):
 		# remove it from storage
 		e = self.edges.remove(edge)
 		return e
+
+	#########################################################################
+	#			Graph Inspection Tools  			#
+	#########################################################################
 
 	def search_nodes(self, **kwargs):
 		"""Convenience function to get nodes based on some properties.
@@ -637,11 +648,35 @@ class Graph(object):
 		for node in self.a_star_traversal(root, lambda s: s.pop(0)):
 			yield node
 
-	def get_shortest_paths(self, source, target=None, get_weight=lambda e: 1):
-		"""Finds the shortest path to all connected nodes from source.
+	def get_connected_components(self):
+		"""Gets all the connected components from the graph."""
+		# set of all connected components
+		connected = set((frozenset(),))
+		# iterate over the nodes
+		for node in self.nodes:
+			discovered = frozenset(self.depth_first_traversal(node))
+			add_this = True
+			for component in connected:
+				if discovered.issubset(component):
+					add_this = False
+					break
+				elif discovered.issuperset(component):
+					add_this = False
+					connected.remove(component)
+					connected.add(discovered)
+					continue
+			if add_this:
+				connected.add(discovered)
+		return connected
 
-		If the optional target is specified, this will return only
-		the distance to that node.
+	def get_common_edges(self, n1, n2):
+		"""Gets the common edges between the two nodes."""
+		n1_edges = set(n1.incoming + n1.outgoing)
+		n2_edges = set(n2.incoming + n2.outgoing)
+		return n1_edges & n2_edges
+
+	def get_shortest_paths(self, source, get_weight=lambda e: 1):
+		"""Finds the shortest path to all connected nodes from source.
 
 		The optional get_weight argument should be a callable that
 		accepts an edge and returns its weight.
@@ -657,34 +692,86 @@ class Graph(object):
 			distance, current = heapq.heappop(unoptomized)
 			# iterate over its outgoing edges
 			for edge in current.outgoing:
-				# get the old path the the endpoint
+				# get the old path to the endpoint
 				old_weight, old_path = paths[edge.end]
 				# get the weight of this path to the edge's end
 				weight, path = paths[current]
 				weight += get_weight(edge)
-				# relax
+				# if the new path is better than the old path
 				if weight < old_weight:
+					# relax it
 					paths[edge.end] = (weight, path + [edge])
+					# and put it on the heap
 					heapq.heappush(unoptomized, (weight, edge.end))
 		return paths
 
-	# XXX does not work
-	def minimum_spanning_tree(self, root, get_weight=lambda e: 1):
-		"""Finds the minimum spanning tree of the graph rooted at root.
+	def size(self):
+		"""Reports the number of edges in the graph.
 
-		Note that if the graph is not fully connected, this will only
-		return the elements which are connected to root.
-
-		The optional argument "get_weight" should be a callable
-		that evaluates the weight for a given edge.
+		Usage:
+			>>> g = Graph()
+			>>> n1, n2 = g.add_node(), g.add_node()
+			>>> g.size()
+			0
+			>>> e = g.add_edge(n1, n2)
+			>>> g.size()
+			1
 		"""
-		# set the distances to all nodes except root as infinite
-		inf = float("inf")
-		distance_from_root = {n: inf for n in self.depth_first_traversal(root)}
-		del distance_from_root[root]
-		# get all the edges in the tree		
-		pass
+		return len(self.edges)
 
+	def order(self):
+		"""Reports the number of nodes in the graph.
+
+		Usage:
+			>>> g = Graph()
+			>>> g.order()
+			0
+			>>> n = g.add_node()
+			>>> g.order()
+			1
+		"""
+		return len(self.nodes)
+
+	#########################################################################
+	#			Graph Rewriting Tools				#
+	#########################################################################
+
+	def move_edge(self, edge, start=None, end=None):
+		"""Moves the edge, leaving its data intact."""
+		edge.start._outgoing.remove(edge)
+		edge.end._incoming.remove(edge)
+		edge._start = start or edge.start
+		edge._end = end or edge.end
+		edge.start._outgoing.append(edge)
+		edge.end._incoming.append(edge)
+		return edge
+
+	def contract_edge(self, edge, node_data):
+		"""Contracts the given edge, calling node_data on its endpoints.
+
+		node_data should return a dictionary that will be used to initialize
+		the new node.
+		"""
+		# check to make sure that the given edge is the only edge between
+		# it endpoints
+		start = edge.start
+		end = edge.end
+		if self.get_common_edges(start, end) != {edge}:
+			raise
+		new_node = self.add_node(**node_data(start, end))
+		# delete the given edge
+		self.remove_edge(edge)
+		# move all incoming edges
+		for edge in start.incoming + end.incoming:
+			self.move_edge(edge, end=new_node)
+		# move all outgoing edges
+		for edge in start.outgoing + end.outgoing:
+			self.move_edge(edge, start=new_node)
+		# delete the existing endpoints
+		self.remove_node(start)
+		self.remove_node(end)
+		return new_node
+			
 	def induce_subgraph(self, *nodes):
 		"""Returns a new graph composed of only the specified nodes and their mutual edges.
 
@@ -733,8 +820,30 @@ class Graph(object):
 					g.add_edge(start, end, **node.data)
 		return g
 
+	def edge_induce_subgraph(self, *edges):
+		"""Similar to induce_subgraph but accepting edges rather than nodes."""
+		# create the new graph
+		g = type(self)()
+		# get all common nodes
+		nodes = {}
+		for edge in edges:
+			# and add them if they don't already exist
+			if edge.start not in nodes:
+				nodes[edge.start] = g.add_node(**edge.start.data)
+			if edge.end not in nodes:
+				nodes[edge.end] = g.add_node(**edge.end.data)
+		# iterate over the provided edges
+		for edge in edges:
+			# and add them, translating nodes as we go
+			g.add_edge(nodes[edge.start], nodes[edge.end], **edge.data)
+		return g
+			
+	#########################################################################
+	#			Graph Comparison Tools				#
+	#########################################################################
+			
 	def union(self, other):
-		"""Returns a new graph with all nodes and edges in either or both of its parents."""
+		"""Returns a new graph with all nodes and edges in either of its parents."""
 		# create the graph
 		g = type(self)()
 		# add all of our nodes and edges
@@ -830,50 +939,3 @@ class Graph(object):
 					g.add_edge(start, end, **edge.data)
 		return g
 
-	def get_connected_components(self):
-		"""Gets all the connected components from the graph."""
-		# set of all connected components
-		connected = set((frozenset(),))
-		# iterate over the nodes
-		for node in self.nodes:
-			discovered = frozenset(self.depth_first_traversal(node))
-			add_this = True
-			for component in connected:
-				if discovered.issubset(component):
-					add_this = False
-					break
-				elif discovered.issuperset(component):
-					add_this = False
-					connected.remove(component)
-					connected.add(discovered)
-					continue
-			if add_this:
-				connected.add(discovered)
-		return connected
-
-	def size(self):
-		"""Reports the number of edges in the graph.
-
-		Usage:
-			>>> g = Graph()
-			>>> n1, n2 = g.add_node(), g.add_node()
-			>>> g.size()
-			0
-			>>> e = g.add_edge(n1, n2)
-			>>> g.size()
-			1
-		"""
-		return len(self.edges)
-
-	def order(self):
-		"""Reports the number of nodes in the graph.
-
-		Usage:
-			>>> g = Graph()
-			>>> g.order()
-			0
-			>>> n = g.add_node()
-			>>> g.order()
-			1
-		"""
-		return len(self.nodes)

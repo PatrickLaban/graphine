@@ -134,7 +134,20 @@ class GraphCorrectnessTest(unittest.TestCase):
 		# test to ensure that non-equal edges unlink unequally
 		self.failIfEqual(j_to_t.flatten(), t_to_d.flatten())
 
-		
+	def testEdgeMoving(self):
+		g = Graph()
+		geremy = g.add_node(name="Geremy")
+		bill = g.add_node(name="Bill")
+		bob = g.add_node(name="Bob")
+		tom = g.add_node(name="Tom")
+		e = g.add_edge(geremy, bob, name="people")
+		e2 = g.move_edge(e, start=bill, end=tom)
+		self.failUnless(e is e2)
+		self.failUnlessEqual(e, e2)
+		self.failUnlessEqual(e2.name, "people")
+		self.failUnlessEqual(e2.start, bill)
+		self.failUnlessEqual(e2.end, tom)
+
 	def testNodeGetting(self):
 		g = self.g
 
@@ -238,6 +251,55 @@ class GraphCorrectnessTest(unittest.TestCase):
 		self.failUnless(positions["A"] < min(positions["B"], positions["C"], positions["E"]))
 		self.failUnless(max(positions["B"], positions["C"], positions["E"]) < min(positions["D"], positions["F"], positions["G"]))
 
+	def testGetCommonEdges(self):
+		g = Graph()
+		n1 = g.add_node()
+		n2 = g.add_node()
+		n3 = g.add_node()
+		e1 = g.add_edge(n1, n2)
+		e2 = g.add_edge(n2, n1)
+		e3 = g.add_edge(n1, n3)
+		e4 = g.add_edge(n2, n3)
+		self.failUnlessEqual(g.get_common_edges(n1, n2), {e1, e2})
+
+	def testEdgeContraction(self):
+		g = Graph()
+		n1 = g.add_node(value=1)
+		n2 = g.add_node(value=2)
+		n3 = g.add_node(value=3)
+		n4 = g.add_node(value=4)
+		n5 = g.add_node(value=6)
+		n6 = g.add_node(value=7)
+		# n1-n3 are completely connected
+		g.add_edge(n1, n2)
+		i1 = g.add_edge(n1, n3)
+		g.add_edge(n2, n1)
+		i2 = g.add_edge(n2, n3)
+		o1 = g.add_edge(n3, n1)
+		o2 = g.add_edge(n3, n2)
+		# n4-n6 are completely connected
+		o3 = g.add_edge(n4, n5)
+		o4 = g.add_edge(n4, n6)
+		i3 = g.add_edge(n5, n4)
+		g.add_edge(n5, n6)
+		i4 = g.add_edge(n6, n4)
+		g.add_edge(n6, n5)
+		# n3 and n4 have one edge between them
+		e = g.add_edge(n3, n4)
+		# you'll add the values of the two nodes
+		# together to get the new value
+		getter = lambda s: s.value
+		get_new_data = lambda x, y: {"value": getter(x) + getter(y)}
+		# contract the graph
+		n = g.contract_edge(e, get_new_data)
+		# test n's properties
+		self.failUnlessEqual(set(n.incoming), {i1, i2, i3, i4})
+		self.failUnlessEqual(set(n.outgoing), {o1, o2, o3, o4})
+		self.failUnlessEqual(n.value, 7)
+		# test the graph's properties
+		self.failUnlessEqual(g.order(), 5)
+		self.failUnlessEqual(g.size(), 12)
+
 	def testInduceSubgraph(self):
 		# setup
 		g = Graph()
@@ -256,6 +318,27 @@ class GraphCorrectnessTest(unittest.TestCase):
 		spock = new_mission.nodes[0]
 		bones = new_mission.nodes[1]
 		uhura = new_mission.nodes[2]
+		self.failUnlessEqual(uhura.outgoing[0].end.name, "spock")
+		self.failUnlessEqual(uhura.outgoing[1].end.name, "bones")
+
+	def testEdgeInduceSubgraph(self):
+		# setup
+		g = Graph()
+		kirk = g.add_node(name="kirk")
+		spock = g.add_node(name="spock")
+		bones = g.add_node(name="bones")
+		uhura = g.add_node(name="uhura")
+		e1 = g.add_edge(kirk, spock)
+		e2 = g.add_edge(kirk, bones)
+		e3 = g.add_edge(kirk, uhura)
+		e4 = g.add_edge(uhura, spock)
+		e5 = g.add_edge(uhura, bones)
+		
+		new_mission = g.edge_induce_subgraph(e4, e5)
+		self.failUnlessEqual({node.name for node in new_mission.nodes}, {"spock", "bones", "uhura"})
+		spock = new_mission.get_equivalent_nodes(spock).pop()
+		bones = new_mission.get_equivalent_nodes(bones).pop()
+		uhura = new_mission.get_equivalent_nodes(uhura).pop()
 		self.failUnlessEqual(uhura.outgoing[0].end.name, "spock")
 		self.failUnlessEqual(uhura.outgoing[1].end.name, "bones")
 
@@ -387,10 +470,16 @@ class GraphCorrectnessTest(unittest.TestCase):
 		n1 = g.add_node(name="Geremy")
 		n2 = g.add_node(name="Bob")
 		n3 = g.add_node(name="Snowflake")
+		# normal edges
 		e1 = g.add_edge(n1, n2, weight=5)
 		e2 = g.add_edge(n2, n3, weight=1)
+		# notice that the path from n1 to n2 to n3 is
+		# shorter than the path from n1 to n3
 		e3 = g.add_edge(n1, n3, weight=7)
-		e4 = g.add_edge(n1, n1, weight=1)
+		# form a loop
+		e4 = g.add_edge(n3, n3, weight=1)
+		# form a cycle
+		e5 = g.add_edge(n3, n2, weight=1)
 		paths = g.get_shortest_paths(n1, get_weight=lambda e: e.weight)
 		self.failUnlessEqual(paths, {n1: (0, []), n2: (5, [e1]), n3: (6, [e1, e2])})
 
@@ -398,10 +487,10 @@ class GraphCorrectnessTest(unittest.TestCase):
 		g = Graph()
 		# create a 3 node complete graph with 2 loops
 		# and one unconnected vertex
-		n1 = g.add_node()
-		n2 = g.add_node()
-		n3 = g.add_node()
-		n4 = g.add_node()
+		n1 = g.add_node(name=1)
+		n2 = g.add_node(name=2)
+		n3 = g.add_node(name=3)
+		n4 = g.add_node(name=4)
 		e1 = g.add_edge(n1, n1, weight=3)
 		e2 = g.add_edge(n2, n2, weight=5)
 		e3 = g.add_edge(n1, n2, weight=4)
@@ -414,8 +503,7 @@ class GraphCorrectnessTest(unittest.TestCase):
 		f = lambda e: e.weight
 		# get the minimum spanning tree
 		minspan = g.minimum_spanning_tree(n1, get_weight=f)
-		self.failUnlessEqual({edge.flatten() for edge in minspan.edges}, {edge.flatten() for edge in (e4, e8)})
-		self.failUnlessEqual(minspan.order(), 3)
+		self.failUnlessEqual(minspan, {e4, e8})
 
 class GraphPerformanceTest(unittest.TestCase):
 
