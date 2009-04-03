@@ -523,6 +523,12 @@ class Graph(object):
 			if properties.issuperset(desired_properties):
 				yield edge
 
+	def get_common_edges(self, n1, n2):
+		"""Gets the common edges between the two nodes."""
+		n1_edges = set(n1.incoming + n1.outgoing)
+		n2_edges = set(n2.incoming + n2.outgoing)
+		return n1_edges & n2_edges
+
 	def get_equivalent_elements(self, element, container, flatten=False):
 		"""Gets all the elements from container that are datawise equal to element.
 
@@ -649,12 +655,15 @@ class Graph(object):
 			yield node
 
 	def get_connected_components(self):
-		"""Gets all the connected components from the graph."""
+		"""Gets all the connected components from the graph.
+
+		Returns a list of sets of vertices. 
+		"""
 		# set of all connected components
-		connected = set((frozenset(),))
+		connected = [set()]
 		# iterate over the nodes
 		for node in self.nodes:
-			discovered = frozenset(self.depth_first_traversal(node))
+			discovered = set(self.depth_first_traversal(node))
 			add_this = True
 			for component in connected:
 				if discovered.issubset(component):
@@ -663,17 +672,33 @@ class Graph(object):
 				elif discovered.issuperset(component):
 					add_this = False
 					connected.remove(component)
-					connected.add(discovered)
+					connected.append(discovered)
 					continue
 			if add_this:
-				connected.add(discovered)
+				connected.append(discovered)
 		return connected
 
-	def get_common_edges(self, n1, n2):
-		"""Gets the common edges between the two nodes."""
-		n1_edges = set(n1.incoming + n1.outgoing)
-		n2_edges = set(n2.incoming + n2.outgoing)
-		return n1_edges & n2_edges
+	def get_strongly_connected(self):
+		"""Returns a list of all strongly connected components.
+
+		Each SCC is expressed as a set of vertices."""
+		strongly_connected_components = []
+		for c in self.get_connected_components():
+			arbitrary = c.pop()
+			visited = [node for node in self.depth_first_traversal(arbitrary)]
+			self.transpose()
+			current_component = set()
+			while visited:
+				current_component = set()
+				for node in self.depth_first_traversal(visited.pop(0)):
+					current_component.add(node)
+					try:
+						visited.remove(node)
+					except:
+						pass
+			strongly_connected_components.append(current_component)
+			self.transpose()
+		return strongly_connected_components
 
 	def get_shortest_paths(self, source, get_weight=lambda e: 1):
 		"""Finds the shortest path to all connected nodes from source.
@@ -704,7 +729,7 @@ class Graph(object):
 					# and put it on the heap
 					heapq.heappush(unoptomized, (weight, edge.end))
 		return paths
-
+	
 	def size(self):
 		"""Reports the number of edges in the graph.
 
@@ -771,6 +796,11 @@ class Graph(object):
 		self.remove_node(start)
 		self.remove_node(end)
 		return new_node
+
+	def transpose(self):
+		"""Reverses the directions on all edges in the current graph"""
+		for e in self.edges:
+			self.move_edge(e, start=e.end, end=e.start)
 			
 	def induce_subgraph(self, *nodes):
 		"""Returns a new graph composed of only the specified nodes and their mutual edges.

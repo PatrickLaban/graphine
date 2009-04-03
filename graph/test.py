@@ -438,16 +438,16 @@ class GraphCorrectnessTest(unittest.TestCase):
 		n1 = g.add_node(name="Bob")
 		n2 = g.add_node(name="Bill")
 		g.add_edge(n1, n2)
-		component_1 = frozenset((n1, n2))
+		component_1 = {n1, n2}
 		# one solitary component
 		n3 = g.add_node(name="Dan")
-		component_2 = frozenset((n3,))
+		component_2 = {n3}
 		# one looped component
 		n4 = g.add_node(name="John")
 		g.add_edge(n4, n4)
-		component_3 = frozenset((n4,))
+		component_3 = {n4}
 		# and test
-		components = {component_1, component_2, component_3}
+		components = [component_1, component_2, component_3]
 		self.failUnlessEqual(g.get_connected_components(), components)
 
 	def testGetShortestPaths(self):
@@ -483,27 +483,31 @@ class GraphCorrectnessTest(unittest.TestCase):
 		paths = g.get_shortest_paths(n1, get_weight=lambda e: e.weight)
 		self.failUnlessEqual(paths, {n1: (0, []), n2: (5, [e1]), n3: (6, [e1, e2])})
 
-	def testGetMinimumSpanningTree(self):
+	def testStronglyConnectedComponents(self):
 		g = Graph()
-		# create a 3 node complete graph with 2 loops
-		# and one unconnected vertex
-		n1 = g.add_node(name=1)
-		n2 = g.add_node(name=2)
-		n3 = g.add_node(name=3)
-		n4 = g.add_node(name=4)
-		e1 = g.add_edge(n1, n1, weight=3)
-		e2 = g.add_edge(n2, n2, weight=5)
-		e3 = g.add_edge(n1, n2, weight=4)
-		e4 = g.add_edge(n1, n3, weight=3)
-		e5 = g.add_edge(n2, n1, weight=5)
-		e6 = g.add_edge(n2, n3, weight=1)
-		e7 = g.add_edge(n3, n1, weight=7)
-		e8 = g.add_edge(n3, n2, weight=1)
-		# the get_weight function
-		f = lambda e: e.weight
-		# get the minimum spanning tree
-		minspan = g.minimum_spanning_tree(n1, get_weight=f)
-		self.failUnlessEqual(minspan, {e4, e8})
+		n1 = g.add_node(value=1)
+		n2 = g.add_node(value=2)
+		n3 = g.add_node(value=3)
+		n4 = g.add_node(value=4)
+		n5 = g.add_node(value=6)
+		n6 = g.add_node(value=7)
+		# n1-n3 are completely connected
+		g.add_edge(n1, n2)
+		g.add_edge(n1, n3)
+		g.add_edge(n2, n1)
+		g.add_edge(n2, n3)
+		g.add_edge(n3, n1)
+		g.add_edge(n3, n2)
+		# n4-n6 are completely connected
+		g.add_edge(n4, n5)
+		g.add_edge(n4, n6)
+		g.add_edge(n5, n4)
+		g.add_edge(n5, n6)
+		g.add_edge(n6, n4)
+		g.add_edge(n6, n5)
+		# get strongly connected components
+		comp = g.get_strongly_connected()
+		self.failUnlessEqual([{n1, n2, n3}, {n4, n5, n6}], comp)
 
 class GraphPerformanceTest(unittest.TestCase):
 
