@@ -802,7 +802,7 @@ class Graph(object):
 		for e in self.edges:
 			self.move_edge(e, start=e.end, end=e.start)
 			
-	def induce_subgraph(self, *nodes):
+	def induce_subgraph(self, *nodes, translator=False):
 		"""Returns a new graph composed of only the specified nodes and their mutual edges.
 
 		Usage:
@@ -848,9 +848,11 @@ class Graph(object):
 					end = node_translator[edge.end]
 					# copies edge data
 					g.add_edge(start, end, **node.data)
+		if translator:
+			return g, node_translator
 		return g
 
-	def edge_induce_subgraph(self, *edges):
+	def edge_induce_subgraph(self, *edges, translator=False):
 		"""Similar to induce_subgraph but accepting edges rather than nodes."""
 		# create the new graph
 		g = type(self)()
@@ -866,13 +868,16 @@ class Graph(object):
 		for edge in edges:
 			# and add them, translating nodes as we go
 			g.add_edge(nodes[edge.start], nodes[edge.end], **edge.data)
+		# handle the translator argument
+		if translator:
+			return g, nodes
 		return g
 			
 	#########################################################################
 	#			Graph Comparison Tools				#
 	#########################################################################
 			
-	def union(self, other):
+	def union(self, other, translator=False):
 		"""Returns a new graph with all nodes and edges in either of its parents."""
 		# create the graph
 		g = type(self)()
@@ -885,9 +890,11 @@ class Graph(object):
 			start = translation_table[edge.start]
 			end = translation_table[edge.end]
 			g.add_edge(start, end, **edge.data)
+		if translator:
+			return g, translation_table
 		return g
 
-	def intersection(self, other):
+	def intersection(self, other, translator=False):
 		"""Returns a graph containing only the nodes and edges in both of its parents.
 
 		Because nodes and edges have no general meaning external to the graph in which
@@ -915,9 +922,11 @@ class Graph(object):
 				if node not in added:
 					if other.get_equivalent_nodes(node):
 						added[node] = g.add_node(**node.data)
+		if translator:
+			return g, translator
 		return g
 	
-	def difference(self, other):
+	def difference(self, other, translator=False):
 		"""Return a graph composed of the nodes and edges not in the other."""
 		# create the new graph
 		g = type(self)()
@@ -935,9 +944,11 @@ class Graph(object):
 						start = added[edge.start]
 						end = added[edge.end]
 						g.add_edge(start, end, **edge.data)
+		if translator:
+			return g, translator
 		return g
 
-	def merge(self, other):
+	def merge(self, other, translator=False):
 		"""Returns a new graph with its nodes and edges merged by data equality."""
 		# create the new graph
 		g = type(self)()
@@ -967,5 +978,7 @@ class Graph(object):
 				end = translate.get(edge.end, False)
 				if start and end:
 					g.add_edge(start, end, **edge.data)
+		if translator:
+			return g, translate
 		return g
 
