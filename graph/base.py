@@ -244,6 +244,10 @@ class GraphElement(object):
 	def data(self):
 		return {k:v for k, v in self.__dict__.items() if not k.startswith("_")}
 
+	@property
+	def key(self):
+		return hash(frozenset((k,v) for k, v in self.data.items()))
+
 
 class Node(GraphElement):
 	"""Base node representation.
@@ -258,19 +262,12 @@ class Node(GraphElement):
 	access to all the non-private portions of the node.
 	"""
 
-	def __init__(self, incoming=None, outgoing=None, **kwargs):
+	def __init__(self, incoming=None, outgoing=None, bidirectional=None, **kwargs):
 		self._incoming = incoming or []
 		self._outgoing = outgoing or []
+		self._bidirectional = bidirectional or []
 		for k, v in kwargs.items():
 			setattr(self, k, v)
-
-	def flatten(self):
-		"""Returns a view of this node useful for comparison to nodes
-		in other graphs.
-		"""
-		outgoing_data = [edge.flatten() for edge in self.outgoing]
-		incoming_data = [edge.flatten() for edge in self.incoming]
-		return (self.data, incoming_data, outgoing_data)
 
 	@property
 	def incoming(self):
@@ -279,7 +276,7 @@ class Node(GraphElement):
 		Note that the list returned is a copy, so modifying it doesn't
 		impact the structure of the graph.
 		"""
-		return copy.copy(self._incoming)
+		return copy.copy(self._incoming + self._bidirectional)
 
 	@property
 	def outgoing(self):
@@ -288,7 +285,31 @@ class Node(GraphElement):
 		Note that the list returned is a copy, so modifying it doesn't
 		impact the structure of the graph.
 		"""
-		return copy.copy(self._outgoing)
+		return copy.copy(self._outgoing + self._bidirectional)
+
+	@property
+	def bidirectional(self):
+		"""Returns a list of all bidirectional edges for this node.
+
+		Note that the list returned is a copy, so modifying it doesn't
+		impact the structure of the graph.
+		"""
+		return copy.copy(self._bidirectional)
+
+	@property
+	def edges(self):
+		"""Returns a list of all edges for this node.
+
+		Note that the list returned is a copy, so modifying it doesn't
+		impact the structure of the graph.
+		"""
+		return copy.copy(self._incoming + self._outgoing + self.bidirectional)
+
+	@property
+	def key(self):
+		"""Returns a value suitable as a key in a dictionary."""
+		attributes = tuple((k,v) for k, v in self.data.items())
+		return frozenset(attributes)
 
 
 class Edge(GraphElement):
@@ -306,22 +327,12 @@ class Edge(GraphElement):
 	the edge.
 	"""
 
-	def __init__(self, start, end, **kwargs):
+	def __init__(self, start, end, is_directed=True, **kwargs):
 		self._start = start
 		self._end = end
+		self._directed = is_directed
 		for k, v in kwargs.items():
 			setattr(self, k, v)
-
-	def flatten(self):
-		"""Returns a representation of this suitable for
-		comparison to edges in other graphs.
-
-		It returns a threeple of this Edge's data, its
-		starting node's data, and its endpoint's data.
-		"""
-		start_data = self.start.data
-		end_data = self.end.data
-		return (self.data, start_data, end_data)
 
 	@property
 	def start(self):
@@ -332,6 +343,19 @@ class Edge(GraphElement):
 	def end(self):
 		"""Returns the ending point for this edge."""
 		return self._end
+
+	@property
+	def is_directed(self):
+		"""Returns whether this is a directed edge or not."""
+		return self._directed
+
+	@property
+	def key(self):
+		"""Returns a value suitable as a key in a dictionary."""
+		endpoints = (("start", self.start.key), ("end", self.end.key))
+		direction = (("is_directed", self.is_directed),)
+		attributes = tuple((k,v) for k, v in self.data.items())
+		return frozenset(endpoints + direction + attributes)
 
 
 class Graph(object):
@@ -427,8 +451,11 @@ class Graph(object):
 		self.nodes.append(node)
 		return node
 
-	def add_edge(self, start, end, **kwargs):
+	def add_edge(self, start, end, is_directed=True, **kwargs):
 		"""Adds an edge to the current graph.
+
+		The optional argument "is_directed" specifies whether
+		the given edge should be directed or undirected.
 
 		Usage:	
 			>>> g = Graph()
@@ -438,11 +465,15 @@ class Graph(object):
 			Edge(weight=5)			
 		"""
 		# build the edge
-		edge = self.Edge(start, end, **kwargs)
+		edge = self.Edge(start, end, is_directed=is_directed, **kwargs)
 		self.edges.append(edge)
 		# take care of adjacency tracking
-		start._outgoing.append(edge)
-		end._incoming.append(edge)
+		if is_directed:
+			start._outgoing.append(edge)
+			end._incoming.append(edge)
+		else:
+			start._bidirectional.append(edge)
+			end._bidirectional.append(edge)
 		return edge
 
 	def remove_node(self, node):
@@ -456,10 +487,8 @@ class Graph(object):
 			False
 		"""
 		# remove it from adjacency tracking
-		for edge in node.incoming:
-			edges.pop(edge)
-		for edge in node.outgoing:
-			edges.pop(edge)
+		for edge in node.edges:
+			self.edges.remove(edge)
 		# remove it from storage
 		n = self.nodes.remove(node)
 		return n
@@ -478,8 +507,12 @@ class Graph(object):
 		# remove it from adjacency tracking
 		start = edge.start
 		end = edge.end
-		start._outgoing.remove(edge)
-		end._incoming.remove(edge)
+		if edge.is_directed:
+			start._outgoing.remove(edge)
+			end._incoming.remove(edge)
+		else:
+			start._bidirectional.remove(edge)
+			end._bidirectional.remove(edge)
 		# remove it from storage
 		e = self.edges.remove(edge)
 		return e
@@ -524,66 +557,28 @@ class Graph(object):
 				yield edge
 
 	def get_common_edges(self, n1, n2):
-		"""Gets the common edges between the two nodes."""
+		"""Gets the common edges between the two nodes.
+
+		Usage:
+			>>> g = Graph()
+			>>> n1 = g.add_node()
+			>>> n2 = g.add_node()
+			>>> e = g.add_edge(n1, n2, name="fluffy")
+			>>> g.get_common_edges(n1, n2)
+			{Edge(name="Fluffy")}
+			>>> 
+		"""
 		n1_edges = set(n1.incoming + n1.outgoing)
 		n2_edges = set(n2.incoming + n2.outgoing)
 		return n1_edges & n2_edges
 
-	def get_equivalent_elements(self, element, container, flatten=False):
-		"""Gets all the elements from container that are datawise equal to element.
+	def walk_nodes(self):
+		"""Provides a mechanism for application-defined walks."""
+		pass
 
-		The optional argument "flatten" indicates whether to use element.data or
-		element.flatten() for comparisons.
-
-		Generally speaking, end users will be more interested in the convenience
-		functions get_equivalent_nodes and get_equivalent edges, which omit the
-		container argument.
-
-		Usage:
-			>>> g1 = Graph()
-			>>> g2 = Graph()
-			>>> n1 = g1.add_node(name="Geremy")
-			>>> n2 = g2.add_node(name="Geremy")
-			>>> g2.get_equivalent_elements(n1, g2.nodes)
-			{Node(name="Geremy")}
-		"""
-		equivalent = set()
-		if flatten:
-			get_data = lambda e: e.flatten()
-		else:
-			get_data = lambda e: e.data
-		data = get_data(element)
-		for e2 in container:
-			if get_data(e2) == data:
-				equivalent.add(e2)
-		return equivalent
-
-	def get_equivalent_nodes(self, n1, flatten=False):
-		"""Convenience function to find all equivalent nodes from this graph.
-
-		The "flatten" argument indicates whether to use node.data or node.flatten()
-		for comparison.
-
-		Usage:
-			>>> g1 = Graph()
-			>>> g2 = Graph()
-			>>> n1 = g1.add_node(name="Geremy")
-			>>> n2 = g2.add_node(name="Geremy")
-			>>> g2.get_equivalent_nodes(n1)
-			{Node(name="Geremy")}
-		"""
-		return self.get_equivalent_elements(n1, self.nodes, flatten=flatten)
-
-	def get_equivalent_edges(self, e1, flatten=False):
-		"""Convenience function to find all equivalent edges from this graph.
-
-		The "flatten" argument indicates whether to use edge.data or edge.flatten()
-		for comparison.
-
-		Usage is identical to get_equivalent_elements except for omitting the
-		container argument.
-		"""
-		return self.get_equivalent_elements(e1, self.edges, flatten=flatten)
+	def walk_edges(self):
+		"""Provides a mechanism for application-defined walks."""
+		pass
 
 	def a_star_traversal(self, root, selector):
 		"""Traverses the graph using selector as a selection filter on the unvisited nodes.
@@ -657,7 +652,16 @@ class Graph(object):
 	def get_connected_components(self):
 		"""Gets all the connected components from the graph.
 
-		Returns a list of sets of vertices. 
+		Returns a list of sets of vertices.
+
+		Usage:
+			>>> g = Graph()
+			>>> n1 = g.add_node(group=1)
+			>>> n2 = g.add_node(group=1)
+			>>> n3 = g.add_node(group=2)
+			>>> e1 = g.add_edge(n1, n2)
+			>>> g.get_connected_components()
+			[{Node(group=1), Node(group=1)}, {Node(group=2}]
 		"""
 		# set of all connected components
 		connected = [set()]
@@ -681,7 +685,10 @@ class Graph(object):
 	def get_strongly_connected(self):
 		"""Returns a list of all strongly connected components.
 
-		Each SCC is expressed as a set of vertices."""
+		Each SCC is expressed as a set of vertices.
+
+		Usage is identical to get_connected_components.
+		"""
 		strongly_connected_components = []
 		for c in self.get_connected_components():
 			arbitrary = c.pop()
@@ -705,6 +712,22 @@ class Graph(object):
 
 		The optional get_weight argument should be a callable that
 		accepts an edge and returns its weight.
+
+		Returns a dictionary of node -> (path_length, [nodes_traversed])
+		mappings.
+
+		Usage:
+			>>> g = Graph()
+			>>> n1 = g.add_node(name="A")
+			>>> n2 = g.add_node(name="B")
+			>>> n3 = g.add_node(name="C")
+			>>> n4 = g.add_node(name="D")
+			>>> e1 = g.add_edge(n1, n2, weight=10)
+			>>> e2 = g.add_edge(n1, n4, weight=1)
+			>>> e3 = g.add_edge(n2, n3, weight=1)
+			>>> e4 = g.add_edge(n3, n4, weight=1)
+			>>> g.get_shortest_paths(n1, get_weight=lambda e: e.weight)[n4]
+			(1, [Node(name="D")])
 		"""
 		# create the paths table
 		paths = defaultdict(lambda: (float("inf"), []))
@@ -763,12 +786,20 @@ class Graph(object):
 
 	def move_edge(self, edge, start=None, end=None):
 		"""Moves the edge, leaving its data intact."""
-		edge.start._outgoing.remove(edge)
-		edge.end._incoming.remove(edge)
+		if edge.is_directed:
+			edge.start._outgoing.remove(edge)
+			edge.end._incoming.remove(edge)
+		else:
+			edge.start._bidirectional.remove(edge)
+			edge.end._bidirectional.remove(edge)
 		edge._start = start or edge.start
 		edge._end = end or edge.end
-		edge.start._outgoing.append(edge)
-		edge.end._incoming.append(edge)
+		if edge.is_directed:
+			edge.start._outgoing.append(edge)
+			edge.end._incoming.append(edge)
+		else:
+			edge.start._bidirectional.append(edge)
+			edge.end._bidirectional.append(edge)
 		return edge
 
 	def contract_edge(self, edge, node_data):
@@ -876,8 +907,27 @@ class Graph(object):
 	#########################################################################
 	#			Graph Comparison Tools				#
 	#########################################################################
-			
-	def union(self, other, translator=False):
+
+	def get_equivalent_elements(self, other):
+		"""Returns a dictionary of element -> equivalentce set mappings."""
+		equivalent_nodes = {}
+		equivalent_edges = {}
+		for element in self.nodes:
+			equivalent_nodes[element.key] = set()
+		for element in self.edges:
+			equivalent_edges[element.key] = set()
+		for element in other.nodes:
+			k = element.key
+			if k in equivalent_nodes:
+				equivalent_nodes[k].add(element)
+		for element in other.edges:
+			k = element.key
+			attrs = dict(k)
+			if k in equivalent_edges:
+				equivalent_edges[k].add(element)
+		return equivalent_nodes, equivalent_edges
+
+	def union(self, other):
 		"""Returns a new graph with all nodes and edges in either of its parents."""
 		# create the graph
 		g = type(self)()
@@ -890,11 +940,9 @@ class Graph(object):
 			start = translation_table[edge.start]
 			end = translation_table[edge.end]
 			g.add_edge(start, end, **edge.data)
-		if translator:
-			return g, translation_table
 		return g
 
-	def intersection(self, other, translator=False):
+	def intersection(self, other):
 		"""Returns a graph containing only the nodes and edges in both of its parents.
 
 		Because nodes and edges have no general meaning external to the graph in which
@@ -907,78 +955,88 @@ class Graph(object):
 		"""
 		# create the graph
 		g = type(self)()
-		added = {}
-		# add all the edges and their endpoints
-		for edge in self.edges:
-			if other.get_equivalent_edges(edge, flatten=True):
-				start = added.get(edge.start, False) or g.add_node(**edge.start.data)
-				end = added.get(edge.end, False) or g.add_node(**edge.end.data)
-				g.add_edge(start, end, **edge.data)
-				added[edge.start] = start
-				added[edge.end] = end
-		# add all the zero degree nodes	
-		for node in self.nodes:
-			if len(node.incoming) + len(node.outgoing) == 0:
-				if node not in added:
-					if other.get_equivalent_nodes(node):
-						added[node] = g.add_node(**node.data)
-		if translator:
-			return g, translator
+		# get the equivalent elements
+		equivalent_nodes, equivalent_edges = self.get_equivalent_elements(other)
+		# create the translation tables
+		translator = {}
+		# create all the equivalent nodes
+		for k, v in equivalent_nodes.items():
+			if v:
+				translator[k] = g.add_node(**dict(k))
+		# create all the equivalent edges
+		for k, v in equivalent_edges.items():
+			if v:
+				attributes = dict(k)
+				start = translator.get(attributes.pop("start"), False)
+				end = translator.get(attributes.pop("end"), False)
+				if start and end:
+					g.add_edge(start, end, **attributes)
 		return g
 	
-	def difference(self, other, translator=False):
+	def difference(self, other):
 		"""Return a graph composed of the nodes and edges not in the other."""
-		# create the new graph
+		# create the graph
 		g = type(self)()
-		added = {}
-		# iterate over all the nodes
-		for node in self.nodes:
-			if node not in added:
-				if not other.get_equivalent_nodes(node):
-					added[node] = g.add_node(**node.data)
-		# iterate over all the edges
-		for edge in self.edges:
-			if not other.get_equivalent_edges(edge, flatten=True):	
-				if edge.start in added:
-					if edge.end in added:
-						start = added[edge.start]
-						end = added[edge.end]
-						g.add_edge(start, end, **edge.data)
-		if translator:
-			return g, translator
+		# get the equivalent elements
+		equivalent_nodes, equivalent_edges = self.get_equivalent_elements(other)
+		# create the translation tables
+		translator = {}
+		# create all the equivalent nodes
+		for k, v in equivalent_nodes.items():
+			if not v:
+				translator[k] = g.add_node(**dict(k))
+		# create all the equivalent edges
+		for k, v in equivalent_edges.items():
+			if not v:
+				attributes = dict(k)
+				start = translator.get(attributes.pop("start"), False)
+				end = translator.get(attributes.pop("end"), False)
+				if start and end:
+					g.add_edge(start, end, **attributes)
 		return g
 
-	def merge(self, other, translator=False):
+	def merge(self, other):
 		"""Returns a new graph with its nodes and edges merged by data equality."""
 		# create the new graph
 		g = type(self)()
-		# create duplicate sets
-		duplicate_nodes = set()
-		duplicate_edges = set()
-		# create unified lists
-		all_nodes = self.nodes + other.nodes
-		all_edges = self.edges + other.edges
 		# create the translation table
-		translate = {}
-		# iterate over the nodes in both sets
-		for node in all_nodes:
-			if node not in duplicate_nodes:
-				duplicates = self.get_equivalent_elements(node, all_nodes)
-				duplicate_nodes |= duplicates
-				translate[node] = g.add_node(**node.data)
-			else:
-				duplicate = g.get_equivalent_nodes(node)
-				translate[node] = duplicate.pop()
-		# iterate over all the edges in both sets
-		for edge in all_edges:
-			if edge not in duplicate_edges:
-				duplicates = self.get_equivalent_elements(edge, all_edges, flatten=True)
-				duplicate_edges &= duplicates
-				start = translate.get(edge.start, False)
-				end = translate.get(edge.end, False)
-				if start and end:
-					g.add_edge(start, end, **edge.data)
-		if translator:
-			return g, translate
+		translator = {}
+		# get equivalent elements
+		my_nodes, my_edges = self.get_equivalent_elements(other)
+		other_nodes, other_edges = other.get_equivalent_elements(self)
+		equivalent_nodes = {}
+		equivalent_edges = {}
+		for k, v in my_nodes.items():
+			equivalent_nodes.setdefault(k, set()).union(v)
+		for k, v in other_nodes.items():
+			equivalent_nodes.setdefault(k, set()).union(v)
+		for k, v in my_edges.items():
+			equivalent_edges.setdefault(k, set()).union(v)
+		for k, v in other_edges.items():
+			equivalent_edges.setdefault(k, set()).union(v)
+		# add all the equivalent nodes
+		for node in equivalent_nodes:
+			translator[node] = g.add_node(**dict(node))
+		# add all the equivalent edges
+		for edge in equivalent_edges:
+			attributes = dict(edge)
+			start = translator[attributes.pop("start")]
+			end = translator[attributes.pop("end")]
+			g.add_edge(start, end, **attributes)
 		return g
 
+	def equivalent(self, other, node_equivalence=None, edge_equivalence=None):
+		"""Determines if this graph and the other are equivalent under the given definitions."""
+		pass
+
+	def isomorphic(self, other, bijection):
+		"""Determines if this graph and the other are isomorphic under the given bijection."""
+		pass
+
+	def is_supergraph(self, other):
+		"""Determines if this graph is a supergraph of the other."""
+		pass
+
+	def is_subgraph(self, other):
+		"""Determines if this graph is a subgraph of the other."""
+		pass

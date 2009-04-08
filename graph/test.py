@@ -64,24 +64,10 @@ class GraphCorrectnessTest(unittest.TestCase):
 		# make sure that change is reflected in the graph's order
 		self.failUnlessEqual(g.order(), 5)
 
-		# test to make sure that unlinking works
-		# if they should be equal
-		self.failUnlessEqual(paul.flatten(), snowflake.flatten())
-		# if their data is the same, but their edges are
-		# in the wrong place
-		e1 = g.add_edge(paul, snowflake, distance=0)
-		self.failIfEqual(paul.flatten(), snowflake.flatten())
-		g.remove_edge(e1)
-		# if their data is the same, and they have different
-		# edges
-		e1 = g.add_edge(paul, ted)
-		e2 = g.add_edge(snowflake, jimmy)
-		self.failIfEqual(paul.flatten(), snowflake.flatten())
 		# if their data is the same and their edges go
 		# to the same place
-		g.remove_edge(e2)
 		g.add_edge(snowflake, ted)
-		self.failUnlessEqual(paul.flatten(), snowflake.flatten())
+		self.failUnlessEqual(paul.key, snowflake.key)
 
 	def testEdgeCreation(self):
 
@@ -129,13 +115,13 @@ class GraphCorrectnessTest(unittest.TestCase):
 
 		# test to ensure that equal edges unlink equally
 		new_lame_trip = g.add_edge(jimmy, ted, distance=850)
-		self.failUnlessEqual(new_lame_trip.flatten(), lame_trip.flatten())
+		self.failUnlessEqual(new_lame_trip.key, lame_trip.key)
 
 		# test to ensure that non-equal edges unlink unequally
-		self.failIfEqual(j_to_t.flatten(), t_to_d.flatten())
+		self.failIfEqual(j_to_t.key, t_to_d.key)
 
 	def testEdgeMoving(self):
-		g = Graph()
+		g = self.g
 		geremy = g.add_node(name="Geremy")
 		bill = g.add_node(name="Bill")
 		bob = g.add_node(name="Bob")
@@ -188,7 +174,7 @@ class GraphCorrectnessTest(unittest.TestCase):
 
 	def testDepthFirstTraversal(self):
 		# setup
-		g = Graph()
+		g = self.g
 		nodes = {}
 		edges = []
 		nodes["A"] = g.add_node(name="A")
@@ -215,7 +201,7 @@ class GraphCorrectnessTest(unittest.TestCase):
 		self.failUnless(positions["F"] > min(positions["B"], positions["E"]))
 
 		# test for the equivalence problem
-		g = Graph()
+		g = self.g
 		a = g.add_node(name="A")
 		b1 = g.add_node(name="B")
 		b2 = g.add_node(name="B")
@@ -229,7 +215,7 @@ class GraphCorrectnessTest(unittest.TestCase):
 
 	def testBreadthFirstTraversal(self):
 		# setup
-		g = Graph()
+		g = self.g
 		nodes = {}
 		edges = []
 		nodes["A"] = g.add_node(name="A")
@@ -252,7 +238,7 @@ class GraphCorrectnessTest(unittest.TestCase):
 		self.failUnless(max(positions["B"], positions["C"], positions["E"]) < min(positions["D"], positions["F"], positions["G"]))
 
 	def testGetCommonEdges(self):
-		g = Graph()
+		g = self.g
 		n1 = g.add_node()
 		n2 = g.add_node()
 		n3 = g.add_node()
@@ -263,7 +249,7 @@ class GraphCorrectnessTest(unittest.TestCase):
 		self.failUnlessEqual(g.get_common_edges(n1, n2), {e1, e2})
 
 	def testEdgeContraction(self):
-		g = Graph()
+		g = self.g
 		n1 = g.add_node(value=1)
 		n2 = g.add_node(value=2)
 		n3 = g.add_node(value=3)
@@ -302,7 +288,7 @@ class GraphCorrectnessTest(unittest.TestCase):
 
 	def testInduceSubgraph(self):
 		# setup
-		g = Graph()
+		g = self.g
 		kirk = g.add_node(name="kirk")
 		spock = g.add_node(name="spock")
 		bones = g.add_node(name="bones")
@@ -323,7 +309,7 @@ class GraphCorrectnessTest(unittest.TestCase):
 
 	def testEdgeInduceSubgraph(self):
 		# setup
-		g = Graph()
+		g = self.g
 		kirk = g.add_node(name="kirk")
 		spock = g.add_node(name="spock")
 		bones = g.add_node(name="bones")
@@ -336,9 +322,9 @@ class GraphCorrectnessTest(unittest.TestCase):
 		
 		new_mission = g.edge_induce_subgraph(e4, e5)
 		self.failUnlessEqual({node.name for node in new_mission.nodes}, {"spock", "bones", "uhura"})
-		spock = new_mission.get_equivalent_nodes(spock).pop()
-		bones = new_mission.get_equivalent_nodes(bones).pop()
-		uhura = new_mission.get_equivalent_nodes(uhura).pop()
+		spock = set(new_mission.search_nodes(name="spock")).pop()
+		bones = set(new_mission.search_nodes(name="bones")).pop()
+		uhura = set(new_mission.search_nodes(name="uhura")).pop()
 		self.failUnlessEqual(uhura.outgoing[0].end.name, "spock")
 		self.failUnlessEqual(uhura.outgoing[1].end.name, "bones")
 
@@ -380,8 +366,6 @@ class GraphCorrectnessTest(unittest.TestCase):
 		g2.add_edge(three_2, one_2)
 		one_and_three = g1 & g2
 		self.failUnlessEqual({1, 3}, {node.name for node in one_and_three.nodes})
-		self.failUnlessEqual(one_and_three.edges[0].start.name, 3)
-		self.failUnlessEqual(one_and_three.edges[0].end.name, 1)
 		self.failUnlessEqual(one_and_three.order(), 2)
 		self.failUnlessEqual(one_and_three.size(), 1)
 
@@ -428,8 +412,9 @@ class GraphCorrectnessTest(unittest.TestCase):
 		g3 = g1 + g2
 		self.failUnlessEqual(g3.order(), 5)
 		self.failUnlessEqual(g3.size(), 6)
-		self.failUnlessEqual([node.name for node in g3.nodes], ["Bob", "Dan", "Doug", "Jeff", "Paul"])
-		self.failUnlessEqual([g3.nodes[0].outgoing[i].end.name for i in range(4)], ["Dan", "Doug", "Jeff", "Paul"])
+		self.failUnlessEqual({node.name for node in g3.nodes}, {"Bob", "Dan", "Doug", "Jeff", "Paul"})
+		bob = list(g3.search_nodes(name="Bob"))[0]
+		self.failUnlessEqual({bob.outgoing[i].end.name for i in range(4)}, {"Dan", "Doug", "Jeff", "Paul"})
 
 	def testGetAllConnected(self):
 		# setup
