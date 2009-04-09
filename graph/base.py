@@ -40,6 +40,12 @@ Notice that edges can have properties as well:
 
 	>>> edge_2 = g.add_edge(node_1, node_2, weight=5)
 	>>> edge_3 = g.add_edge(node_3, node_1, stuff="things")
+
+The most important keyword property on edges is the "is_directed"
+keyword argument, which, when set to False, will cause the edge
+created to be bidirectional.
+
+	>>> edge_4 = g.add_edge(node_1, node_3, is_directed=False)
 	
 To remove nodes:
 
@@ -102,9 +108,11 @@ to the oldest node attached to node_1, I could do the following:
 
 	>>> interesting_node = node_1.outgoing[0].end.outgoing[0]
 
-And, if you're dealing with a graph containing undirected edges,
-you can use the "other_end" function, which takes a node and,
-if it leads from there to another node, returns that node.
+In addition to the "start" and "end" properties, you can use the 
+"other_end" function, which takes a node and, if possible, returns
+the edge's other end. If it cannot follow the edge to a point 
+opposite the given node- for instance, because the edge is directed
+the other way- it raises AttributeError.
 
 	>>> endpoint = edge_1.other_end(node_2)
 	>>> endpoint == node_3
@@ -112,6 +120,10 @@ if it leads from there to another node, returns that node.
 	>>> edge_1.other_end(node_3)
 	...
 	AttributeError: Edge() contains no endpoint opposite to Node()
+
+You will frequently see "other_end" used in situations where it is
+possible that the given edge could be either directed or undirected,
+or where the orientation of a directed edge is unknown.
 
 Of course, there are scenarios in which you don't know how to
 navigate your graph, or need to find a starting point that isn't
@@ -146,34 +158,25 @@ And for edges:
 	>>> 	print(edge)
 	Edge(weight=5)
 
-You can also search for elements which demonstrate data
-equality with a given element. This is often useful when
-comparing elements from different graphs.
+You can also get the elements which are equivalent to a
+given one, for example to compare elements between graphs.
+This is done using the "key" attribute and dictionary-style
+access.
 
-To get all equivalent nodes:
+	>>> g[node_1.key]
+	Node(weight=5)
 
-	>>> n = Node(name="bob")
-	>>> g.get_equivalent_nodes(n)
-	{Node(name="bob")}
+This technique also works for edges.
 
-And its edge-comparing equivalent
-
-	>>> e = Edge(node_2, node_3, weight=5)
-	>>> g.get_equivalent_edges(e)
-	{Node(weight=5)}
-
-Of course, the edge returned by this function *is* datawise
-equivalent to the edge we just created. But more likely,
-when you're looking at edges you're interested in the nodes
-around them as much as you are the node itself. In the
-example above, the edge returned is attached at different
-points than the edge given. To solve this, you can use the 
-optional "key" argument, which causes it to also compare
-the data in edges incident to the node given or nodes 
-incident to the edge given.
+In addition to the datawise and unordered views of graphs,
+several methods for ordering based on structural properties
+are provided. The most important of these are traversals
+and walks.
 
 Three traversals are provided by default- A*, depth first,
-and breadth first.
+and breadth first. They are all guarenteed to only visit
+a given node once, and visit nodes in a different order
+based on how they are related structurally.
 
 To do a depth first traversal:
 
@@ -182,7 +185,7 @@ To do a depth first traversal:
 	Node(name="bob")
 	Node(weight=5)
 
-Depth first traversals are similar in usage, simply
+Breadth first traversals are similar in usage, simply
 substituting "depth_first_traversal" for "breadth_first_traversal".
 
 A* traversals require an additional callable argument.
@@ -204,11 +207,48 @@ A selector function:
 
 And traverse the graph:
 
-	>>> for node in g.a_star_traversal(node_1, get_heaviest):
+	>>> for node in g.a_star_traversal(node_1, get_most_popular):
 	>>> 	print(node)
 	Node(weight=5)
 	Node(name="bob")
 
+The walks, in contrast to the traversals, can visit a node
+or edge more than once. They are the most powerful structural
+technique provided for navigating graphs, but are also probably
+the hardest to use.
+
+The walks are implemented as generators, with each step yielding
+a set of nodes (for walk_nodes) or edges (for walk_edges) that
+are potentially "next" in terms of adjacency. The application
+should select one of those and use send() to send it back.
+
+The trick is that generators must be fed None in their first
+send(), which can complicate application logic. For example:
+
+	>>> w = g.walk_nodes()
+	>>> w.send(None)
+
+Now we send it the node we're interested in walking away from:
+
+	>>> candidates = w.send(node_1)
+	>>> candidates
+	{Node(weight=5)}
+
+We get back the set of nodes to which we can walk. We should
+select one and send it back:
+
+	>>> w.send(candidates.pop())
+	set()
+
+To end the generator's run:
+
+	>>> w.send(None)
+	...
+	StopIteration
+
+walk_edges operates identically but accepts edges and yields
+sets of edges.
+	
 Binary Graph Operations
 -----------------------
 
@@ -624,14 +664,16 @@ class Graph:
 		n2_edges = set(n2.incoming + n2.outgoing)
 		return n1_edges & n2_edges
 
-	def walk_nodes(self, next):
+	def walk_nodes(self):
 		"""Provides a generator for application-defined walks."""
+		next = (yield)
 		while next:
 			adjacent = {edge.other_end(next) for edge in next.outgoing}
 			next = (yield adjacent)
 
-	def walk_edges(self, next):
+	def walk_edges(self):
 		"""Provides a generator for application-defined walks."""
+		next = (yield)
 		while next:
 			incident = set(next.other_end(next.start).outgoing)
 			next = (yield incident)
