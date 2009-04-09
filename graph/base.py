@@ -58,7 +58,8 @@ a few other special properties by default.
 For Nodes, these properties are "incoming" and "outgoing", 
 and they contain the incoming and outgoing edges attached
 to that node. The "bidirectional" property is also there
-in case you only want the edges which go both ways.
+in case you only want the edges which go both ways. An
+additional property "edges" contains all of these elements.
 
 For Edges, these properties are (again, by default) 
 "start" and "end". Because edges can be bidirectional,
@@ -82,14 +83,17 @@ And to get the incoming edges:
 	>>> n2.incoming
 	[Edge(weight=5)]
 
+The same sorts of things work for the properties
+"bidirectional" and "edges".
+
 You can use this to get all the nodes adjacent to
 an interesting Node:
 
-	>>> adjacent = [edge.end for edge in node1.outgoing]
+	>>> adjacent = [edge.end for edge in node_1.outgoing]
 
-Or to get the degree of the given node:
+To get the degree of the given node:
 
-	>>> degree = len(node1.outgoing) + len(node2.incoming)
+	>>> degree = node1.degree
 	
 You can combine this with Edges' "start" and "end" properties
 to navigate your graph, if you know how your data is related
@@ -98,11 +102,22 @@ to the oldest node attached to node_1, I could do the following:
 
 	>>> interesting_node = node_1.outgoing[0].end.outgoing[0]
 
+And, if you're dealing with a graph containing undirected edges,
+you can use the "other_end" function, which takes a node and,
+if it leads from there to another node, returns that node.
+
+	>>> endpoint = edge_1.other_end(node_2)
+	>>> endpoint == node_3
+	True
+	>>> edge_1.other_end(node_3)
+	...
+	AttributeError: Edge() contains no endpoint opposite to Node()
+
 Of course, there are scenarios in which you don't know how to
 navigate your graph, or need to find a starting point that isn't
 easily determined based on a given element's properties. For that,
 Graph supports Node and Edge iteration for the simple cases, and
-traversals for more complex behavior.
+traversals and walks for more complex behavior.
 
 To iterate over all the nodes in a graph:
 
@@ -153,7 +168,7 @@ when you're looking at edges you're interested in the nodes
 around them as much as you are the node itself. In the
 example above, the edge returned is attached at different
 points than the edge given. To solve this, you can use the 
-optional "flatten" argument, which causes it to also compare
+optional "key" argument, which causes it to also compare
 the data in edges incident to the node given or nodes 
 incident to the edge given.
 
@@ -317,7 +332,7 @@ class Node(GraphElement):
 		Note that the list returned is a copy, so modifying it doesn't
 		impact the structure of the graph.
 		"""
-		return copy.copy(self._incoming + self._outgoing + self.bidirectional)
+		return copy.copy(self._incoming + self._outgoing + self._bidirectional)
 
 	@property
 	def degree(self):
