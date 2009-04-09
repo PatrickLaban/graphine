@@ -43,7 +43,8 @@ Notice that edges can have properties as well:
 
 The most important keyword property on edges is the "is_directed"
 keyword argument, which, when set to False, will cause the edge
-created to be bidirectional.
+created to be bidirectional. Its default value is True, ie,
+edges are by default directed.
 
 	>>> edge_4 = g.add_edge(node_1, node_3, is_directed=False)
 	
@@ -53,7 +54,10 @@ To remove nodes:
 	
 And edges:
 
-	>>> g.remove_edge(edge_3)
+	>>> g.remove_edge(edge_4)
+
+Note that removing one or more of an Edge's endpoints will
+remove that edge as well.
 
 Navigating Graphs
 -----------------
@@ -305,16 +309,27 @@ class GraphElement:
 	"""
 
 	def __repr__(self):
+		"""Pretty prints this element."""
 		classname = type(self).__name__
 		attrs = ''.join(("%s=%s, " % (k, v) for k, v in self.data.items()))[:-2]
 		return "%s(%s)" % (classname, attrs)
 
 	@property
 	def data(self):
+		"""Returns a dictionary representing the data values of this element.
+
+		Note that elements which are marked private- ie, start with a single
+		underscore- will not appear in this dictionary.
+		"""
 		return {k:v for k, v in self.__dict__.items() if not k.startswith("_")}
 
 	@property
 	def key(self):
+		"""Generates a key suitable for datawise association in a dictionary.
+
+		As with the data attribute, this does not include data values which
+		are prefixed with an underscore.
+		"""
 		return hash(frozenset((k,v) for k, v in self.data.items()))
 
 
@@ -376,6 +391,7 @@ class Node(GraphElement):
 
 	@property
 	def degree(self):
+		"""Returns the degree of this Node, ie, the number of edges."""
 		return len(self.edges)
 
 	@property
