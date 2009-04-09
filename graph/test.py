@@ -34,91 +34,166 @@ import unittest
 import timeit
 from base import Graph
 
+class NodeCreationTest(unittest.TestCase):
+
+	def setUp(self):
+		self.g = Graph()
+		# try not to error out
+		self.jimmy = self.g.add_node(city="New York")
+		self.ted = self.g.add_node(city="Atlanta")
+		self.dan = self.g.add_node(city="Seattle")
+		self.paul = self.g.add_node(city="Austin")
+
+	def testEquality(self):
+		# test for equality between elements
+		snowflake = self.g.add_node(city="Austin")
+		self.failIfEqual(self.dan, snowflake)
+		self.failUnlessEqual(self.paul.data, snowflake.data)
+		self.failUnlessEqual(self.paul.key, snowflake.key)
+		self.failUnlessEqual(self.paul.city, snowflake.city)
+
+	def testData(self):
+		# make sure that the nodes are what we want them to be
+		self.failUnlessEqual(self.jimmy.data, {"city":"New York"})
+		self.failUnlessEqual(self.ted.data, {"city":"Atlanta"})
+		self.failUnlessEqual(self.paul.data, {"city":"Austin"})
+
+	def testOrder(self):
+		# make sure that change is reflected in the graph's order
+		self.failUnlessEqual(self.g.order(), 4)
+
+
+class EdgeCreationTest(unittest.TestCase):
+
+	def setUp(self):
+		self.g = Graph()
+		g = self.g
+		# make some nodes
+		self.jimmy = g.add_node(city="New York")
+		self.ted = g.add_node(city="Atlanta")
+		self.dan = g.add_node(city="Seattle")
+		self.paul = g.add_node(city="Austin")
+		self.zeke = g.add_node(city="LA")
+		self.kurt = g.add_node(city="Chicago")
+		# try not to error out
+		self.j_to_t = g.add_edge(self.jimmy, self.ted, distance=850)
+		self.t_to_d = g.add_edge(self.ted, self.dan, distance=2150)
+		self.d_to_p = g.add_edge(self.dan, self.paul, distance=2850)
+		# for directional tests
+		self.z_to_k = g.add_edge(self.zeke, self.kurt, distance=1300, is_directed=False)
+
+	def testAdjacency(self):
+		# ensure adjacency list is correct
+		self.failUnlessEqual(self.jimmy.incoming, [])
+		self.failUnlessEqual(self.jimmy.outgoing, [self.j_to_t])
+		self.failUnlessEqual(self.ted.incoming, [self.j_to_t])
+		self.failUnlessEqual(self.ted.outgoing, [self.t_to_d])
+		self.failUnlessEqual(self.ted.bidirectional, [])
+		self.failUnlessEqual(self.dan.incoming, [self.t_to_d])
+		self.failUnlessEqual(self.dan.outgoing, [self.d_to_p])
+		self.failUnlessEqual(self.paul.incoming, [self.d_to_p])
+		self.failUnlessEqual(self.zeke.incoming, [self.z_to_k])
+		self.failUnlessEqual(self.zeke.outgoing, [self.z_to_k])
+		self.failUnlessEqual(self.zeke.bidirectional, [self.z_to_k])
+		self.failUnlessEqual(self.kurt.incoming, [self.z_to_k])
+		self.failUnlessEqual(self.kurt.outgoing, [self.z_to_k])
+		self.failUnlessEqual(self.kurt.bidirectional, [self.z_to_k])
+		self.failUnlessEqual(self.paul.outgoing, [])
+
+	def testDeletion(self):
+		# and after deletion
+		self.g.remove_edge(self.t_to_d)
+		self.failUnlessEqual(self.ted.outgoing, [])
+		self.failUnlessEqual(self.dan.incoming, [])
+		new_trip = self.g.add_edge(self.ted, self.dan, distance=850)
+		self.failUnlessEqual(self.ted.outgoing, [new_trip])
+		self.failUnlessEqual(self.dan.incoming, [new_trip])
+
+	def testEquivalence(self):
+		# equivalence test
+		new_trip = self.g.add_edge(self.ted, self.dan, distance=850)
+		lame_trip = self.g.add_edge(self.jimmy, self.ted, distance=850)
+		self.failUnlessEqual(new_trip.data, lame_trip.data)
+		self.failIfEqual(new_trip.key, lame_trip.key)
+
+	def testEdgeProperties(self):
+		# ensure that the edges properties are being set properly
+		self.failUnlessEqual(self.t_to_d.data, {"distance": 2150})
+		self.failUnlessEqual(self.d_to_p.data, {"distance": 2850})
+		self.failUnlessEqual(self.z_to_k.data, {"distance": 1300})
+
+	def testSize(self):
+		# make sure that the change is reflected in the graph's size
+		self.failUnlessEqual(self.g.size(), 4)
+
+	def testBidirection(self):
+		# test to ensure that there is now a bidirectional link
+		self.failUnlessEqual(self.zeke.outgoing[-1].other_end(self.zeke).city, "Chicago")
+		self.failUnlessEqual(self.kurt.outgoing[-1].other_end(self.kurt).city, "LA")
+
+
+class GraphPropertiesTest(unittest.TestCase):
+
+	def setUp(self):
+		self.g = Graph()
+		self.n1 = self.g.add_node(name="Geremy")
+		self.n2 = self.g.add_node(name="Bob")
+		self.n3 = self.g.add_node(name="Bill")
+		self.e1 = self.g.add_edge(self.n1, self.n2)
+		self.e2 = self.g.add_edge(self.n2, self.n3)
+		self.g.remove_node(self.n1)
+
+	def testIn(self):
+		self.failUnlessEqual(self.n1 in self.g, False)
+		self.failUnlessEqual(self.n2 in self.g, True)
+		self.failUnlessEqual(self.e1 in self.g, False)
+		self.failUnlessEqual(self.e2 in self.g, True)
+
+	def testGetItem(self):
+		self.failUnlessEqual(self.g[self.n2.key], self.n2)
+		self.failUnlessEqual(self.g[self.e2.key], self.e2)
+		self.failUnlessRaises(KeyError, lambda: self.g[self.e1.key])
+
+	def testOrder(self):
+		self.failUnlessEqual(self.g.order(), 2)
+
+	def testSize(self):
+		self.failUnlessEqual(self.g.size(), 1)
+
+
+class GraphSearchTest(unittest.TestCase):
+
+	def setUp(self):
+		self.g = Graph()
+		self.n1 = self.g.add_node(name="Geremy")
+		self.n2 = self.g.add_node(name="Bob")
+		self.n3 = self.g.add_node(name="Bill")
+		self.n4 = self.g.add_node(name="Bill")
+		self.e1 = self.g.add_edge(self.n1, self.n2)
+		self.e2 = self.g.add_edge(self.n2, self.n3)
+		self.e3 = self.g.add_edge(self.n4, self.n3, weight=5)
+		self.g.remove_node(self.n1)
+
+	def testNodeSearch(self):
+		l = list(self.g.search_nodes(name="Geremy"))
+		self.failUnlessEqual(l, [])
+		l = list(self.g.search_nodes(name="Bob"))
+		self.failUnlessEqual(l, [self.n2])
+		l = list(self.g.search_nodes(name="Bill"))
+		self.failUnlessEqual(l, [self.n3, self.n4])
+
+	def testEdgeSearch(self):
+		l = list(self.g.search_edges(weight=5))
+		self.failUnlessEqual(l, [self.e3])
+		s = set(self.g.search_edges(end=self.n3))
+		self.failUnlessEqual(s, {self.e2, self.e3})
+		l = list(self.g.search_edges(start=self.n2))
+		self.failUnlessEqual(l, [self.e2])
+
 class GraphCorrectnessTest(unittest.TestCase):
 
 	def setUp(self):
 		self.g = Graph()
-
-	def testNodeCreation(self):
-		g = self.g
-
-		# try not to error out
-		jimmy = g.add_node(city="New York")
-		ted = g.add_node(city="Atlanta")
-		dan = g.add_node(city="Seattle")
-		paul = g.add_node(city="Austin")
-
-		# test for equality between elements
-		snowflake = g.add_node(city="Austin")
-		self.failIfEqual(dan, snowflake)
-		self.failUnlessEqual(paul.data, snowflake.data)
-		
-		# test for non-identity
-		self.failUnless(not paul.data != snowflake.data)
-
-		# make sure that the nodes are what we want them to be
-		self.failUnlessEqual(jimmy.data, {"city":"New York"})
-		self.failUnlessEqual(ted.data, {"city":"Atlanta"})
-		self.failUnlessEqual(paul.data, {"city":"Austin"})
-	
-		# make sure that change is reflected in the graph's order
-		self.failUnlessEqual(g.order(), 5)
-
-		# if their data is the same and their edges go
-		# to the same place
-		g.add_edge(snowflake, ted)
-		self.failUnlessEqual(paul.key, snowflake.key)
-
-	def testEdgeCreation(self):
-
-		g = self.g
-
-		# make some nodes
-		jimmy = g.add_node(city="New York")
-		ted = g.add_node(city="Atlanta")
-		dan = g.add_node(city="Seattle")
-		paul = g.add_node(city="Austin")
-
-		# try not to error out
-		j_to_t = g.add_edge(jimmy, ted, distance=850)
-		t_to_d = g.add_edge(ted, dan, distance=2150)
-		d_to_p = g.add_edge(dan, paul, distance=2850)
-
-		# ensure adjacency list is correct
-		self.failUnlessEqual(jimmy.incoming, [])
-		self.failUnlessEqual(jimmy.outgoing, [j_to_t])
-		self.failUnlessEqual(ted.incoming, [j_to_t])
-		self.failUnlessEqual(ted.outgoing, [t_to_d])
-		self.failUnlessEqual(dan.incoming, [t_to_d])
-		self.failUnlessEqual(dan.outgoing, [d_to_p])
-		self.failUnlessEqual(paul.incoming, [d_to_p])
-		self.failUnlessEqual(paul.outgoing, [])
-
-		# and after deletion
-		g.remove_edge(t_to_d)
-		self.failUnlessEqual(ted.outgoing, [])
-		self.failUnlessEqual(dan.incoming, [])
-		new_trip = g.add_edge(ted, dan, distance=850)
-		self.failUnlessEqual(ted.outgoing, [new_trip])
-		self.failUnlessEqual(dan.incoming, [new_trip])
-
-		# equivalence test
-		lame_trip = g.add_edge(jimmy, ted, distance=850)
-		self.failUnlessEqual(new_trip.data, lame_trip.data)
-
-		# ensure that the edges properties are being set properly
-		self.failUnlessEqual(dict(lame_trip.data), {"distance": 850})
-		self.failUnlessEqual(dict(d_to_p.data), {"distance": 2850})
-
-		# make sure that the change is reflected in the graph's size
-		self.failUnlessEqual(g.size(), 4)
-
-		# test to ensure that equal edges unlink equally
-		new_lame_trip = g.add_edge(jimmy, ted, distance=850)
-		self.failUnlessEqual(new_lame_trip.key, lame_trip.key)
-
-		# test to ensure that non-equal edges unlink unequally
-		self.failIfEqual(j_to_t.key, t_to_d.key)
 
 	def testEdgeMoving(self):
 		g = self.g
@@ -582,4 +657,10 @@ class GraphPerformanceTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
+	GraphCorrectnessTest = unittest.TestLoader().loadTestsFromTestCase(GraphCorrectnessTest)
+	GraphPropertiesTest = unittest.TestLoader().loadTestsFromTestCase(GraphPropertiesTest)
+	GraphSearchTest = unittest.TestLoader().loadTestsFromTestCase(GraphSearchTest)
+	NodeCreationTest = unittest.TestLoader().loadTestsFromTestCase(NodeCreationTest)
+	EdgeCreationTest = unittest.TestLoader().loadTestsFromTestCase(EdgeCreationTest)
+	CorrectnessTest = unittest.TestSuite([GraphCorrectnessTest, NodeCreationTest, EdgeCreationTest, GraphPropertiesTest, GraphSearchTest])
 	unittest.main()

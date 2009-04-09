@@ -13,9 +13,10 @@ This module contains the base GraphElement, Node, Edge,
 and Graph implementations for Graphine, an easy-to-use,
 easy-to-extend Graph library.
 
-Graphs generated using this representation have directed 
-edges, the ability to represent loops and parallel edges,
-and can attach arbitrary data to nodes and edges.
+Graphs generated using this representation can have 
+directed or undirected edges, the ability to represent 
+loops and parallel edges, and can attach arbitrary data 
+to nodes and edges.
 
 Interface summary
 =================
@@ -29,7 +30,7 @@ To add nodes:
 
 	>>> node_1 = g.add_node(name="bob")
 	>>> node_2 = g.add_node(weight=5)
-	>>> node_3 = g.add_node(color="red", flags=["visited"])
+	>>> node_3 = g.add_node(color="red", visited=False)
 
 To add edges:
 
@@ -38,7 +39,7 @@ To add edges:
 Notice that edges can have properties as well:
 
 	>>> edge_2 = g.add_edge(node_1, node_2, weight=5)
-	>>> edge_3 = g.add_edge(node_3, node_1, stuff={})
+	>>> edge_3 = g.add_edge(node_3, node_1, stuff="things")
 	
 To remove nodes:
 
@@ -52,11 +53,24 @@ Navigating Graphs
 -----------------
 
 In addition to storing your data, Nodes and Edges have
-a few other special properties by default. For Nodes,
-these properties are "incoming" and "outgoing", and
-they contain the incoming and outgoing edges attached
-to that node. For Edges, these properties are (again,
-by default) "start" and "end".
+a few other special properties by default.
+
+For Nodes, these properties are "incoming" and "outgoing", 
+and they contain the incoming and outgoing edges attached
+to that node. The "bidirectional" property is also there
+in case you only want the edges which go both ways.
+
+For Edges, these properties are (again, by default) 
+"start" and "end". Because edges can be bidirectional,
+they also have an "is_directed" property, and provide
+the convenience function "other_end", which takes a
+node and, if possible, returns the opposite endpoint
+incident to that edge.
+
+The "key" attribute is also provided for use in
+dictionaries and other settings where the essential
+question is whether two graph elements are equivalent,
+not whether they are the exact same element.
 
 To get all the outgoing edges of a particular node:
 
@@ -224,7 +238,7 @@ from collections import deque, namedtuple, defaultdict
 import heapq
 import copy
 
-class GraphElement(object):
+class GraphElement:
 	"""Base class for Nodes and Edges.
 
 	A GraphEdge.data property is provided to give easier
@@ -306,6 +320,10 @@ class Node(GraphElement):
 		return copy.copy(self._incoming + self._outgoing + self.bidirectional)
 
 	@property
+	def degree(self):
+		return len(self.edges)
+
+	@property
 	def key(self):
 		"""Returns a value suitable as a key in a dictionary."""
 		attributes = tuple((k,v) for k, v in self.data.items())
@@ -334,6 +352,15 @@ class Edge(GraphElement):
 		for k, v in kwargs.items():
 			setattr(self, k, v)
 
+	def other_end(self, starting_point):
+		"""Returns the other end of the edge from the given point."""
+		if starting_point is self.start:
+			return self.end
+		elif not self.is_directed:
+			if starting_point is self.end:
+				return self.start
+		raise AttributeError("%s has no endpoint opposite to %s" % (self, starting_point))
+
 	@property
 	def start(self):
 		"""Returns the starting point for this edge."""
@@ -358,7 +385,7 @@ class Edge(GraphElement):
 		return frozenset(endpoints + direction + attributes)
 
 
-class Graph(object):
+class Graph:
 
 	"""A basic graph class, and base for all Graph mixins.
 
@@ -418,6 +445,14 @@ class Graph(object):
 		else:
 			return element in self.edges
 
+	def __getitem__(self, key):
+		"""Returns the item corresponding to the given key.
+
+		Raises KeyError if it is not found.
+		"""
+		d = {n.key: n for n in self.nodes + self.edges}
+		return d[key]
+
 	def __and__(self, other):
 		"""Maps the & operator to the intersection operation."""
 		return self.intersection(other)
@@ -443,8 +478,7 @@ class Graph(object):
 
 		Usage:
 			>>> g = Graph()
-			>>> n = g.add_node(weight=5)
-			>>> n
+			>>> g.add_node(weight=5)
 			Node(weight=5)
 		"""
 		node = self.Node(**kwargs)
@@ -460,8 +494,7 @@ class Graph(object):
 		Usage:	
 			>>> g = Graph()
 			>>> n1, n2 = g.add_node(), g.add_node()
-			>>> e = g.add_edge(n1, n2, weight=5)
-			>>> e
+			>>> g.add_edge(n1, n2, weight=5)
 			Edge(weight=5)			
 		"""
 		# build the edge
@@ -529,7 +562,7 @@ class Graph(object):
 			>>> n1 = g.add_node(name="bob")
 			>>> n2 = g.add_node(name="bill")
 			>>> for node in g.search_nodes(name="bob"):
-			>>> 	print(node)
+			... 	print(node)
 			Node(name="bob")
 		"""
 		desired_properties = set(kwargs.items())
@@ -547,13 +580,17 @@ class Graph(object):
 			>>> e1 = g.add_edge(n1, n2, weight=4)
 			>>> e2 = g.add_edge(n1, n2, weight=5)
 			>>> for edge in g.search_edges(weight=5):
-			>>> 	print(edge)
+			... 	print(edge)
 			Edge(weight=5)
 		"""
 		desired_properties = set(kwargs.items())
 		for edge in self.edges:
-			properties = set(edge.data.items())
-			if properties.issuperset(desired_properties):
+			attrs = set(edge.data.items())
+			if "start" in kwargs:
+				attrs.add(("start", edge.start))
+			if "end" in kwargs:
+				attrs.add(("end", edge.end))
+			if attrs.issuperset(desired_properties):
 				yield edge
 
 	def get_common_edges(self, n1, n2):
@@ -572,13 +609,17 @@ class Graph(object):
 		n2_edges = set(n2.incoming + n2.outgoing)
 		return n1_edges & n2_edges
 
-	def walk_nodes(self):
-		"""Provides a mechanism for application-defined walks."""
-		pass
+	def walk_nodes(self, next):
+		"""Provides a generator for application-defined walks."""
+		while next:
+			adjacent = {edge.other_end(next) for edge in next.outgoing}
+			next = (yield adjacent)
 
-	def walk_edges(self):
-		"""Provides a mechanism for application-defined walks."""
-		pass
+	def walk_edges(self, next):
+		"""Provides a generator for application-defined walks."""
+		while next:
+			incident = set(next.other_end(next.start).outgoing)
+			next = (yield incident)
 
 	def a_star_traversal(self, root, selector):
 		"""Traverses the graph using selector as a selection filter on the unvisited nodes.
@@ -603,7 +644,7 @@ class Graph(object):
 			# visit it
 			visited.add(next)
 			# get the adjacent nodes
-			adjacent = {edge.end for edge in next.outgoing}
+			adjacent = {edge.other_end(next) for edge in next.outgoing}
 			# filter it against those we've already visited
 			not_yet_visited = adjacent - visited
 			# make sure we're not double-adding
@@ -741,16 +782,16 @@ class Graph(object):
 			# iterate over its outgoing edges
 			for edge in current.outgoing:
 				# get the old path to the endpoint
-				old_weight, old_path = paths[edge.end]
+				old_weight, old_path = paths[edge.other_end(current)]
 				# get the weight of this path to the edge's end
 				weight, path = paths[current]
 				weight += get_weight(edge)
 				# if the new path is better than the old path
 				if weight < old_weight:
 					# relax it
-					paths[edge.end] = (weight, path + [edge])
+					paths[edge.other_end(current)] = (weight, path + [edge])
 					# and put it on the heap
-					heapq.heappush(unoptomized, (weight, edge.end))
+					heapq.heappush(unoptomized, (weight, edge.other_end(current)))
 		return paths
 	
 	def size(self):
@@ -833,7 +874,7 @@ class Graph(object):
 		for e in self.edges:
 			self.move_edge(e, start=e.end, end=e.start)
 			
-	def induce_subgraph(self, *nodes, translator=False):
+	def induce_subgraph(self, *nodes):
 		"""Returns a new graph composed of only the specified nodes and their mutual edges.
 
 		Usage:
@@ -879,11 +920,9 @@ class Graph(object):
 					end = node_translator[edge.end]
 					# copies edge data
 					g.add_edge(start, end, **node.data)
-		if translator:
-			return g, node_translator
 		return g
 
-	def edge_induce_subgraph(self, *edges, translator=False):
+	def edge_induce_subgraph(self, *edges):
 		"""Similar to induce_subgraph but accepting edges rather than nodes."""
 		# create the new graph
 		g = type(self)()
@@ -899,9 +938,6 @@ class Graph(object):
 		for edge in edges:
 			# and add them, translating nodes as we go
 			g.add_edge(nodes[edge.start], nodes[edge.end], **edge.data)
-		# handle the translator argument
-		if translator:
-			return g, nodes
 		return g
 			
 	#########################################################################
@@ -1024,19 +1060,3 @@ class Graph(object):
 			end = translator[attributes.pop("end")]
 			g.add_edge(start, end, **attributes)
 		return g
-
-	def equivalent(self, other, node_equivalence=None, edge_equivalence=None):
-		"""Determines if this graph and the other are equivalent under the given definitions."""
-		pass
-
-	def isomorphic(self, other, bijection):
-		"""Determines if this graph and the other are isomorphic under the given bijection."""
-		pass
-
-	def is_supergraph(self, other):
-		"""Determines if this graph is a supergraph of the other."""
-		pass
-
-	def is_subgraph(self, other):
-		"""Determines if this graph is a subgraph of the other."""
-		pass
