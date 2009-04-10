@@ -15,7 +15,7 @@ easy-to-extend Graph library.
 
 Graphs generated using this representation can have 
 directed or undirected edges, the ability to represent 
-loops and parallel edges, and can attach arbitrary data 
+loops and parallel edges, and can attach any hashable data 
 to nodes and edges.
 
 Interface summary
@@ -261,10 +261,10 @@ Four basic operations are provided for the comparison
 of graphs: 
 
 	1. union (|), which creates a new graph containing all
-	   the nodes and edges of its parents,
+	   the nodes and edges in either of its parents,
 
 	2. intersection (&), which creates a new graph containing
-	   all the nodes and edges not in both
+	   all the nodes and edges in both of its parents,
 
 	3. difference (-), which creates a new graph containing
 	   all the nodes and edges in the first parent but
@@ -274,6 +274,8 @@ of graphs:
 	   data-unique nodes from both parent graphs plus all 
 	   their structurally and data unique edges.
 
+For more information on the usage of these functions, consult their
+individual docstrings.
 """
 
 # Copyright (C) 2009 Geremy Condra
@@ -301,7 +303,7 @@ import copy
 class GraphElement:
 	"""Base class for Nodes and Edges.
 
-	A GraphEdge.data property is provided to give easier
+	A GraphElement.data property is provided to give easier
 	access to all of the element's non-structural member
 	variables. It returns a dictionary.
 
@@ -331,7 +333,7 @@ class GraphElement:
 		As with the data attribute, this does not include data values which
 		are prefixed with an underscore.
 		"""
-		return hash(frozenset((k,v) for k, v in self.data.items()))
+		return frozenset((k,v) for k, v in self.data.items())
 
 
 class Node(GraphElement):
@@ -340,7 +342,7 @@ class Node(GraphElement):
 	Nodes have two properties, incoming and outgoing, which are
 	tuples of the edges which are incident to the node.
 
-	Nodes also have the flatten function, which provides a view
+	Nodes also have the key function, which provides a data view
 	of the node suitable for comparison with nodes from other graphs.
 
 	They also inheirit the data property, which provides dictionary
@@ -408,9 +410,9 @@ class Edge(GraphElement):
 	Edges have two properties, start and end, which are
 	Node objects incident to the edge.
 
-	Edges also provide the flatten function, which gives
-	a view of the edge suitable for comparison to edges in
-	other graphs. 
+	Edges also provide the key function, which gives a 
+	view of the edge suitable for data-centric comparison
+	with other nodes. 
 
 	They also inhierit the data property, which provides
 	dictionary access to all the non-private portions of
@@ -465,30 +467,12 @@ class Graph:
 
 	"""A basic graph class, and base for all Graph mixins.
 
-	Details
-	=======
+	In graph theoretic terms, this represents a bridge multigraph.
+	This means that it supports both directed and undirected edges,
+	loops, parallel and identical edges, and identical nodes.
 
-	In graph theoretic terms, this represents a directed multigraph.
-
-	Graph is designed to have a simple, easy-to-use, easy-to-extend
-	architecture, which allows for easy and intuitive graph construction
-	and traversal.
-
-	Internally, nodes and edges are maintained in lists, each element of
-	which is of the type specified by Graph.Node or Graph.Edge, as
-	appropriate. Both types should have the property "data", which
-	should return a dictionary represenation of its optional attributes,
-	while nodes should provide "incoming" and "outgoing" properties, as
-	well as writable private properties by the names "_incoming" and 
-	"_outgoing". Edges should provide similarly conventioned "start"
-	and "end" properties.
-
-	Todo
-	====
-
-	- Add graph analysis tools
-		- all_pairs_shortest_paths
-		- minimum_spanning_tree	
+	Because of its generality, it is suitable as a general-purpose
+	Graph representation.
 	"""
 
 	Node = Node
@@ -686,14 +670,35 @@ class Graph:
 		return n1_edges & n2_edges
 
 	def walk_nodes(self):
-		"""Provides a generator for application-defined walks."""
+		"""Provides a generator for application-defined walks.
+
+		Usage:
+			>>> g = Graph()
+			>>> n1 = g.add_node()
+			>>> n2 = g.add_node()
+			>>> e1 = g.add_edge(n1, n2)
+			>>> w = g.walk_nodes()
+			>>> w.next()
+			>>> candidates = w.send(n1)
+			>>> candidates
+			{Node()}
+			>>> w.send(candidates.pop())
+			set()
+			>>> w.send(None)
+			...
+			StopIteration
+		"""
 		next = (yield)
 		while next:
 			adjacent = {edge.other_end(next) for edge in next.outgoing}
 			next = (yield adjacent)
 
 	def walk_edges(self):
-		"""Provides a generator for application-defined walks."""
+		"""Provides a generator for application-defined walks.
+
+		Usage is identical to walk_nodes, excepting only that it accepts,
+		and yields, Edges in the place of Nodes.
+		"""
 		next = (yield)
 		while next:
 			incident = set(next.other_end(next.start).outgoing)
@@ -904,7 +909,10 @@ class Graph:
 	#########################################################################
 
 	def move_edge(self, edge, start=None, end=None):
-		"""Moves the edge, leaving its data intact."""
+		"""Moves the edge, leaving its data intact.
+
+		Does not reverse direction.
+		"""
 		if edge.is_directed:
 			edge.start._outgoing.remove(edge)
 			edge.end._incoming.remove(edge)
@@ -922,10 +930,10 @@ class Graph:
 		return edge
 
 	def contract_edge(self, edge, node_data):
-		"""Contracts the given edge, calling node_data on its endpoints.
+		"""Contracts the given edge, merging its endpoints.
 
-		node_data should return a dictionary that will be used to initialize
-		the new node.
+		node_data should be a callable that returns a dictionary.
+		That dictionary will be used to initialize the new node.
 		"""
 		# check to make sure that the given edge is the only edge between
 		# it endpoints
@@ -1023,7 +1031,15 @@ class Graph:
 	#########################################################################
 
 	def get_equivalent_elements(self, other):
-		"""Returns a dictionary of element -> equivalentce set mappings."""
+		"""Returns a dictionary of element -> equivalentce set mappings.
+
+		Usage:
+			>>> g1 = Graph()
+			>>> g2 = Graph()
+			>>> g1.add_node(name="Geremy")
+			>>> g2.add_node(name="Geremy")
+			>>> 
+		"""
 		equivalent_nodes = {}
 		equivalent_edges = {}
 		for element in self.nodes:
@@ -1042,7 +1058,15 @@ class Graph:
 		return equivalent_nodes, equivalent_edges
 
 	def union(self, other):
-		"""Returns a new graph with all nodes and edges in either of its parents."""
+		"""Returns a new graph with all nodes and edges in either of its parents.
+
+		Usage:
+			>>> g1 = Graph()
+			>>> g2 = Graph()
+			>>> g1.add_node(value=1)
+			>>> g1.add_node(value=2)
+			>>> g1.add_node(value=3)
+		"""
 		# create the graph
 		g = type(self)()
 		# add all of our nodes and edges
@@ -1059,13 +1083,7 @@ class Graph:
 	def intersection(self, other):
 		"""Returns a graph containing only the nodes and edges in both of its parents.
 
-		Because nodes and edges have no general meaning external to the graph in which
-		they reside, this operation tests data equivalence for nodes and data and
-		structural equivalence for edges. The net result of that is that this operation
-		produces a graph containing all of the edges from this graph which have a
-		structural equivalent in the other graph, and all the endpoints required for
-		those edges to exist. It then tests all nodes without edges from this graph to
-		ensure that the zero edge case is caught.
+		Note that both endpooints must exist in the new graph for an edge to exist.
 		"""
 		# create the graph
 		g = type(self)()
