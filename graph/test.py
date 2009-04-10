@@ -190,24 +190,30 @@ class GraphSearchTest(unittest.TestCase):
 		l = list(self.g.search_edges(start=self.n2))
 		self.failUnlessEqual(l, [self.e2])
 
+class EdgeMovementTest(unittest.TestCase):
+
+	def setUp(self):
+		self.g = Graph()
+		self.geremy = self.g.add_node(name="Geremy")
+		self.bill = self.g.add_node(name="Bill")
+		self.bob = self.g.add_node(name="Bob")
+		self.tom = self.g.add_node(name="Tom")
+		self.e = self.g.add_edge(self.geremy, self.bob, name="people")
+
+	def testEdgeMoving(self):
+		e2 = self.g.move_edge(self.e, start=self.bill, end=self.tom)
+		self.failUnless(self.e is e2)
+		self.failUnlessEqual(self.e, e2)
+		self.failUnlessEqual(e2.name, "people")
+		self.failUnlessEqual(e2.start, self.bill)
+		self.failUnlessEqual(e2.end, self.tom)
+
 class GraphCorrectnessTest(unittest.TestCase):
 
 	def setUp(self):
 		self.g = Graph()
 
-	def testEdgeMoving(self):
-		g = self.g
-		geremy = g.add_node(name="Geremy")
-		bill = g.add_node(name="Bill")
-		bob = g.add_node(name="Bob")
-		tom = g.add_node(name="Tom")
-		e = g.add_edge(geremy, bob, name="people")
-		e2 = g.move_edge(e, start=bill, end=tom)
-		self.failUnless(e is e2)
-		self.failUnlessEqual(e, e2)
-		self.failUnlessEqual(e2.name, "people")
-		self.failUnlessEqual(e2.start, bill)
-		self.failUnlessEqual(e2.end, tom)
+
 
 	def testNodeGetting(self):
 		g = self.g
@@ -662,5 +668,6 @@ if __name__ == "__main__":
 	GraphSearchTest = unittest.TestLoader().loadTestsFromTestCase(GraphSearchTest)
 	NodeCreationTest = unittest.TestLoader().loadTestsFromTestCase(NodeCreationTest)
 	EdgeCreationTest = unittest.TestLoader().loadTestsFromTestCase(EdgeCreationTest)
-	CorrectnessTest = unittest.TestSuite([GraphCorrectnessTest, NodeCreationTest, EdgeCreationTest, GraphPropertiesTest, GraphSearchTest])
+	EdgeMovementTest = unittest.TestLoader().loadTestsFromTestCase(EdgeMovementTest)
+	CorrectnessTest = unittest.TestSuite([GraphCorrectnessTest, NodeCreationTest, EdgeCreationTest, GraphPropertiesTest, GraphSearchTest, EdgeMovementTest])
 	unittest.main()
