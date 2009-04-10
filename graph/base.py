@@ -791,18 +791,30 @@ class Graph:
 		connected = [set()]
 		# iterate over the nodes
 		for node in self.nodes:
+			# get all the nodes that are reachable from this node
 			discovered = set(self.depth_first_traversal(node))
 			add_this = True
 			for component in connected:
+				# if the newly discovered component is part of
+				# an existing component
 				if discovered.issubset(component):
+					# don't add it
 					add_this = False
 					break
+				# if the existing component is a part of the
+				# newly discovered component
 				elif discovered.issuperset(component):
+					# don't add it
 					add_this = False
+					# but replace the old component with
+					# the new one
 					connected.remove(component)
 					connected.append(discovered)
 					continue
+			# if this component was not a part of an existing
+			# component or vice versa...
 			if add_this:
+				# add it to the components list
 				connected.append(discovered)
 		return connected
 
