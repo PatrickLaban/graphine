@@ -1122,7 +1122,7 @@ class Graph:
 	def intersection(self, other):
 		"""Returns a graph containing only the nodes and edges in both of its parents.
 
-		Note that both endpooints must exist in the new graph for an edge to exist.
+		Note that both endpoints must exist in the new graph for an edge to exist.
 
 		Usage:
 			>>> g1 = Graph()
