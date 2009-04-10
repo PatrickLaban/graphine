@@ -1063,9 +1063,21 @@ class Graph:
 		Usage:
 			>>> g1 = Graph()
 			>>> g2 = Graph()
-			>>> g1.add_node(value=1)
-			>>> g1.add_node(value=2)
-			>>> g1.add_node(value=3)
+			>>> a = g1.add_node(value=1)
+			>>> b = g1.add_node(value=3)
+			>>> c = g1.add_node(value=5)
+			>>> ab = g1.add_edge(a, b, value=2)
+			>>> bc = g1.add_edge(b, c, value=4)
+			>>> d = g2.add_node(value=3)
+			>>> e = g2.add_node(value=5)
+			>>> f = g2.add_node(value=7)
+			>>> de = g2.add_edge(d, e, value=4)
+			>>> ef = g2.add_edge(e, f, value=6)
+			>>> g3 = g1 | g2
+			>>> [node.value for node in g3.nodes]
+			[1, 3, 5, 3, 5, 7]
+			>>> [edge.value for edge in g3.edges]
+			[2, 4, 4, 6]
 		"""
 		# create the graph
 		g = type(self)()
@@ -1084,6 +1096,25 @@ class Graph:
 		"""Returns a graph containing only the nodes and edges in both of its parents.
 
 		Note that both endpooints must exist in the new graph for an edge to exist.
+
+		Usage:
+			>>> g1 = Graph()
+			>>> g2 = Graph()
+			>>> a = g1.add_node(value=1)
+			>>> b = g1.add_node(value=3)
+			>>> c = g1.add_node(value=5)
+			>>> ab = g1.add_edge(a, b, value=2)
+			>>> bc = g1.add_edge(b, c, value=4)
+			>>> d = g2.add_node(value=3)
+			>>> e = g2.add_node(value=5)
+			>>> f = g2.add_node(value=7)
+			>>> de = g2.add_edge(d, e, value=4)
+			>>> ef = g2.add_edge(e, f, value=6)
+			>>> g3 = g1 & g2
+			>>> [node.value for node in g3.nodes]
+			[3, 5]
+			>>> [edge.value for edge in g3.edges]
+			[4]
 		"""
 		# create the graph
 		g = type(self)()
@@ -1106,7 +1137,27 @@ class Graph:
 		return g
 	
 	def difference(self, other):
-		"""Return a graph composed of the nodes and edges not in the other."""
+		"""Return a graph composed of the nodes and edges not in the other.
+
+		Usage:
+			>>> g1 = Graph()
+			>>> g2 = Graph()
+			>>> a = g1.add_node(value=1)
+			>>> b = g1.add_node(value=3)
+			>>> c = g1.add_node(value=5)
+			>>> ab = g1.add_edge(a, b, value=2)
+			>>> bc = g1.add_edge(b, c, value=4)
+			>>> d = g2.add_node(value=3)
+			>>> e = g2.add_node(value=5)
+			>>> f = g2.add_node(value=7)
+			>>> de = g2.add_edge(d, e, value=4)
+			>>> ef = g2.add_edge(e, f, value=6)
+			>>> g3 = g1 & g2
+			>>> [node.value for node in g3.nodes]
+			[1]
+			>>> [edge.value for edge in g3.edges]
+			[]
+		"""
 		# create the graph
 		g = type(self)()
 		# get the equivalent elements
@@ -1128,7 +1179,27 @@ class Graph:
 		return g
 
 	def merge(self, other):
-		"""Returns a new graph with its nodes and edges merged by data equality."""
+		"""Returns a new graph with its nodes and edges merged by data equality.
+
+		Usage:
+			>>> g1 = Graph()
+			>>> g2 = Graph()
+			>>> a = g1.add_node(value=1)
+			>>> b = g1.add_node(value=3)
+			>>> c = g1.add_node(value=5)
+			>>> ab = g1.add_edge(a, b, value=2)
+			>>> bc = g1.add_edge(b, c, value=4)
+			>>> d = g2.add_node(value=3)
+			>>> e = g2.add_node(value=5)
+			>>> f = g2.add_node(value=7)
+			>>> de = g2.add_edge(d, e, value=4)
+			>>> ef = g2.add_edge(e, f, value=6)
+			>>> g3 = g1 | g2
+			>>> [node.value for node in g3.nodes]
+			[1, 3, 5, 7]
+			>>> [edge.value for edge in g3.edges]
+			[2, 4, 6]
+		"""
 		# create the new graph
 		g = type(self)()
 		# create the translation table
