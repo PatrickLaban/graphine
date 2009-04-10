@@ -785,7 +785,7 @@ class Graph:
 			>>> n3 = g.add_node(group=2)
 			>>> e1 = g.add_edge(n1, n2)
 			>>> g.get_connected_components()
-			[{Node(group=1), Node(group=1)}, {Node(group=2}]
+			[{Node(group=1), Node(group=1)}, {Node(group=2)}]
 		"""
 		# set of all connected components
 		connected = [set()]
