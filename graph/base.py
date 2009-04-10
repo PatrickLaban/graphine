@@ -763,7 +763,7 @@ class Graph:
 			>>> c, d = g.add_node(name="C"), g.add_node(name="D")
 			>>> e1, e2 = g.add_edge(a, b), g.add_edge(a, c)
 			>>> e3, e4 = g.add_edge(b, d), g.add_edge(c, d)
-			>>> for node in g.depth_first_traversal(a):
+			>>> for node in g.breadth_first_traversal(a):
 			>>> 	print(node)
 			Node(name="A")
 			Node(name="B")

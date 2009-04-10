@@ -213,8 +213,6 @@ class GraphCorrectnessTest(unittest.TestCase):
 	def setUp(self):
 		self.g = Graph()
 
-
-
 	def testNodeGetting(self):
 		g = self.g
 
