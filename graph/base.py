@@ -849,7 +849,7 @@ class Graph:
 		The optional get_weight argument should be a callable that
 		accepts an edge and returns its weight.
 
-		Returns a dictionary of node -> (path_length, [nodes_traversed])
+		Returns a dictionary of node -> (path_length, [edges_traversed])
 		mappings.
 
 		Usage:
@@ -862,8 +862,15 @@ class Graph:
 			>>> e2 = g.add_edge(n1, n4, weight=1)
 			>>> e3 = g.add_edge(n2, n3, weight=1)
 			>>> e4 = g.add_edge(n3, n4, weight=1)
-			>>> g.get_shortest_paths(n1, get_weight=lambda e: e.weight)[n4]
-			(1, [Node(name="D")])
+			>>> d = g.get_shortest_paths(n1, get_weight=lambda e: e.weight)
+			>>> d[n1]
+			(0, [])
+			>>> d[n2]
+			(10, [Edge(weight=10)])
+			>>> d[n3]
+			(11, [Edge(weight=10), Edge(weight=1)])
+			>>> d[n4]
+			(1, [Edge(weight=1)])
 		"""
 		# create the paths table
 		paths = defaultdict(lambda: (float("inf"), []))
