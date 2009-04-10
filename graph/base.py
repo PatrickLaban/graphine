@@ -825,12 +825,18 @@ class Graph:
 
 		Usage is identical to get_connected_components.
 		"""
+		# list of all SCCs
 		strongly_connected_components = []
+		# iterate over all connected components
 		for c in self.get_connected_components():
+			# get an arbitrary node
 			arbitrary = c.pop()
+			# get all the nodes visitable from there
 			visited = [node for node in self.depth_first_traversal(arbitrary)]
+			# reverse the direction of the edges in the graph
 			self.transpose()
 			current_component = set()
+			# while there are still elements which aren't reachable
 			while visited:
 				current_component = set()
 				for node in self.depth_first_traversal(visited.pop(0)):
@@ -1050,14 +1056,16 @@ class Graph:
 	#########################################################################
 
 	def get_equivalent_elements(self, other):
-		"""Returns a dictionary of element -> equivalentce set mappings.
+		"""Returns a dictionary of element -> {equivalence set} mappings.
 
 		Usage:
 			>>> g1 = Graph()
 			>>> g2 = Graph()
-			>>> g1.add_node(name="Geremy")
-			>>> g2.add_node(name="Geremy")
-			>>> 
+			>>> n1 = g1.add_node(name="Geremy")
+			>>> n2 = g2.add_node(name="Geremy")
+			>>> d = g1.get_equivalent_elements(g2)
+			>>> d[n1]
+			{Node(name="Geremy")}
 		"""
 		equivalent_nodes = {}
 		equivalent_edges = {}
