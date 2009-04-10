@@ -31,6 +31,7 @@ To add nodes:
 	>>> node_1 = g.add_node(name="bob")
 	>>> node_2 = g.add_node(weight=5)
 	>>> node_3 = g.add_node(color="red", visited=False)
+	>>> node_4 = g.add_node()
 
 To add edges:
 
@@ -46,7 +47,7 @@ keyword argument, which, when set to False, will cause the edge
 created to be bidirectional. Its default value is True, ie,
 edges are by default directed.
 
-	>>> edge_4 = g.add_edge(node_1, node_3, is_directed=False)
+	>>> edge_4 = g.add_edge(node_1, node_4, is_directed=False)
 	
 To remove nodes:
 
@@ -424,7 +425,11 @@ class Edge(GraphElement):
 			setattr(self, k, v)
 
 	def other_end(self, starting_point):
-		"""Returns the other end of the edge from the given point."""
+		"""Returns the other end of the edge from the given point.
+
+		If the point given is not an endpoint on this edge or the 
+		endpoint on a directed edge, this raises AttributeError.
+		"""
 		if starting_point is self.start:
 			return self.end
 		elif not self.is_directed:
