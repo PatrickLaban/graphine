@@ -317,6 +317,10 @@ class GraphElement:
 		attrs = ''.join(("%s=%s, " % (k, v) for k, v in self.data.items()))[:-2]
 		return "%s(%s)" % (classname, attrs)
 
+	def __lt__(self, other):
+		"""Arbitrary comparison for sorting."""
+		return id(self) < id(other)
+
 	@property
 	def data(self):
 		"""Returns a dictionary representing the data values of this element.
