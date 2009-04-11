@@ -349,7 +349,7 @@ class Node(GraphElement):
 	Nodes also have the key function, which provides a data view
 	of the node suitable for comparison with nodes from other graphs.
 
-	They also inheirit the data property, which provides dictionary
+	They also inherit the data property, which provides dictionary
 	access to all the non-private portions of the node.
 	"""
 
@@ -418,7 +418,7 @@ class Edge(GraphElement):
 	view of the edge suitable for data-centric comparison
 	with other nodes. 
 
-	They also inhierit the data property, which provides
+	They also inherit the data property, which provides
 	dictionary access to all the non-private portions of
 	the edge.
 	"""
@@ -667,7 +667,6 @@ class Graph:
 			>>> e = g.add_edge(n1, n2, name="fluffy")
 			>>> g.get_common_edges(n1, n2)
 			{Edge(name="Fluffy")}
-			>>> 
 		"""
 		n1_edges = set(n1.incoming + n1.outgoing)
 		n2_edges = set(n2.incoming + n2.outgoing)
