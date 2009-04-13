@@ -34,9 +34,8 @@ def build_maze():
 			# connect them
 			maze.add_edge(node_1, node_2, is_directed=False)
 			# then merge the components
-			nodes.remove(component_1)
+			component_1.extend(component_2)
 			nodes.remove(component_2)
-			nodes.append(component_1 + component_2)
 	# finally, make sure that the start and end points have doors.
 	maze.add_edge(p1_start, random.choice(maze.nodes), is_directed=False)
 	maze.add_edge(p2_start, random.choice(maze.nodes), is_directed=False)
@@ -45,21 +44,13 @@ def build_maze():
 
 def ai_path(start, maze):
 	# selector is the selection heuristic that the AI will use
-	# to decide what door to go through next
 	def selector(candidates):
-		# the current best candidate
 		best = (0, -1, None)
-		# for each possible room...
 		for pos, room in enumerate(candidates):
-			# select this one if its the end
-			if room.name == "END":
-				best = (0, pos, room)
-				break
-			# otherwise, see if its the best door
+			if room.name == "END": return candidates.pop(pos)
 			num_doors = len(room.outgoing)
 			if num_doors > best[0]:
 				best = (num_doors, pos, room)
-		# now return the best room to go to
 		return candidates.pop(best[1])
 	# the total distance traveled
 	distance = 0
@@ -69,8 +60,7 @@ def ai_path(start, maze):
 		# take all the steps between dead ends
 		distance += maze.get_shortest_paths(previous)[node][0]
 		# and end if you're at the end
-		if node.name == "END":
-			return distance
+		if node.name == "END": return distance
 		previous = node
 
 def player_select(options):
@@ -100,15 +90,11 @@ def handle_player(start, maze, max_length):
 		next = w.send(selection)
 	# otherwise, lose
 	print("You lose!")
-	return
 
 if __name__ == "__main__":
-	
 	# build the maze
 	p1_start, p2_start, maze = build_maze()
-
 	# run the simulation for the AI
 	path_to_beat = ai_path(p1_start, maze)
-
 	# get the player's moves
 	handle_player(p2_start, maze, path_to_beat)
