@@ -295,6 +295,54 @@ class TraversalTest(unittest.TestCase):
 		self.failUnless(max(positions["B"], positions["C"], positions["E"]) < min(positions["D"], positions["F"], positions["G"]))
 
 
+class InductionTest(unittest.TestCase):
+
+	def setUp(self):
+		g = Graph()
+		kirk = g.add_node(name="kirk")
+		spock = g.add_node(name="spock")
+		bones = g.add_node(name="bones")
+		uhura = g.add_node(name="uhura")
+		self.e1 = g.add_edge(kirk, spock)
+		self.e2 = g.add_edge(kirk, bones)
+		self.e3 = g.add_edge(kirk, uhura)
+		self.e4 = g.add_edge(uhura, spock)
+		self.e5 = g.add_edge(uhura, bones)
+		self.g = g
+		self.kirk = kirk
+		self.spock = spock
+		self.bones = bones
+		self.uhura = uhura
+
+	def testNodeInduction(self):
+		g = self.g
+		kirk = self.kirk
+		spock = self.spock
+		bones = self.bones
+		uhura = self.uhura
+		new_mission = g.induce_subgraph(spock, bones, uhura)
+		self.failUnlessEqual([node.name for node in new_mission.nodes], ["spock", "bones", "uhura"])
+		spock = new_mission.nodes[0]
+		bones = new_mission.nodes[1]
+		uhura = new_mission.nodes[2]
+		self.failUnlessEqual(uhura.outgoing[0].end.name, "spock")
+		self.failUnlessEqual(uhura.outgoing[1].end.name, "bones")
+
+	def testEdgeInduction(self):
+		g = self.g
+		kirk = self.kirk
+		spock = self.spock
+		bones = self.bones
+		uhura = self.uhura
+		new_mission = g.edge_induce_subgraph(self.e4, self.e5)
+		self.failUnlessEqual({node.name for node in new_mission.nodes}, {"spock", "bones", "uhura"})
+		spock = set(new_mission.search_nodes(name="spock")).pop()
+		bones = set(new_mission.search_nodes(name="bones")).pop()
+		uhura = set(new_mission.search_nodes(name="uhura")).pop()
+		self.failUnlessEqual(uhura.outgoing[0].end.name, "spock")
+		self.failUnlessEqual(uhura.outgoing[1].end.name, "bones")
+
+
 class GraphCorrectnessTest(unittest.TestCase):
 
 	def setUp(self):
@@ -348,48 +396,6 @@ class GraphCorrectnessTest(unittest.TestCase):
 		# test the graph's properties
 		self.failUnlessEqual(g.order(), 5)
 		self.failUnlessEqual(g.size(), 12)
-
-	def testInduceSubgraph(self):
-		# setup
-		g = self.g
-		kirk = g.add_node(name="kirk")
-		spock = g.add_node(name="spock")
-		bones = g.add_node(name="bones")
-		uhura = g.add_node(name="uhura")
-		e1 = g.add_edge(kirk, spock)
-		e2 = g.add_edge(kirk, bones)
-		e3 = g.add_edge(kirk, uhura)
-		e4 = g.add_edge(uhura, spock)
-		e5 = g.add_edge(uhura, bones)
-		
-		new_mission = g.induce_subgraph(spock, bones, uhura)
-		self.failUnlessEqual([node.name for node in new_mission.nodes], ["spock", "bones", "uhura"])
-		spock = new_mission.nodes[0]
-		bones = new_mission.nodes[1]
-		uhura = new_mission.nodes[2]
-		self.failUnlessEqual(uhura.outgoing[0].end.name, "spock")
-		self.failUnlessEqual(uhura.outgoing[1].end.name, "bones")
-
-	def testEdgeInduceSubgraph(self):
-		# setup
-		g = self.g
-		kirk = g.add_node(name="kirk")
-		spock = g.add_node(name="spock")
-		bones = g.add_node(name="bones")
-		uhura = g.add_node(name="uhura")
-		e1 = g.add_edge(kirk, spock)
-		e2 = g.add_edge(kirk, bones)
-		e3 = g.add_edge(kirk, uhura)
-		e4 = g.add_edge(uhura, spock)
-		e5 = g.add_edge(uhura, bones)
-		
-		new_mission = g.edge_induce_subgraph(e4, e5)
-		self.failUnlessEqual({node.name for node in new_mission.nodes}, {"spock", "bones", "uhura"})
-		spock = set(new_mission.search_nodes(name="spock")).pop()
-		bones = set(new_mission.search_nodes(name="bones")).pop()
-		uhura = set(new_mission.search_nodes(name="uhura")).pop()
-		self.failUnlessEqual(uhura.outgoing[0].end.name, "spock")
-		self.failUnlessEqual(uhura.outgoing[1].end.name, "bones")
 
 	def testUnion(self):
 		evens = Graph()
@@ -653,6 +659,7 @@ if __name__ == "__main__":
 	EdgeMovementTest = unittest.TestLoader().loadTestsFromTestCase(EdgeMovementTest)
 	GetElementsTest = unittest.TestLoader().loadTestsFromTestCase(GetElementsTest)
 	TraversalTest = unittest.TestLoader().loadTestsFromTestCase(TraversalTest)
-	suites = [GraphCorrectnessTest, NodeCreationTest, EdgeCreationTest, GraphPropertiesTest, GraphSearchTest, EdgeMovementTest, GetElementsTest, TraversalTest]
+	InductionTest = unittest.TestLoader().loadTestsFromTestCase(InductionTest)
+	suites = [GraphCorrectnessTest, NodeCreationTest, EdgeCreationTest, GraphPropertiesTest, GraphSearchTest, EdgeMovementTest, GetElementsTest, TraversalTest, InductionTest]
 	CorrectnessTest = unittest.TestSuite(suites)
 	unittest.main()
