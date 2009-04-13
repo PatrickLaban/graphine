@@ -208,29 +208,34 @@ class EdgeMovementTest(unittest.TestCase):
 		self.failUnlessEqual(e2.start, self.bill)
 		self.failUnlessEqual(e2.end, self.tom)
 
+class GetNodesTest(unittest.TestCase):
+
+	def setUp(self):
+		self.g = Graph()
+
+		# make some nodes
+		self.jimmy = self.g.add_node(city="New York")
+		self.ted = self.g.add_node(city="Atlanta")
+		self.dan = self.g.add_node(city="Seattle")
+		self.paul = self.g.add_node(city="Austin")
+
+		# try not to error out
+		self.j_to_t = self.g.add_edge(self.jimmy, self.ted, distance=850)
+		self.t_to_d = self.g.add_edge(self.ted, self.dan, distance=2150)
+		self.d_to_p = self.g.add_edge(self.dan, self.paul, distance=2850)
+
+	def testNodeGetting(self):
+		# test for equivalence
+		self.failUnless(all(node in [self.jimmy, self.ted, self.dan, self.paul] for node in self.g.nodes))
+		self.failUnless(all(node in self.g.nodes for node in [self.jimmy, self.ted, self.dan, self.paul]))
+		self.failUnlessEqual([n for n in self.g.search_nodes(city="New York")], [self.jimmy])
+
+
 class GraphCorrectnessTest(unittest.TestCase):
 
 	def setUp(self):
 		self.g = Graph()
 
-	def testNodeGetting(self):
-		g = self.g
-
-		# make some nodes
-		jimmy = g.add_node(city="New York")
-		ted = g.add_node(city="Atlanta")
-		dan = g.add_node(city="Seattle")
-		paul = g.add_node(city="Austin")
-
-		# try not to error out
-		j_to_t = g.add_edge(jimmy, ted, distance=850)
-		t_to_d = g.add_edge(ted, dan, distance=2150)
-		d_to_p = g.add_edge(dan, paul, distance=2850)
-
-		# test for equivalence
-		self.failUnless(all(node in [jimmy, ted, dan, paul] for node in g.nodes))
-		self.failUnless(all(node in g.nodes for node in [jimmy, ted, dan, paul]))
-		self.failUnlessEqual([n for n in g.search_nodes(city="New York")], [jimmy])
 
 	def testEdgeGetting(self):
 		g = self.g
@@ -667,5 +672,6 @@ if __name__ == "__main__":
 	NodeCreationTest = unittest.TestLoader().loadTestsFromTestCase(NodeCreationTest)
 	EdgeCreationTest = unittest.TestLoader().loadTestsFromTestCase(EdgeCreationTest)
 	EdgeMovementTest = unittest.TestLoader().loadTestsFromTestCase(EdgeMovementTest)
-	CorrectnessTest = unittest.TestSuite([GraphCorrectnessTest, NodeCreationTest, EdgeCreationTest, GraphPropertiesTest, GraphSearchTest, EdgeMovementTest])
+	GetNodesTest = unittest.TestLoader().loadTestsFromTestCase(GetNodesTest)
+	CorrectnessTest = unittest.TestSuite([GraphCorrectnessTest, NodeCreationTest, EdgeCreationTest, GraphPropertiesTest, GraphSearchTest, EdgeMovementTest, GetNodesTest])
 	unittest.main()

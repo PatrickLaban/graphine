@@ -29,16 +29,16 @@ def build_maze():
 		node_1 = random.choice(component_1)
 		node_2 = random.choice(component_2)
 		# and if they don't have too many doors...
-		if len(node_1.outgoing) <= NUM_DOORS and len(node_2.outgoing) <= NUM_DOORS:
+		if len(node_1.outgoing) < NUM_DOORS and len(node_2.outgoing) < NUM_DOORS:
 			# connect them
 			maze.add_edge(node_1, node_2, is_directed=False)
 			# then merge the components
 			component_1.extend(component_2)
 			nodes.remove(component_2)
 	# finally, make sure that the start and end points have doors.
-	maze.add_edge(p1_start, random.choice(maze.nodes), is_directed=False)
-	maze.add_edge(p2_start, random.choice(maze.nodes), is_directed=False)
-	maze.add_edge(end, random.choice(maze.nodes), is_directed=False)
+	if len(p1_start.outgoing) < NUM_DOORS: maze.add_edge(p1_start, random.choice(maze.nodes), is_directed=False)
+	if len(p2_start.outgoing) < NUM_DOORS: maze.add_edge(p2_start, random.choice(maze.nodes), is_directed=False)
+	if len(end.outgoing) < NUM_DOORS: maze.add_edge(end, random.choice(maze.nodes), is_directed=False)
 	return p1_start, p2_start, maze
 
 def ai_path(start, maze):
