@@ -6,6 +6,9 @@ import random
 
 from graph.base import Graph
 
+NUM_ROOMS = 25
+NUM_DOORS = 4
+
 def build_maze():
 	# create the maze
 	maze = Graph()
@@ -17,7 +20,7 @@ def build_maze():
 	# create a list of connected components
 	nodes = [[p1_start], [p2_start], [end]]
 	# add all the rooms, making each its own component
-	for i in range(25):
+	for i in range(NUM_ROOMS):
 		nodes.append([maze.add_node(name=i)])
 	# while some components are unconnected
 	while len(nodes) > 1:
@@ -27,7 +30,7 @@ def build_maze():
 		node_1 = random.choice(component_1)
 		node_2 = random.choice(component_2)
 		# and if they don't have too many doors...
-		if len(node_1.outgoing) < 5 and len(node_2.outgoing) < 5:
+		if len(node_1.outgoing) <= NUM_DOORS and len(node_2.outgoing) <= NUM_DOORS:
 			# connect them
 			maze.add_edge(node_1, node_2, is_directed=False)
 			# then merge the components
