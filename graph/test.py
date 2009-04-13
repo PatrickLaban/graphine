@@ -349,15 +349,21 @@ class GraphCorrectnessTest(unittest.TestCase):
 		self.g = Graph()
 
 	def testGetCommonEdges(self):
+		""" Testing common edges correctness """
 		g = self.g
 		n1 = g.add_node()
 		n2 = g.add_node()
 		n3 = g.add_node()
+		n4 = g.add_node()
 		e1 = g.add_edge(n1, n2)
 		e2 = g.add_edge(n2, n1)
 		e3 = g.add_edge(n1, n3)
 		e4 = g.add_edge(n2, n3)
+		e5 = g.add_edge(n4, n4)
+		e6 = g.add_edge(n4, n4)
 		self.failUnlessEqual(g.get_common_edges(n1, n2), {e1, e2})
+		self.failUnlessEqual(g.get_common_edges(n4, n4), {e5, e6})
+		self.failUnlessEqual(g.get_common_edges(n1, n1), {e1, e2, e3})
 
 	def testEdgeContraction(self):
 		g = self.g
@@ -651,6 +657,7 @@ class GraphPerformanceTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
+	"""
 	GraphCorrectnessTest = unittest.TestLoader().loadTestsFromTestCase(GraphCorrectnessTest)
 	GraphPropertiesTest = unittest.TestLoader().loadTestsFromTestCase(GraphPropertiesTest)
 	GraphSearchTest = unittest.TestLoader().loadTestsFromTestCase(GraphSearchTest)
@@ -662,4 +669,5 @@ if __name__ == "__main__":
 	InductionTest = unittest.TestLoader().loadTestsFromTestCase(InductionTest)
 	suites = [GraphCorrectnessTest, NodeCreationTest, EdgeCreationTest, GraphPropertiesTest, GraphSearchTest, EdgeMovementTest, GetElementsTest, TraversalTest, InductionTest]
 	CorrectnessTest = unittest.TestSuite(suites)
+	"""	
 	unittest.main()
