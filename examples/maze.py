@@ -1,7 +1,5 @@
 #! /usr/bin/env python3.0
 
-# maze.py
-
 import random
 
 from graph.base import Graph
@@ -36,9 +34,10 @@ def build_maze():
 			component_1.extend(component_2)
 			nodes.remove(component_2)
 	# finally, make sure that the start and end points have doors.
-	if len(p1_start.outgoing) < NUM_DOORS: maze.add_edge(p1_start, random.choice(maze.nodes), is_directed=False)
-	if len(p2_start.outgoing) < NUM_DOORS: maze.add_edge(p2_start, random.choice(maze.nodes), is_directed=False)
-	if len(end.outgoing) < NUM_DOORS: maze.add_edge(end, random.choice(maze.nodes), is_directed=False)
+	choices = random.sample(maze.nodes, 3)
+	if len(p1_start.outgoing) < NUM_DOORS: maze.add_edge(p1_start, choices[0], is_directed=False)
+	if len(p2_start.outgoing) < NUM_DOORS: maze.add_edge(p2_start, choices[1], is_directed=False)
+	if len(end.outgoing) < NUM_DOORS: maze.add_edge(end, choices[2], is_directed=False)
 	return p1_start, p2_start, maze
 
 def ai_path(start, maze):
