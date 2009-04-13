@@ -238,15 +238,10 @@ class GetElementsTest(unittest.TestCase):
 		self.failUnlessEqual([e for e in self.g.search_edges(distance=2850)], [self.d_to_p])
 
 
-class GraphCorrectnessTest(unittest.TestCase):
+class TraversalTest(unittest.TestCase):
 
 	def setUp(self):
-		self.g = Graph()
-
-
-	def testDepthFirstTraversal(self):
-		# setup
-		g = self.g
+		g = Graph()
 		nodes = {}
 		edges = []
 		nodes["A"] = g.add_node(name="A")
@@ -263,7 +258,14 @@ class GraphCorrectnessTest(unittest.TestCase):
 		edges += [g.add_edge(nodes["A"], nodes["C"])]
 		edges += [g.add_edge(nodes["C"], nodes["G"])]
 		edges += [g.add_edge(nodes["A"], nodes["E"])]
+		self.g = g
+		self.nodes = nodes
+		self.edges = edges
 
+	def testDepthFirstTraversal(self):
+		nodes = self.nodes
+		edges = self.edges
+		g = self.g
 		positions = {node.name:pos for pos, node in enumerate(g.depth_first_traversal(nodes["A"]))} 
 		self.failUnless(positions["A"] < positions["B"])
 		self.failUnless(positions["A"] < positions["C"])
@@ -272,8 +274,7 @@ class GraphCorrectnessTest(unittest.TestCase):
 		self.failUnless(positions["C"] < positions["G"])
 		self.failUnless(positions["F"] > min(positions["B"], positions["E"]))
 
-		# test for the equivalence problem
-		g = self.g
+		# test for equivalence problem
 		a = g.add_node(name="A")
 		b1 = g.add_node(name="B")
 		b2 = g.add_node(name="B")
@@ -286,28 +287,18 @@ class GraphCorrectnessTest(unittest.TestCase):
 		self.failUnlessEqual(set((node for node in g.depth_first_traversal(a))), {a, b1, b2, c, d})
 
 	def testBreadthFirstTraversal(self):
-		# setup
 		g = self.g
-		nodes = {}
-		edges = []
-		nodes["A"] = g.add_node(name="A")
-		nodes["B"] = g.add_node(name="B")
-		nodes["C"] = g.add_node(name="C")
-		nodes["D"] = g.add_node(name="D")
-		nodes["E"] = g.add_node(name="E")
-		nodes["F"] = g.add_node(name="F")
-		nodes["G"] = g.add_node(name="G")
-		edges += [g.add_edge(nodes["A"], nodes["B"])]
-		edges += [g.add_edge(nodes["B"], nodes["D"])]
-		edges += [g.add_edge(nodes["B"], nodes["F"])]
-		edges += [g.add_edge(nodes["F"], nodes["E"])]
-		edges += [g.add_edge(nodes["A"], nodes["C"])]
-		edges += [g.add_edge(nodes["C"], nodes["G"])]
-		edges += [g.add_edge(nodes["A"], nodes["E"])]
-
+		nodes = self.nodes
+		edges = self.edges
 		positions = {node.name:pos for pos, node in enumerate(g.breadth_first_traversal(nodes["A"]))}
 		self.failUnless(positions["A"] < min(positions["B"], positions["C"], positions["E"]))
 		self.failUnless(max(positions["B"], positions["C"], positions["E"]) < min(positions["D"], positions["F"], positions["G"]))
+
+
+class GraphCorrectnessTest(unittest.TestCase):
+
+	def setUp(self):
+		self.g = Graph()
 
 	def testGetCommonEdges(self):
 		g = self.g
@@ -661,5 +652,7 @@ if __name__ == "__main__":
 	EdgeCreationTest = unittest.TestLoader().loadTestsFromTestCase(EdgeCreationTest)
 	EdgeMovementTest = unittest.TestLoader().loadTestsFromTestCase(EdgeMovementTest)
 	GetElementsTest = unittest.TestLoader().loadTestsFromTestCase(GetElementsTest)
-	CorrectnessTest = unittest.TestSuite([GraphCorrectnessTest, NodeCreationTest, EdgeCreationTest, GraphPropertiesTest, GraphSearchTest, EdgeMovementTest, GetElementsTest])
+	TraversalTest = unittest.TestLoader().loadTestsFromTestCase(TraversalTest)
+	suites = [GraphCorrectnessTest, NodeCreationTest, EdgeCreationTest, GraphPropertiesTest, GraphSearchTest, EdgeMovementTest, GetElementsTest, TraversalTest]
+	CorrectnessTest = unittest.TestSuite(suites)
 	unittest.main()
