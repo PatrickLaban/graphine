@@ -10,12 +10,11 @@ NUM_ROOMS = 25
 NUM_DOORS = 4
 
 def build_maze():
-	# create the maze
+	"""Creates the maze."""
 	maze = Graph()
-	# add the player's starting positions
+	# add the player's starting positions and the end
 	p1_start = maze.add_node(name="p1_start")
 	p2_start = maze.add_node(name="p2_start")
-	# ...and the endpoint
 	end = maze.add_node(name="END")
 	# create a list of connected components
 	nodes = [[p1_start], [p2_start], [end]]
@@ -43,6 +42,7 @@ def build_maze():
 	return p1_start, p2_start, maze
 
 def ai_path(start, maze):
+	"""Defines the AI's heuristic and finds the path it will take."""
 	# selector is the selection heuristic that the AI will use
 	def selector(candidates):
 		best = (0, -1, None)
@@ -83,7 +83,6 @@ def handle_player(start, maze, max_length):
 		max_length -= 1
 		# go where the player tells you
 		selection = player_select(next)
-		# win if you're at the end spot before the AI
 		if selection.name == "END":
 			print("You win!")
 			return
