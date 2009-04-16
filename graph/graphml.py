@@ -357,11 +357,18 @@ class Writer:
 		return id
 
 
-def load(source):
+def load(filename):
+	"""Loads a graph from a GraphML file specified by filename."""
 	r = Reader()
-	parse(open(source), r)
+	parse(open(filename), r)
 	return r.current_graph
 
 def store(graph, filename, obj_extension=False):
+	"""Writes a graph to the file given by filename in GraphML.
+
+	The optional argument obj_extension indicates whether to use
+	the object extension, which stores arbitrary Python objects
+	via pickle if a Java type does not exist to handle it.
+	"""
 	w = Writer(filename, obj_extension=obj_extension)
 	w.handle_graph(graph)
