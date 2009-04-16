@@ -25,6 +25,11 @@ from xml.sax.handler import ContentHandler
 from xml.sax.saxutils import XMLGenerator
 from xml.sax import parse
 
+from pickle import loads, dumps
+
+from collections import defaultdict
+
+
 from graph.base import Graph
 
 class Reader(ContentHandler):
@@ -41,20 +46,19 @@ class Reader(ContentHandler):
 		"""Dispatches opening tags to the appropriate handler."""
 		try:
 			handler = getattr(self, "handle_%s_start" % name)
-			print("Handling %s" % name)
-			handler(attrs)
 		except AttributeError as error:
 			print(error)
 			print("Warning: ignoring unsupported tag %s" % name)
+		handler(attrs)
 
 	def endElement(self, name):
 		"""Dispatches closing tags to the appropriate handler."""
 		try:
 			handler = getattr(self, "handle_%s_end" % name)
-			handler()
 		except AttributeError as error:
 			print(error)
 			print("Warning: ignoring unsupported tag %s" % name)
+		handler()
 
 	def handle_graphml_start(self, attrs):
 		pass
@@ -162,7 +166,7 @@ class Reader(ContentHandler):
 		data_type = key["type"]
 		default_value = key.get("default", False)
 		data_value = data.get("default", default_value)
-		types = {"obj": eval, "string": str, "boolean": bool, "int": int, "float": float, "double": float, "long": float}
+		types = {"obj": loads, "string": str, "boolean": bool, "int": int, "float": float, "double": float, "long": float}
 		setattr(self.elements[-1], data_name, types[data_type](data_value))
 
 	def handle_default_start(self, attrs):
@@ -194,15 +198,146 @@ class Reader(ContentHandler):
 class Writer:
 	"""Generates a GraphML representation of a given graph."""
 
-	data = ""
+	def __init__(self, filename, obj_extension=False):
+		self.xml = XMLGenerator(open(filename, "w"), "utf-8")
+		self.ids = {}
+		self.node_keys = {}
+		self.edge_keys = {}
+		self.nodes = []
+		self.type_map = {"str": ("string", str), "float": ("float", str), "int": ("int", str), "bool": ("boolean", lambda b: "1" if b else "0")}
+		if obj_extension:
+			self.type_map = defaultdict(self.type_map, lambda s: ("obj", pickle.dumps))
 
-	def to_string(self, graph):
-		"""Converts the given graph into GraphML format."""
-		return self.data
+	def handle_graph(self, graph):
+		# start the document
+		self.xml.startDocument()
+		
+		# build attributes
+		attrs =  {"xmlns": "http://graphml.graphdrawing.org/xmlns", 
+			  "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance", 
+			  "xsi:schemaLocation": "http://graphml.graphdrawing.org/xmlns"}
 
-	def to_file(self, f):
-		"""Writes the data to a file."""
-		f.write(self.data)
+		# attach the graphml root element
+		attrs = self.xml.startElement("graphml", attrs)
+
+		# accumulates all unique node data as threeples of (name, type, "node")
+		node_data = set()
+		for node in graph.nodes:
+			for k, v in node.data.items():
+				# get the data type and conversion function
+				data_type, converter = self.type_map[str(type(v).__name__)]
+				data_threeple = (k, data_type, "node")
+				# add the threeple to node_data
+				node_data.add(data_threeple)
+
+		# accumulates all unique edge data as threeples of (name, type, "edge")
+		edge_data = set()
+		for edge in graph.edges:
+			for k, v in edge.data.items():
+				# get the data type and conversion function
+				data_type, converter = self.type_map[str(type(v).__name__)]
+				data_threeple = (k, data_type, "edge")
+				# add the threeple to edge_data
+				edge_data.add(data_threeple)
+
+		# process all threeples into keys and map their (name, type) to their id
+		for pos, threeple in enumerate(node_data):
+			self.node_keys[(threeple[0], threeple[1])] = self.handle_key(pos, *threeple)
+		for pos, threeple in enumerate(edge_data):
+			self.edge_keys[(threeple[0], threeple[1])] = self.handle_key(pos, *threeple)
+
+		print(self.node_keys)
+		print(self.edge_keys)
+
+		# attach the graph element, with edges directed by default
+		self.xml.startElement("graph", {"edgedefault": "directed"})
+
+		# for each node, attach it and record its id
+		for pos, node in enumerate(graph.nodes):
+			self.nodes.append((node, self.handle_node(pos, node)))
+
+		# for each edge, attach it and record its id
+		for pos, edge in enumerate(graph.edges):
+			self.handle_edge(pos, edge)
+
+		# close the graph element
+		self.xml.endElement("graph")
+		# close the graphml element
+		self.xml.endElement("graphml")
+		# close the document
+		self.xml.endDocument()
+
+	def handle_key(self, id, name, var_type, attaches_to):
+		# make the id unique to keys by prefixing "k"
+		id = "k" + str(id)
+		# build the attrs object
+		attrs = {"id": id, "for": attaches_to, "attr.name": name, "attr.type": var_type}
+		# attach the start tag
+		self.xml.startElement("key", attrs)
+		# attach the end tag
+		self.xml.endElement("key")
+		# return the id
+		return id
+
+	def handle_data(self, name, value, attaches_to):
+		# get the data's type
+		t = str(type(value).__name__)
+		# find the appropriate key
+		if attaches_to == "node": key = self.node_keys[(name, self.type_map[t][0])]
+		elif attaches_to == "edge": key = self.edge_keys[(name, self.type_map[t][0])]
+		# build the attrs object
+		attrs = {"key": key}
+		# place the data tag
+		self.xml.startElement("data", attrs)
+		# place the data
+		converter = self.type_map[t][1]
+		data = converter(value)
+		self.xml.characters(data)
+		# place the end tag
+		self.xml.endElement("data")
+
+	def handle_node(self, id, node):
+		# make the id unique to nodes by prefixing "n"
+		id = "n" + str(id)
+		# build the attrs object
+		attrs = {"id": id}
+		# attach the start tag
+		self.xml.startElement("node", attrs)
+		# for each attribute the node has
+		for k, v in node.data.items():
+			# write its data
+			self.handle_data(k, v, "node")
+		# close the tag
+		self.xml.endElement("node")
+		# return the id
+		return id
+
+	def handle_edge(self, id, edge):
+		# make the id unique to edges by prefixing "e"
+		id = "e" + str(id)
+		# find the start and end ids
+		start = None
+		end = None
+		for node, id in self.nodes:
+			if node == edge.start:
+				start = id
+			if node == edge.end:
+				end = id
+		# determine if it is directional
+		if edge.is_directed: directed="true"
+		else: directed="false"
+		# build the attrs object
+		attrs = {"id": id, "source": start, "target": end, "directed": directed}
+		# attach the start tag
+		self.xml.startElement("edge", attrs)
+		# for each attribute the edge has
+		for k, v in edge.data.items():
+			# write the data
+			self.handle_data(k, v, "edge")
+		# close the tag
+		self.xml.endElement("edge")
+		# return the id
+		return id
 
 
 def load(source):
@@ -210,5 +345,6 @@ def load(source):
 	parse(open(source), r)
 	return r.current_graph
 
-def store(graph, f):
-	raise NotImplementedError
+def store(graph, filename, obj_extension=False):
+	w = Writer(filename, obj_extension=obj_extension)
+	w.handle_graph(graph)
