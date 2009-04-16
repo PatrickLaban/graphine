@@ -3,7 +3,7 @@
 """
 test.py
 
-Written by Geremy Condra
+Written by Geremy Condra and Patrick Laban
 
 Licensed under GPLv3
 
@@ -12,7 +12,7 @@ Released 17 Feb 2009
 This contains all the test data for Graphine.
 """
 
-# Copyright (C) 2009 Geremy Condra and OpenMigration, LLC
+# Copyright (C) 2009 Geremy Condra and Patrick Laban
 #
 # This file is part of Graphine.
 # 
