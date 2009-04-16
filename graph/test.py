@@ -37,23 +37,15 @@ from base import Graph
 class NodeCreationTest(unittest.TestCase):
 
 	def setUp(self):
+		# WARNING: g = Graph() & g.add_node() MUST work to perform tests
 		self.g = Graph()
-		# try not to error out
 		self.jimmy = self.g.add_node(city="New York")
 		self.ted = self.g.add_node(city="Atlanta")
 		self.dan = self.g.add_node(city="Seattle")
 		self.paul = self.g.add_node(city="Austin")
 
-	def testEquality(self):
-		# test for equality between elements
-		snowflake = self.g.add_node(city="Austin")
-		self.failIfEqual(self.dan, snowflake)
-		self.failUnlessEqual(self.paul.data, snowflake.data)
-		self.failUnlessEqual(self.paul.key, snowflake.key)
-		self.failUnlessEqual(self.paul.city, snowflake.city)
-
 	def testData(self):
-		# make sure that the nodes are what we want them to be
+		""" test node.data against set values """
 		self.failUnlessEqual(self.jimmy.data, {"city":"New York"})
 		self.failUnlessEqual(self.ted.data, {"city":"Atlanta"})
 		self.failUnlessEqual(self.paul.data, {"city":"Austin"})
@@ -65,14 +57,25 @@ class NodeCreationTest(unittest.TestCase):
 		self.failUnlessEqual(self.dan.key, frozenset({("city", "Seattle")}))
 		self.failUnlessEqual(self.paul.key, frozenset({("city", "Austin")}))
 
+	def testEquality(self):
+		""" test for equality between nodes """
+		snowflake = self.g.add_node(city="Austin")
+		self.failIfEqual(self.dan, snowflake)
+		self.failUnlessEqual(self.paul.data, snowflake.data)
+		self.failUnlessEqual(self.paul.key, snowflake.key)
+		self.failUnlessEqual(self.paul.city, snowflake.city)
+
 	def testOrder(self):
-		# make sure that change is reflected in the graph's order
+		""" compare order to known number of nodes """
 		self.failUnlessEqual(self.g.order(), 4)
 		temp_node = self.g.add_node()
 		self.failUnlessEqual(self.g.order(), 5)
 		self.g.remove_node(temp_node)
 		self.failUnlessEqual(self.g.order(), 4)
 
+	def testCreationFail(self):
+		""" test node creation fail points """
+		self.assertRaises(TypeError, self.g.add_node())
 
 class EdgeCreationTest(unittest.TestCase):
 
@@ -353,7 +356,7 @@ class InductionTest(unittest.TestCase):
 		self.failUnlessEqual(uhura.outgoing[0].end.name, "spock")
 		self.failUnlessEqual(uhura.outgoing[1].end.name, "bones")
 
-
+"""
 class GraphFailureTest(unittest.TestCase):
     
 	def setUp(self):
@@ -361,8 +364,8 @@ class GraphFailureTest(unittest.TestCase):
         
 	def testUnhasableNodeData(self):
 		""" node.key should fail if unhashable """
-		self.assertRaises(TypeError, self.g.add_node(stuff={"a":4, "b":5}))
-
+		self.failUnlessRaises(self.g.TypeError, self.g.add_node(stuff="a"))
+"""
 	"""
 	Tests to be written:
 	unnamed node or edge removal
