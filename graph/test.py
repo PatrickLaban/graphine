@@ -72,25 +72,26 @@ class NodeCreationTest(unittest.TestCase):
 		self.failUnlessEqual(self.g.order(), 5)
 		self.g.remove_node(temp_node)
 		self.failUnlessEqual(self.g.order(), 4)
-	"""
+
 	def testCreationFail(self):
-		# test node creation fail points
-		self.assertRaises(TypeError, self.g.add_node())
-	"""
+		""" test node creation fail points """
+		self.failUnlessRaises(TypeError, self.g.add_node, "hello")
+
 
 class EdgeCreationTest(unittest.TestCase):
 
 	def setUp(self):
+		# WARNING: Errors in setup will cuase unkown test failures
 		self.g = Graph()
 		g = self.g
-		# make some nodes
+		# create nodes
 		self.jimmy = g.add_node(city="New York")
 		self.ted = g.add_node(city="Atlanta")
 		self.dan = g.add_node(city="Seattle")
 		self.paul = g.add_node(city="Austin")
 		self.zeke = g.add_node(city="LA")
 		self.kurt = g.add_node(city="Chicago")
-		# try not to error out
+		# create edges
 		self.j_to_t = g.add_edge(self.jimmy, self.ted, distance=850)
 		self.t_to_d = g.add_edge(self.ted, self.dan, distance=2150)
 		self.d_to_p = g.add_edge(self.dan, self.paul, distance=2850)
@@ -98,7 +99,7 @@ class EdgeCreationTest(unittest.TestCase):
 		self.z_to_k = g.add_edge(self.zeke, self.kurt, distance=1300, is_directed=False)
 
 	def testAdjacency(self):
-		# ensure adjacency list is correct
+		""" ensure adjacency list is correct """
 		self.failUnlessEqual(self.jimmy.incoming, [])
 		self.failUnlessEqual(self.jimmy.outgoing, [self.j_to_t])
 		self.failUnlessEqual(self.ted.incoming, [self.j_to_t])
@@ -114,8 +115,6 @@ class EdgeCreationTest(unittest.TestCase):
 		self.failUnlessEqual(self.kurt.outgoing, [self.z_to_k])
 		self.failUnlessEqual(self.kurt.bidirectional, [self.z_to_k])
 		self.failUnlessEqual(self.paul.outgoing, [])
-
-	def testDeletion(self):
 		# and after deletion
 		self.g.remove_edge(self.t_to_d)
 		self.failUnlessEqual(self.ted.outgoing, [])
@@ -125,24 +124,24 @@ class EdgeCreationTest(unittest.TestCase):
 		self.failUnlessEqual(self.dan.incoming, [new_trip])
 
 	def testEquivalence(self):
-		# equivalence test
+		""" test equivalence """
 		new_trip = self.g.add_edge(self.ted, self.dan, distance=850)
 		lame_trip = self.g.add_edge(self.jimmy, self.ted, distance=850)
 		self.failUnlessEqual(new_trip.data, lame_trip.data)
 		self.failIfEqual(new_trip.key, lame_trip.key)
 
 	def testEdgeProperties(self):
-		# ensure that the edges properties are being set properly
+		""" ensure that the edges properties are being set properly """
 		self.failUnlessEqual(self.t_to_d.data, {"distance": 2150})
 		self.failUnlessEqual(self.d_to_p.data, {"distance": 2850})
 		self.failUnlessEqual(self.z_to_k.data, {"distance": 1300})
 
 	def testSize(self):
-		# make sure that the change is reflected in the graph's size
+		""" check size against known number of edges """
 		self.failUnlessEqual(self.g.size(), 4)
 
 	def testBidirection(self):
-		# test to ensure that there is now a bidirectional link
+		""" test bidirectional link  """
 		self.failUnlessEqual(self.zeke.outgoing[-1].other_end(self.zeke).city, "Chicago")
 		self.failUnlessEqual(self.kurt.outgoing[-1].other_end(self.kurt).city, "LA")
 
@@ -150,6 +149,7 @@ class EdgeCreationTest(unittest.TestCase):
 class GraphPropertiesTest(unittest.TestCase):
 
 	def setUp(self):
+		# WARNING: Errors is setup will cuase unkown test failures
 		self.g = Graph()
 		self.n1 = self.g.add_node(name="Geremy")
 		self.n2 = self.g.add_node(name="Bob")
@@ -159,6 +159,7 @@ class GraphPropertiesTest(unittest.TestCase):
 		self.g.remove_node(self.n1)
 
 	def testIn(self):
+		""" test functionality of 'in' against known values """
 		self.failUnlessEqual(self.n1 in self.g, False)
 		self.failUnlessEqual(self.n2 in self.g, True)
 		self.failUnlessEqual(self.e1 in self.g, False)
@@ -357,16 +358,16 @@ class InductionTest(unittest.TestCase):
 		self.failUnlessEqual(uhura.outgoing[0].end.name, "spock")
 		self.failUnlessEqual(uhura.outgoing[1].end.name, "bones")
 
-"""
+
 class GraphFailureTest(unittest.TestCase):
-    
+
 	def setUp(self):
 		self.g = Graph()
         
 	def testUnhasableNodeData(self):
-		""" node.key should fail if unhashable """
-		self.failUnlessRaises(self.g.TypeError, self.g.add_node(stuff="a"))
-"""
+		# node.key should fail if unhashable 
+		self.failUnlessRaises(TypeError, self.g.add_node, stuff="a")
+
 	"""
 	Tests to be written:
 	unnamed node or edge removal
