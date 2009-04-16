@@ -58,8 +58,19 @@ class NodeCreationTest(unittest.TestCase):
 		self.failUnlessEqual(self.ted.data, {"city":"Atlanta"})
 		self.failUnlessEqual(self.paul.data, {"city":"Austin"})
 
+	def testKey(self):
+		""" test node.key against set values """
+		self.failUnlessEqual(self.jimmy.key, frozenset({("city", "New York")}))
+		self.failUnlessEqual(self.ted.key, frozenset({("city", "Atlanta")}))
+		self.failUnlessEqual(self.dan.key, frozenset({("city", "Seattle")}))
+		self.failUnlessEqual(self.paul.key, frozenset({("city", "Austin")}))
+
 	def testOrder(self):
 		# make sure that change is reflected in the graph's order
+		self.failUnlessEqual(self.g.order(), 4)
+		temp_node = self.g.add_node()
+		self.failUnlessEqual(self.g.order(), 5)
+		self.g.remove_node(temp_node)
 		self.failUnlessEqual(self.g.order(), 4)
 
 
@@ -341,6 +352,22 @@ class InductionTest(unittest.TestCase):
 		uhura = set(new_mission.search_nodes(name="uhura")).pop()
 		self.failUnlessEqual(uhura.outgoing[0].end.name, "spock")
 		self.failUnlessEqual(uhura.outgoing[1].end.name, "bones")
+
+
+class GraphFailureTest(unittest.TestCase):
+    
+	def setUp(self):
+		self.g = Graph()
+        
+	def testUnhasableNodeData(self):
+		""" node.key should fail if unhashable """
+		self.assertRaises(TypeError, self.g.add_node(stuff={"a":4, "b":5}))
+
+	"""
+	Tests to be written:
+	unnamed node or edge removal
+	nonexistant node or edge removal
+	"""
 
 
 class GraphCorrectnessTest(unittest.TestCase):
@@ -657,7 +684,6 @@ class GraphPerformanceTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
-	"""
 	GraphCorrectnessTest = unittest.TestLoader().loadTestsFromTestCase(GraphCorrectnessTest)
 	GraphPropertiesTest = unittest.TestLoader().loadTestsFromTestCase(GraphPropertiesTest)
 	GraphSearchTest = unittest.TestLoader().loadTestsFromTestCase(GraphSearchTest)
@@ -669,5 +695,4 @@ if __name__ == "__main__":
 	InductionTest = unittest.TestLoader().loadTestsFromTestCase(InductionTest)
 	suites = [GraphCorrectnessTest, NodeCreationTest, EdgeCreationTest, GraphPropertiesTest, GraphSearchTest, EdgeMovementTest, GetElementsTest, TraversalTest, InductionTest]
 	CorrectnessTest = unittest.TestSuite(suites)
-	"""	
 	unittest.main()
