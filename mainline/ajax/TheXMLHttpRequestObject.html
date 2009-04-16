@@ -1,0 +1,1499 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html lang="en-US"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+
+ 
+  <title>The XMLHttpRequest Object</title>
+
+  <style type="text/css">
+   pre.idl { border:solid thin; background:#eee; color:#000; padding:0.5em }
+   pre.idl :link, pre.idl :visited { color:inherit; background:transparent }
+   pre code { color:inherit; background:transparent }
+   div.example { margin-left:1em; padding-left:1em; border-left:double; color:#222; background:#fcfcfc }
+   .note { margin-left:2em; font-weight:bold; font-style:italic; color:#008000 }
+   p.note::before { content:"Note: " }
+   .issue { padding:.5em; border:solid #f00 }
+   p.issue::before { content:"Issue: " }
+   dl.switch { padding-left:2em }
+   dl.switch dt { text-indent:-1.5em }
+   dl.switch dt:before { content:'\21AA'; padding:0 0.5em 0 0; display:inline-block; width:1em; text-align:right; line-height:0.5em }
+   em.ct { text-transform:lowercase; font-variant:small-caps; font-style:normal }
+   dfn { font-weight:bold; font-style:normal }
+   code { color:orangered }
+   code :link, code :visited { color:inherit }
+   h1 code, h2 code, h3 code { color:inherit; background:inherit; font:inherit }
+  </style>
+  <link href="TheXMLHttpRequestObject_files/W3C-WD.css" rel="stylesheet">
+
+ </head><body>
+  <div class="head">
+   <p><a href="http://www.w3.org/"><img alt="W3C" src="TheXMLHttpRequestObject_files/w3c_home.png" width="72" height="48"></a></p>
+
+   <h1 class="head" id="the-xmlhttprequest-object">The <code title="">XMLHttpRequest</code> Object</h1>
+
+   <h2 class="no-num no-toc" id="w3c-doctype">W3C Working Draft 15 April 2008</h2>
+
+   <dl>
+    <dt>This Version:
+
+    </dt><dd><a href="http://www.w3.org/TR/2008/WD-XMLHttpRequest-20080415/">http://www.w3.org/TR/2008/WD-XMLHttpRequest-20080415/</a>
+
+    </dd><dt>Latest Version:
+
+    </dt><dd><a href="http://www.w3.org/TR/XMLHttpRequest/">http://www.w3.org/TR/XMLHttpRequest/</a>
+
+    </dd><dt>Previous Versions:
+
+    </dt><dd><a href="http://www.w3.org/TR/2007/WD-XMLHttpRequest-20071026/">http://www.w3.org/TR/2007/WD-XMLHttpRequest-20071026/</a>
+
+    </dd><dd><a href="http://www.w3.org/TR/2007/WD-XMLHttpRequest-20070618/">http://www.w3.org/TR/2007/WD-XMLHttpRequest-20070618/</a>
+
+    </dd><dd><a href="http://www.w3.org/TR/2007/WD-XMLHttpRequest-20070227/">http://www.w3.org/TR/2007/WD-XMLHttpRequest-20070227/</a>
+
+    </dd><dd><a href="http://www.w3.org/TR/2006/WD-XMLHttpRequest-20060927/">http://www.w3.org/TR/2006/WD-XMLHttpRequest-20060927/</a>
+
+    </dd><dd><a href="http://www.w3.org/TR/2006/WD-XMLHttpRequest-20060619/">http://www.w3.org/TR/2006/WD-XMLHttpRequest-20060619/</a>
+
+    </dd><dd><a href="http://www.w3.org/TR/2006/WD-XMLHttpRequest-20060405/">http://www.w3.org/TR/2006/WD-XMLHttpRequest-20060405/</a>
+
+    </dd><dt>Editor:
+
+    </dt><dd><a href="http://annevankesteren.nl/">Anne van Kesteren</a> (<a href="http://www.opera.com/">Opera Software ASA</a>) &lt;<a href="mailto:annevk@opera.com">annevk@opera.com</a>&gt;
+   </dd></dl>
+
+   <p class="copyright"><a href="http://www.w3.org/Consortium/Legal/ipr-notice#Copyright">Copyright</a>
+    © 2007 <a href="http://www.w3.org/"><acronym title="World Wide Web
+    Consortium">W3C</acronym></a><sup>®</sup> (<a href="http://www.csail.mit.edu/"><acronym title="Massachusetts Institute
+    of Technology">MIT</acronym></a>, <a href="http://www.ercim.org/"><acronym title="European Research Consortium
+    for Informatics and Mathematics">ERCIM</acronym></a>, <a href="http://www.keio.ac.jp/">Keio</a>), All Rights Reserved. W3C <a href="http://www.w3.org/Consortium/Legal/ipr-notice#Legal_Disclaimer">liability</a>,
+    <a href="http://www.w3.org/Consortium/Legal/ipr-notice#W3C_Trademarks">trademark</a>
+    and <a href="http://www.w3.org/Consortium/Legal/copyright-documents">document
+    use</a> rules apply.</p>
+  </div>
+
+  <hr>
+
+  <h2 class="no-num no-toc" id="specabstract">Abstract</h2>
+
+  <p>The <code title="">XMLHttpRequest</code> Object specification defines an
+   <abbr title="Application Programming Interface">API</abbr> that provides
+   scripted client functionality for transferring data between a client and a
+   server.
+
+  </p><h2 class="no-num no-toc" id="sotd">Status of this Document</h2>
+
+  <p><em>This section describes the status of this document at the time of
+   its publication. Other documents may supersede this document. A list of
+   current W3C publications and the latest revision of this technical report
+   can be found in the <a href="http://www.w3.org/TR/">W3C technical reports
+   index</a> at http://www.w3.org/TR/.</em>
+
+  </p><p>This is the 15 April 2008 Last Call Working Draft of The <code title="">XMLHttpRequest</code> Object specification. Please send comments
+   to <a href="mailto:public-webapi@w3.org">public-webapi@w3.org</a> (<a href="http://lists.w3.org/Archives/Public/public-webapi/">archived</a>)
+   with either <samp>[XHR]</samp> or <samp title="">[XMLHttpRequest]</samp>
+   at the start of the subject line before befor 2 June 2008.
+
+  </p><p>This document is produced by the <a href="http://www.w3.org/2006/webapi/">Web API Working Group</a>, part of
+   the <a href="http://www.w3.org/2006/rwc/Activity">Rich Web Clients
+   Activity</a> in the W3C <a href="http://www.w3.org/Interaction/">Interaction Domain</a>. Changes made
+   to this document can be found in the <a href="http://dev.w3.org/cvsweb/2006/webapi/XMLHttpRequest/Overview.html">W3C
+   public CVS server</a>.
+
+  </p><p>Publication as a Working Draft does not imply endorsement by the W3C
+   Membership. This is a draft document and may be updated, replaced or
+   obsoleted by other documents at any time. It is inappropriate to cite this
+   document as other than work in progress.
+
+  </p><p>This document was produced by a group operating under the <a href="http://www.w3.org/Consortium/Patent-Policy-20040205/">5 February
+   2004 W3C Patent Policy</a>. W3C maintains a <a href="http://www.w3.org/2004/01/pp-impl/38482/status" rel="disclosure">public list of any patent disclosures</a> made in
+   connection with the deliverables of the group; that page also includes
+   instructions for disclosing a patent. An individual who has actual
+   knowledge of a patent which the individual believes contains <a href="http://www.w3.org/Consortium/Patent-Policy-20040205/#def-essential">Essential
+   Claim(s)</a> must disclose the information in accordance with <a href="http://www.w3.org/Consortium/Patent-Policy-20040205/#sec-Disclosure">section
+   6 of the W3C Patent Policy</a>.
+
+  </p><h2 class="no-num no-toc" id="toc">Table of Contents</h2>
+  <!--begin-toc-->
+
+  <ul class="toc">
+   <li><a href="#introduction"><span class="secno">1. </span>Introduction</a>
+
+   </li><li><a href="#conformance"><span class="secno">2. </span>Conformance</a>
+    <ul class="toc">
+     <li><a href="#dependencies"><span class="secno">2.1
+      </span>Dependencies</a>
+
+     </li><li><a href="#terminology"><span class="secno">2.2 </span>Terminology</a>
+
+     </li><li><a href="#extensibility"><span class="secno">2.3
+      </span>Extensibility</a>
+    </li></ul>
+
+   </li><li><a href="#security"><span class="secno">3. </span>Security
+    Considerations</a>
+
+   </li><li><a href="#xmlhttprequest"><span class="secno">4. </span>The <code title="">XMLHttpRequest</code> Object</a>
+    <ul class="toc">
+     <li><a href="#events"><span class="secno">4.1 </span>Events for the <code title="">XMLHttpRequest</code> Object</a>
+
+     </li><li><a href="#exceptions"><span class="secno">4.2 </span>Exceptions for
+      the <code title="">XMLHttpRequest</code> Object</a>
+    </li></ul>
+
+   </li><li class="no-num"><a href="#notcovered">Not in this Specification</a>
+
+   </li><li class="no-num"><a href="#bibref">References</a>
+
+   </li><li class="no-num"><a href="#acknowledgments">Acknowledgments</a>
+  </li></ul>
+  <!--end-toc-->
+
+  <h2 id="introduction"><span class="secno">1. </span>Introduction</h2>
+
+  <p><em>This section is non-normative.</em>
+
+  </p><p>The <code><a href="#xmlhttprequest-object">XMLHttpRequest</a></code>
+   object implements an interface exposed by a scripting engine that allows
+   scripts to perform HTTP client functionality, such as submitting form data
+   or loading data from a server.
+
+  </p><p>The name of the object is <code><a href="#xmlhttprequest-object">XMLHttpRequest</a></code> for compatibility
+   with the Web, though each component of this name is potentially
+   misleading. First, the object supports any text based format, including
+   XML. Second, it can be used to make requests over both HTTP and HTTPS
+   (some implementations support protocols in addition to HTTP and HTTPS, but
+   that functionality is not covered by this specification). Finally, it
+   supports "requests" in a broad sense of the term as it pertains to HTTP;
+   namely all activity involved with HTTP requests or responses for the
+   defined HTTP methods.
+
+  </p><div class="example">
+   <p>Some simple code to do something with data from an XML document fetched
+    over the network:</p>
+
+   <pre><code>function test(data) {
+ // taking care of data
+}
+
+function handler() {
+ if(this.readyState == 4 &amp;&amp; this.status == 200) {
+  // so far so good
+  if(this.responseXML != null &amp;&amp; this.responseXML.getElementById('test').firstChild.data)
+     // success!
+   test(this.responseXML.getElementById('test').firstChild.data);
+  else
+   test(null);
+ } else if (this.readyState == 4 &amp;&amp; this.status != 200) {
+  // fetched the wrong page or network error...
+  test(null);
+ }
+}
+
+var client = new XMLHttpRequest();
+client.onreadystatechange = handler;
+client.open("GET", "test.xml");
+client.send();</code></pre>
+
+   <p>If you just want to log a message to the server:</p>
+
+   <pre><code>function log(message) {
+ var client = new XMLHttpRequest();
+ client.open("POST", "/log");
+ client.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
+ client.send(message);
+}</code></pre>
+
+   <p>Or if you want to check the status of a document on the server:</p>
+
+   <pre><code>function fetchStatus(address) {
+ var client = new XMLHttpRequest();
+ client.onreadystatechange = function() {
+  // in case of network errors this might not give reliable results
+  if(this.readyState == 4)
+   returnStatus(this.status);
+ }
+ client.open("HEAD", address);
+ client.send();
+}</code></pre>
+  </div>
+
+  <h2 id="conformance"><span class="secno">2. </span>Conformance</h2>
+
+  <p>Everything in this specification is normative except for diagrams,
+   examples, notes and sections marked non-normative.
+
+  </p><p>The key words <em class="ct">must</em>, <em class="ct">must not</em>, <em class="ct">should</em> and <em class="ct">may</em> in this document are to be
+   interpreted as described in RFC 2119. [<cite><a href="#ref-rfc2119">RFC2119</a></cite>]
+
+  </p><p>This specification defines the following classes of products:
+
+  </p><dl>
+   <dt><dfn id="conforming-user-agent">Conforming user agent</dfn>
+
+   </dt><dd>
+    <p>A user agent <em class="ct">must</em> behave as described in this
+     specification in order to be considered conformant.</p>
+
+    <p>If the user agent is not a conforming XML user agent the <a href="#xml-response-entity-body">XML response entity body</a> <em class="ct">must</em> (always) be <code>null</code>.</p>
+
+    <p>User agents <em class="ct">may</em> implement algorithms given in this
+     specification in any way desired, so long as the end result is
+     indistinguishable from the result that would be obtained by the
+     specification's algorithms.</p>
+
+    <p class="note">This specification uses both the terms "conforming user
+     agent(s)" and "user agent(s)" to refer to this product class.</p>
+
+   </dd><dt><dfn id="conforming-xml-user-agent">Conforming XML user agent</dfn>
+
+   </dt><dd>
+    <p>An XML user agent <em class="ct">must</em> be a <a href="#conforming-user-agent">conforming user agent</a> and <em class="ct">must</em> be a conforming XML processor that reports violations
+     of namespace well-formedness. [<cite><a href="#ref-xml">XML</a></cite>]
+     [<cite><a href="#ref-xmlns">XMLNS</a></cite>]
+  </p></dd></dl>
+
+  <h3 id="dependencies"><span class="secno">2.1 </span>Dependencies</h3>
+
+  <p>This specification relies on several underlying specifications.
+
+  </p><dl>
+   <dt>DOM
+
+   </dt><dd>
+    <p>A <a href="#conforming-user-agent" title="conforming user
+     agent">conforming user agent</a> <em class="ct">must</em> support some
+     subset of the functionality defined in DOM Events and DOM Core that this
+     specification relies upon. [<cite><a href="#ref-dom2events">DOM2Events</a></cite>] [<cite><a href="#ref-dom3core">DOM3Core</a></cite>]
+
+   </p></dd><dt>HTML&nbsp;5
+
+   </dt><dd>
+    <p>This specification depends on HTML&nbsp;5 for defining the
+     <code>Window</code> object and finding the character encoding of a
+     <code>text/html</code> resource. A <a href="#conforming-user-agent">conforming user agent</a> <em class="ct">must</em> support these features. [<cite><a href="#ref-html5">HTML5</a></cite>]</p>
+
+    <p class="note">The <a href="http://www.w3.org/TR/2006/WD-Window-20060407/">Window Object
+     1.0</a> draft is not referenced normatively as it appears to be no
+     longer maintained and HTML&nbsp;5 defines the <code>Window</code> object
+     in more detail. This specification already depends on HTML&nbsp;5 for
+     other reasons so there is not much additional overhead because of this.</p>
+
+   </dd><dt>HTTP
+
+   </dt><dd>
+    <p>A <a href="#conforming-user-agent">conforming user agent</a> <em class="ct">must</em> support some version of the HTTP protocol. It <em class="ct">should</em> support any HTTP method that matches the <a href="#method"><code>Method</code> production</a> and <em class="ct">must</em> at least support the following methods:</p>
+
+    <ul>
+     <li><code>GET</code>
+
+     </li><li><code>POST</code>
+
+     </li><li><code>HEAD</code>
+
+     </li><li><code>PUT</code>
+
+     </li><li><code>DELETE</code>
+
+     </li><li><code>OPTIONS</code>
+    </li></ul>
+
+    <p>Other requirements regarding HTTP are made throughout the
+     specification. [<cite><a href="#ref-rfc2616">RFC2616</a></cite>]</p>
+  </dd></dl>
+
+  <h3 id="terminology"><span class="secno">2.2 </span>Terminology</h3>
+
+  <p>There is a <dfn id="case-insensitive-match">case-insensitive match</dfn>
+   of strings <var>s1</var> and <var>s2</var> if after mapping the ASCII
+   character range A-Z to the range a-z both strings are identical.
+
+  </p><p>Two URIs are <dfn id="same-origin">same-origin</dfn> if after performing
+   scheme-based normalization on both URIs as described in section 5.3.3 of
+   RFC 3987 the scheme, ihost and port components are identical. If either
+   URI does not have an ihost component the URIs <em class="ct">must not</em>
+   be considered same-origin. [<cite><a href="#ref-rfc3987">RFC3987</a></cite>]
+
+  </p><p>The terms <dfn id="origin">origin</dfn> and <dfn id="event-handler-attribute">event handler DOM attribute</dfn> are defined
+   by the HTML&nbsp;5 specification. [<cite><a href="#ref-html5">HTML5</a></cite>]
+
+  </p><h3 id="extensibility"><span class="secno">2.3 </span>Extensibility</h3>
+
+  <p>Extensions of the API defined by this specification are <em>strongly
+   discouraged</em>. User agents, Working Groups and other interested parties
+   should discuss extensions on a relevant public forum, preferably <a href="mailto:public-webapi@w3.org">public-webapi@w3.org</a>.
+
+  </p><h2 id="security"><span class="secno">3. </span>Security Considerations</h2>
+
+  <p>Apart from requirements affecting security made throughout this
+   specification implementations <em class="ct">may</em>, at their discretion,
+   not expose certain headers, such as HttpOnly cookies.
+
+  </p><h2 id="xmlhttprequest"><span class="secno">4. </span>The <code title="">XMLHttpRequest</code> Object</h2>
+
+  <p>The <code><a href="#xmlhttprequest-object">XMLHttpRequest</a></code>
+   object can be used by scripts to programmatically connect to their
+   originating server via HTTP.
+
+  </p><p>Objects implementing the <code><a href="#xmlhttprequest-object">XMLHttpRequest</a></code> interface <em class="ct">must</em> also implement the <code>EventTarget</code> interface.
+   [<cite><a href="#ref-dom2events">DOM2Events</a></cite>]
+
+  </p><p>Objects implementing the <code title="">Window</code> interface <em class="ct">must</em> provide an <code title="">XMLHttpRequest()</code>
+   constructor. [<cite><a href="#ref-html5">HTML5</a></cite>]
+
+  </p><div class="example">
+   <p>In ECMAScript this can be used as follows:</p>
+
+   <pre><code>var client = new XMLHttpRequest();</code></pre>
+  </div>
+
+  <p>When the <code title="">XMLHttpRequest()</code> constructor is invoked a
+   persistent pointer to the associated <code title="">Document</code> object
+   is stored on the newly created object. This is the <dfn id="document-pointer" title="Document pointer"><code>Document</code>
+   pointer</dfn>. The associated <code>Document</code> object is the one
+   returned by the <code>document</code> attribute from the object on which
+   the <code title="">XMLHttpRequest()</code> constructor was invoked (a
+   <code>Window</code> object). The pointer can become "null" if the object
+   is destroyed.
+
+  </p><p class="note">As per the conformance criteria implementations are free to
+   implement this in any way they desire as long as the end results are
+   identical to those given by the English prose.
+
+  </p><div class="example">
+   <p>If <var><code>iframe</code></var> is a <code title="">Window</code>
+    object <var><code>client</code></var> will have a pointer to
+    <var><code>iframe.document</code></var> in the following example:</p>
+
+   <pre><code>var client = new iframe.XMLHttpRequest()</code></pre>
+  </div>
+
+  <pre class="idl">interface <dfn id="xmlhttprequest-object">XMLHttpRequest</dfn> {
+  // event handler
+           attribute EventListener <a href="#onreadystatechange">onreadystatechange</a>;
+
+  // state
+  const unsigned short <a href="#unsent-state" title="UNSENT state">UNSENT</a> = 0;
+  const unsigned short <a href="#opened-state" title="OPENED state">OPENED</a> = 1;
+  const unsigned short <a href="#headers-received-state" title="HEADERS_RECEIVED state">HEADERS_RECEIVED</a> = 2;
+  const unsigned short <a href="#loading-state" title="LOADING state">LOADING</a> = 3;
+  const unsigned short <a href="#done-state" title="DONE state">DONE</a> = 4;
+  readonly attribute unsigned short <a href="#readystate">readyState</a>;
+
+  // request
+  void <a href="#open">open</a>(in DOMString <var>method</var>, in DOMString <var>url</var>);
+  void <a href="#open">open</a>(in DOMString <var>method</var>, in DOMString <var>url</var>, in boolean <var>async</var>);
+  void <a href="#open">open</a>(in DOMString <var>method</var>, in DOMString <var>url</var>, in boolean <var>async</var>, in DOMString <var>user</var>);
+  void <a href="#open">open</a>(in DOMString <var>method</var>, in DOMString <var>url</var>, in boolean <var>async</var>, in DOMString <var>user</var>, in DOMString <var>password</var>);
+  void <a href="#setrequestheader">setRequestHeader</a>(in DOMString <var>header</var>, in DOMString <var>value</var>);
+  void <a href="#send">send</a>();
+  void <a href="#send">send</a>(in DOMString <var>data</var>);
+  void <a href="#send">send</a>(in Document <var>data</var>);
+  void <a href="#abort">abort</a>();
+
+  // response
+  DOMString <a href="#getallresponseheaders">getAllResponseHeaders</a>();
+  DOMString <a href="#getresponseheader">getResponseHeader</a>(in DOMString <var>header</var>);
+  readonly attribute DOMString <a href="#responsetext">responseText</a>;
+  readonly attribute Document <a href="#responsexml">responseXML</a>;
+  readonly attribute unsigned short <a href="#status">status</a>;
+  readonly attribute DOMString <a href="#statustext">statusText</a>;
+};</pre>
+
+  <p>The <code><a href="#xmlhttprequest-object">XMLHttpRequest</a></code>
+   object can be in five states: <a href="#unsent-state" title="UNSENT
+   state">UNSENT</a>, <a href="#opened-state" title="OPENED
+   state">OPENED</a>, <a href="#headers-received-state" title="HEADERS_RECEIVED state">HEADERS_RECEIVED</a>, <a href="#loading-state" title="LOADING state">LOADING</a> and <a href="#done-state" title="DONE state">DONE</a>. The current state is
+   exposed through the <code><a href="#readystate">readyState</a></code>
+   attribute. The method definitions below define when a state transition
+   takes place.
+
+  </p><p>When constructed, the <code><a href="#xmlhttprequest-object">XMLHttpRequest</a></code> object <em class="ct">must</em> be in the UNSENT state. This state is represented by
+   the <dfn id="unsent-state" title="UNSENT state"><code>UNSENT</code></dfn>
+   constant, whose value is <code>0</code>.
+
+  </p><p>The OPENED state is the state of the object when the <code><a href="#open">open()</a></code> method has been successfully invoked.
+   During this state request headers can be set using <code><a href="#setrequestheader">setRequestHeader()</a></code> and the request can
+   be made using <code><a href="#send">send()</a></code>. This state is
+   represented by the <dfn id="opened-state" title="OPENED
+   state"><code>OPENED</code></dfn> constant, whose value is <code>1</code>.
+
+  </p><p>The OPENED state has an associated <dfn id="send-flag"><code>send()</code>
+   flag</dfn> which can be either "true" or "false". The initial value of the
+   <code title="">send()</code> flag is "false".
+
+  </p><p>The HEADERS_RECEIVED state is the state of the object when all response
+   headers have been received. This state is represented by the <dfn id="headers-received-state" title="HEADERS_RECEIVED
+   state"><code>HEADERS_RECEIVED</code></dfn> constant, whose value is
+   <code>2</code>.
+
+  </p><p>The LOADING state is the state of the object when the response entity
+   body is being received. This state is represented by the <dfn id="loading-state" title="LOADING state"><code>LOADING</code></dfn>
+   constant, whose value is <code>3</code>.
+
+  </p><p>The DONE state is the state of the object when either the data transfer
+   has been completed or something went wrong during the transfer (infinite
+   redirects for instance). This state is represented by the <dfn id="done-state" title="DONE state"><code>DONE</code></dfn> constant, whose
+   value is <code>4</code>.
+
+  </p><p>The DONE state has an associated <dfn id="error-flag">error flag</dfn>
+   which can be either "true" or "false". The initial value of the error flag
+   is "false".
+
+  </p><p>The <dfn id="response-entity-body">response entity body</dfn> is the
+   fragment of the <a href="#entity-body">entity body</a> received so far
+   (LOADING state) or the complete entity body (DONE state). If there is no
+   entity body the response entity body is "null".
+
+  </p><p>The <dfn id="text-response-entity-body">text response entity body</dfn> is
+   a <code>DOMString</code> representing the <a href="#response-entity-body">response entity body</a>. The text response
+   entity body is the return value of the following algorithm:
+
+  </p><ol>
+   <li>
+    <p>If the response entity body is "null" return the empty string and
+     terminate these steps.</p>
+
+   </li><li>
+    <p>Let <var>charset</var> be "null".
+
+   </p></li><li>
+    <p>If there is no <code>Content-Type</code> header or there is a
+     <code>Content-Type</code> header which contains a MIME type that is
+     <code>text/xml</code>, <code>application/xml</code> or ends in <code title="">+xml</code> (ignoring any parameters) use the rules set forth
+     in the XML specifications to determine the character encoding. Let
+     <var>charset</var> be the determined character encoding.
+
+   </p></li><li>
+    <p>If there is a <code>Content-Type</code> header which contains a
+     <code>text/html</code> MIME type follow the rules set forth in the
+     HTML&nbsp;5 specification to determine the character encoding. Let
+     <var>charset</var> be the determined character encoding. [<cite><a href="#ref-html5">HTML5</a></cite>]
+
+   </p></li><li>
+    <p>If the MIME type specified by the <code>Content-Type</code> header
+     contains a <code>charset</code> parameter and <var>charset</var> is
+     "null" let <var>charset</var> be the value of that parameter.</p>
+
+    <p class="note">The algorithms described by the XML and HTML specifications
+     already take <code>Content-Type</code> into account.</p>
+
+   </li><li> <!-- This stuff is copied from HTML5. Thanks Hixie! -->
+    <p>If <var>charset</var> is "null" then, for each of the rows in the
+     following table, starting with the first one and going down, if the
+     first bytes of <var>bytes</var> match the bytes given in the first
+     column, then let <var>charset</var> be the encoding given in the cell in
+     the second column of that row. If there is no match <var>charset</var>
+     remains "null".</p>
+
+    <table>
+     <thead>
+      <tr>
+       <th>Bytes in Hexadecimal
+
+       </th><th>Description
+
+     </th></tr></thead><tbody>
+      <tr>
+       <td>00 00 FE FF
+
+       </td><td>UTF-32BE BOM
+
+      </td></tr><tr>
+       <td>FF FE 00 00
+
+       </td><td>UTF-32LE BOM
+
+      </td></tr><tr>
+       <td>FE FF
+
+       </td><td>UTF-16BE BOM
+
+      </td></tr><tr>
+       <td>FF FE
+
+       </td><td>UTF-16LE BOM
+
+      </td></tr><tr>
+       <td>EF BB BF
+
+       </td><td>UTF-8 BOM<!-- nobody uses this
+      <tr>
+       <td>DD 73 66 73
+       <td>UTF-EBCDIC
+-->
+        
+    </td></tr></tbody></table>
+
+   </li><li>
+    <p>If <var>charset</var> is "null" let <var>charset</var> be UTF-8.
+
+   </p></li><li>
+    <p>Return the result of decoding the response entity body using
+     <var>charset</var>. Replace bytes or sequences of bytes that are not
+     valid accordng to the <var>charset</var> with a single U+FFFD character.
+  </p></li></ol>
+
+  <p class="note">Authors are encouraged to simply encode their resources using
+   UTF-8.
+
+  </p><p>The <dfn id="xml-response-entity-body">XML response entity body</dfn> is
+   either a <code>Document</code> representing the <a href="#response-entity-body">response entity body</a> or
+   <code>null</code>. The XML response entity body is the return value of the
+   following algorithm:
+
+  </p><ol>
+   <li>
+    <p>If the response entity body is "null" terminate these steps and return
+     <code>null</code>.
+
+   </p></li><li>
+    <p>If a <code>Content-Type</code> is present and it does not contain a
+     MIME type (ignoring any parameters) that is <code>text/xml</code>,
+     <code>application/xml</code> or ends in <code title="">+xml</code>
+     terminate these steps and return <code>null</code>. (Do not terminate
+     these steps if there is no <code>Content-Type</code> header at all.)
+
+   </p></li><li>
+    <p>Parse the response entity body into a document tree following the
+     rules from the XML specifications. Let the result be <var>parsed
+     document</var>. If this fails (unsupported character encoding, namespace
+     well-formedness error et cetera) terminate these steps return
+     <code>null</code>. [<cite><a href="#ref-xml">XML</a></cite>] [<cite><a href="#ref-xmlns">XMLNS</a></cite>]</p>
+
+    <p class="note">Scripts in the resulting document tree will not be
+     executed, resources referenced will not be loaded and no associated XSLT
+     will be applied.</p>
+
+   </li><li>
+    <p>Return an object implementing the <code>Document</code> interface
+     representing the <var>parsed document</var>.
+  </p></li></ol>
+
+  <dl>
+   <dt><dfn id="onreadystatechange"><code>onreadystatechange</code></dfn> of
+    type <code>EventListener</code>
+
+   </dt><dd>
+    <p>This attribute is an <a href="#event-handler-attribute">event handler
+     DOM attribute</a> and <em class="ct">must</em> be invoked whenever a
+     <code><a href="#readystatechange">readystatechange</a></code> event is
+     targated at the object.
+
+   </p></dd><dt><dfn id="readystate"><code>readyState</code></dfn> of type
+    <code>unsigned short</code>, readonly
+
+   </dt><dd>
+    <p>On getting the attribute <em class="ct">must</em> return the value of
+     the constant corresponding to the object's current state.
+
+   </p></dd><dt><dfn id="open" title="open"><code>open(<var>method</var>, <var>url</var>,
+    <var>async</var>, <var>user</var>, <var>password</var>)</code></dfn>,
+    method
+
+   </dt><dd>
+    <p>When invoked, the user agent <em class="ct">must</em> follow the
+     following steps (unless otherwise indicated):</p>
+
+    <ol>
+     <li>
+      <p>Let <var>stored method</var> be the <var>method</var> argument.
+
+     </p></li><li>
+      <p>If <var>stored method</var> does not match the <dfn id="method"><code>Method</code> production</dfn>, defined in section
+       5.1.1 of RFC 2616, raise a <code>SYNTAX_ERR</code> exception and
+       terminate these steps. [<cite><a href="#ref-rfc2616">RFC2616</a></cite>]
+
+     </p></li><li>
+      <p>If <var>stored method</var> <a href="#case-insensitive-match" title="case-insensitive match">case-insensitively matches</a>
+       <code>CONNECT</code>, <code>DELETE</code>, <code>GET</code>,
+       <code>HEAD</code>, <code>OPTIONS</code> <code>POST</code>,
+       <code>PUT</code>, <code>TRACE</code>, or <code>TRACK</code> let
+       <var>stored method</var> be the canonical uppercase form of the
+       matched method name.
+     
+     <!-- WebKit (and supposedly Firefox) also uppercase: COPY, INDEX, LOCK,
+     M-POST, MKCOL, MOVE, PROPFIND, PROPPATCH, and UNLOCK. -->
+
+     </p></li><li>
+      <p>If <var>stored method</var> is one of <code>CONNECT</code>,
+       <code>TRACE</code>, or <code>TRACK</code> the user agent <em class="ct">should</em> raise a <code><a href="#security-err">SECURITY_ERR</a></code> exception and terminate
+       these steps.
+
+     </p></li><li>
+      <p>Drop the fragment identifier (if any) from <var>url</var> and let
+       <var>stored url</var> be the result of that operation.
+
+     </p></li><li>
+      <p>If <var>stored url</var> is a relative reference resolve it using
+       the current value of the <code>baseURI</code> attribute of the <a href="#document-pointer"><code>Document</code> pointer</a>. If this
+       fails raise a <code>SYNTAX_ERR</code> exception and terminate these
+       steps.
+
+     </p></li><li>
+      <p>If <var>stored url</var> contains an unsupported scheme raise a
+       <code>NOT_SUPPORTED_ERR</code> and terminate these steps.
+
+     </p></li><li>
+      <p>If the <code>"user:password"</code> format in the
+       <code>userinfo</code> production defined in section 3.2.1 of RFC 3986
+       is not supported for the relevant scheme and <var>stored url</var>
+       contains this format raise a <code>SYNTAX_ERR</code> and terminate
+       these steps. [<cite><a href="#ref-rfc3986">RFC3986</a></cite>]
+
+     </p></li><li>
+      <p>If <var>stored url</var> contains the <code>"user:password"</code>
+       format let <var>stored user</var> be the user part and <var>stored
+       password</var> be the password part.
+
+     </p></li><li>
+      <p>If <var>stored url</var> just contains the <code>"user"</code>
+       format let <var>stored user</var> be the user part.
+
+     </p></li><li>
+      <p>If <var>stored url</var> is not of the <a href="#same-origin">same-origin</a> as the <a href="#origin">origin</a> of the <a href="#document-pointer"><code>Document</code> pointer</a> the user
+       agent <em class="ct">should</em> raise a <code><a href="#security-err">SECURITY_ERR</a></code> exception and terminate
+       these steps.
+
+     </p></li><li>
+      <p>Let <var>async</var> be the value of the <var>async</var> argument
+       or <code>true</code> if it was omitted.
+
+     </p></li><li>
+      <p>If the <var>user</var> argument was not omitted, and its syntax does
+       not match that specified by the relevant authentication scheme, raise
+       a <code>SYNTAX_ERR</code> exception and terminate these steps.
+
+     </p></li><li>
+      <p>If the <var>user</var> argument was not omitted and is not
+       <code>null</code> let <var>stored user</var> be <var>user</var>
+       encoded using the encoding specified in the relevant authentication
+       scheme or UTF-8 if the scheme fails to specify an encoding.</p>
+
+      <p class="note">This step overrides any user that may have been set by
+       the <var>url</var> argument.</p>
+
+     </li><li>
+      <p>If the <var>user</var> argument was not omitted and is
+       <code>null</code> remove <var>stored user</var>.
+
+     </p></li><li>
+      <p>If the <var>password</var> argument was not omitted and its syntax
+       does not match that specified by the relevant authentication scheme
+       raise a <code>SYNTAX_ERR</code> exception and terminate these steps.
+
+     </p></li><li>
+      <p>If the <var>password</var> argument was not omitted and is not
+       <code>null</code> let <var>stored password</var> be
+       <var>password</var> encoded using the encoding specified in the
+       relevant authentication scheme or UTF-8 if the scheme fails to specify
+       an encoding.
+
+     </p></li><li>
+      <p>If the <var>password</var> argument was not omitted and is
+       <code>null</code> remove <var>stored password</var>.
+
+     </p></li><li>
+      <p><a href="#abort-send-algorithm" title="abort send()">Abort the
+       <code>send()</code> algorithm</a>, set <a href="#response-entity-body">response entity body</a> to "null" and
+       reset the list of request headers.
+
+      </p><p>
+
+     </p></li><li>
+      <p>The user agent <em class="ct">should</em> cancel any network activity
+       for which the object is responsible.
+     
+     <!-- we can hardly require it... -->
+
+     </p></li><li>
+      <p>Switch the object to the <a href="#opened-state" title="OPENED
+       state">OPENED</a> state, set the <a href="#send-flag"><code>send()</code> flag</a> to "false" and then
+       synchronously dispatch a <code><a href="#readystatechange">readystatechange</a></code> event on the
+       object and return the method call.
+    </p></li></ol>
+
+    <p class="note">A future version or extension of this specification will
+     most likely define a way of doing cross-site requests.</p>
+
+   </dd><dt><dfn id="setrequestheader" title="setrequestheader"><code>setRequestHeader(<var>header</var>,
+    <var>value</var>)</code></dfn>, method
+
+   </dt><dd>
+    <p>Each request has a list of request headers with associated values. The
+     <code><a href="#setrequestheader">setRequestHeader()</a></code> method
+     can be used to manipulate those values and set new request headers.</p>
+
+    <p class="note">The <code><a href="#setrequestheader">setRequestHeader()</a></code> method appends a
+     value if the HTTP header given as argument is already part of the list
+     of request headers.</p>
+
+    <p>When invoked, the user agent <em class="ct">must</em> follow the
+     following steps (unless otherwise indicated):</p>
+
+    <ol>
+     <li>
+      <p>If the state of the object is not <a href="#opened-state" title="OPENED state">OPENED</a> raise an
+       <code>INVALID_STATE_ERR</code> exception and terminate these steps.
+
+     </p></li><li>
+      <p>If the <a href="#send-flag"><code>send()</code> flag</a> is "true"
+       raise an <code>INVALID_STATE_ERR</code> exception and terminate these
+       steps.
+
+     </p></li><li>
+      <p>If the <var>header</var> argument does not match the <dfn id="field-name"><code>field-name</code> production</dfn> as defined by
+       section 4.2 of RFC 2616 or is <code>null</code> raise a
+       <code>SYNTAX_ERR</code> exception and terminate these steps. [<cite><a href="#ref-rfc2616">RFC2616</a></cite>]
+
+     </p></li><li>
+      <p>If the <var>value</var> argument is <code>null</code> terminate
+       these steps. (Do not raise an exception.)
+     
+     <!-- undefined is to be treated as null here... -->
+
+     </p></li><li>
+      <p>If the <var>value</var> argument does not match the <dfn id="field-value"><code>field-value</code> production</dfn> as defined by
+       section 4.2 of RFC 2616 raise a <code>SYNTAX_ERR</code> and terminate
+       these steps. [<cite><a href="#ref-rfc2616">RFC2616</a></cite>]
+
+     </p></li><li>
+      <p>For security reasons, these steps <em class="ct">should</em> be
+       terminated if the <var>header</var> argument <a href="#case-insensitive-match" title="case-insensitive
+       match">case-insensitively matches</a> one of the following headers:</p>
+
+      <ul>
+       <li><code>Accept-Charset</code>
+
+       </li><li><code>Accept-Encoding</code>
+
+       </li><li><code>Connection</code>
+
+       </li><li><code>Content-Length</code>
+
+       </li><li><code>Content-Transfer-Encoding</code>
+
+       </li><li><code>Date</code>
+
+       </li><li><code>Expect</code>
+
+       </li><li><code>Host</code>
+
+       </li><li><code>Keep-Alive</code>
+
+       </li><li><code>Referer</code>
+
+       </li><li><code>TE</code>
+
+       </li><li><code>Trailer</code>
+
+       </li><li><code>Transfer-Encoding</code>
+
+       </li><li><code>Upgrade</code>
+
+       </li><li><code>Via</code>
+      </li></ul>
+
+     </li><li>
+      <p>Also for security reasons, these steps <em class="ct">should</em> be
+       terminated if the start of the <var>header</var> argument <a href="#case-insensitive-match" title="case-insensitive
+       match">case-insensitively matches</a> <code>Proxy-</code> or
+       <code>Sec-</code>.
+
+     </p></li><li>
+      <p>If the <var>header</var> argument is not in the list of request
+       headers append the <var>header</var> with its associated
+       <var>value</var> to the list and terminate these steps.
+
+     </p></li><li>
+      <p>If the <var>header</var> argument is in the list of request headers
+       either use multiple headers, combine the values or use a combination
+       of those (section 4.2, RFC 2616). [<cite><a href="#ref-rfc2616">RFC2616</a></cite>]
+     
+     <!-- XXX it seems UAs always combine the values -->
+    </p></li></ol>
+
+    <p class="note">See also the <code><a href="#send">send()</a></code> method
+     regarding user agent header handling for caching, authentication,
+     proxies, and cookies.</p>
+
+    <div class="example">
+     <pre><code>// The following script:
+var client = new XMLHttpRequest();
+client.open('GET', 'demo.cgi');
+client.setRequestHeader('X-Test', 'one');
+client.setRequestHeader('X-Test', 'two');
+client.send();
+
+// ...would result in the following header being sent:
+...
+X-Test: one, two
+...</code></pre>
+    </div>
+
+   </dd><dt><dfn id="send" title="send"><code>send(<var>data</var>)</code></dfn>,
+    method
+
+   </dt><dd>
+    <p>The <code><a href="#send">send()</a></code> method initiates the
+     request and its optional argument provides the <a href="#entity-body">entity body</a>.</p>
+
+    <p class="note">Authors are encouraged to ensure that they have specified
+     the <code>Content-Type</code> header via <code><a href="#setrequestheader">setRequestHeader()</a></code> before invoking
+     <code><a href="#send">send()</a></code> with a non-<code>null</code>
+     <var>data</var> argument.</p>
+
+    <p>When invoked, the user agent <em class="ct">must</em> follow the
+     following steps (unless otherwise noted). Note that this algorithm might
+     get aborted if the <code><a href="#open">open()</a></code> or <code><a href="#abort">abort()</a></code> method is invoked. When the <dfn id="abort-send-algorithm" title="abort send()"><code>send()</code>
+     algorithm is aborted</dfn> the user agent <em class="ct">must</em>
+     terminate the algorithm after finishing the step it is on.</p>
+
+    <p class="note">The following algorithm can not be aborted through script
+     when <var>async</var> is <code>false</code>. It can only be aborted when
+     <var>async</var> is <code>true</code> and only after the method call has
+     returned.</p>
+
+    <ol>
+     <li>
+      <p>If the state of the object is not <a href="#opened-state" title="OPENED state">OPENED</a> raise an
+       <code>INVALID_STATE_ERR</code> exception and terminate these steps.
+
+     </p></li><li>
+      <p>If the <a href="#send-flag"><code>send()</code> flag</a> is "true"
+       raise an <code>INVALID_STATE_ERR</code> exception and terminate these
+       steps.
+
+     </p></li><li>
+      <p>If <var>async</var> is <code>true</code> set the <a href="#send-flag"><code>send()</code> flag</a> to "true".
+
+     </p></li><li>
+      <p>If <var>stored method</var> is <code>GET</code> act as if the
+       <var>data</var> argument is <code>null</code>.</p>
+
+      <p>If the <var>data</var> argument has not been omitted and is not
+       <code>null</code> use it for the <dfn id="entity-body">entity body</dfn>
+       as defined by section 7.2 of RFC 2616 observing the following rules:
+       [<cite><a href="#ref-rfc2616">RFC2616</a></cite>]</p>
+
+      <dl class="switch">
+       <dt><var>data</var> is a <code>DOMString</code>
+
+       </dt><dd>
+        <p>Encode <var>data</var> using UTF-8 for transmission.</p>
+
+        <p>If a <code>Content-Type</code> header is set using <code><a href="#setrequestheader">setRequestHeader()</a></code> set the
+         <code>charset</code> parameter of that header to <code>UTF-8</code>.</p>
+
+       </dd><dt><var>data</var> is a <code>Document</code>
+
+       </dt><dd>
+        <p>Serialize <var>data</var> into a namespace well-formed XML
+         document and encoded using the encoding given by
+         <code><var>data</var>.inputEncoding</code>, when not
+         <code>null</code>, or UTF-8 otherwise. Or, if this fails because the
+         <code>Document</code> cannot be serialized act as if <var>data</var>
+         is <code>null</code>.</p>
+
+        <p>If no <code>Content-Type</code> header has been set using <code><a href="#setrequestheader">setRequestHeader()</a></code> append a
+         <code>Content-Type</code> header to the list of request headers with
+         a value of <code>application/xml;charset=<var>charset</var></code>
+         where <var>charset</var> is the encoding used to encode the
+         document.</p>
+
+        <p class="note">Subsequent changes to the <code>Document</code> have no
+         effect on what is submitted.</p>
+
+       </dd><dt><var>data</var> is not a <code>DOMString</code> or
+        <code>Document</code>
+
+       </dt><dd>
+        <p>Use the stringification mechanisms of the host language on
+         <var>data</var> and treat the result as if <var>data</var> is a
+         <code>DOMString</code>. Or, if this fails, act as if the
+         <var>data</var> argument is <code>null</code>.
+      </p></dd></dl>
+
+      <p>If the <var>data</var> argument has been omitted, or is
+       <code>null</code>, no entity body is used in the request.</p>
+
+     </li><li>
+      <p>Make a request to <var>stored url</var>, using HTTP method
+       <var>stored method</var>, user <var>stored user</var> (if provided)
+       and password <var>stored password</var> (if provided), taking into
+       account the entity body, list of request headers and the rules listed
+       directly after this set of steps.
+
+     </p></li><li>
+      <p>Synchronously dispatch a <code><a href="#readystatechange">readystatechange</a></code> event on the
+       object.</p>
+
+      <p class="note">The state of the object does not change. The event is
+       dispatched for historical reasons.</p>
+
+     </li><li>
+      <p>If <var>async</var> is <code>true</code> return the <code><a href="#send">send()</a></code> method call. (Do not terminate the
+       steps in the algorithm though.)
+
+     </p></li><li>
+      <p>While downloading the resource the following rules are to be
+       observed.</p>
+
+      <dl class="switch">
+       <dt>If the response is an HTTP redirect
+
+       </dt><dd>
+        <p>If the redirect does not violate security (it is <a href="#same-origin">same-origin</a> for instance) or infinite loop
+         precautions and the scheme is supported transparently follow the
+         redirect and go to the start of this step (step 8).</p>
+
+        <p class="note">HTTP places requirements on the user agent regarding
+         the preservation of the request method and entity body during
+         redirects, and also requires users to be notified of certain kinds
+         of automatic redirections.</p>
+        <!-- Arguably HTTP should be fixed for the latter case. No browser
+        follows that as far as I know. -->
+        
+        <p>Otherwise, follow the following set of steps:</p>
+
+        <ol>
+         <li>
+          <p>Set the <a href="#response-entity-body">response entity body</a>
+           to "null", the <a href="#error-flag">error flag</a> to "true" and
+           reset the list of request headers.
+
+         </p></li><li>
+          <p>Synchronously switch the state to <a href="#done-state" title="DONE state">DONE</a>.
+
+         </p></li><li>
+          <p>If <var>async</var> is set to <code>false</code> raise a
+           <code><a href="#network-err">NETWORK_ERR</a></code> exception and
+           terminate the overall algorithm.
+
+         </p></li><li>
+          <p>Synchronously dispatch a <code><a href="#readystatechange">readystatechange</a></code> event on the
+           object.
+
+         </p></li><li>
+          <p>Terminate the overall algorithm.
+        </p></li></ol>
+
+        <p class="note">It is likely that a future version of the <code><a href="#xmlhttprequest-object">XMLHttpRequest</a></code> object will
+         dispatch an <code>error</code> event here as well.</p>
+
+       </dd><dt>If the user cancels the download
+
+       </dt><dd>
+        <p>Run the following set of steps:</p>
+
+        <ol>
+         <li>
+          <p>Set the <a href="#response-entity-body">response entity body</a>
+           to "null", the <a href="#error-flag">error flag</a> to "true" and
+           reset the list of request headers.
+
+         </p></li><li>
+          <p>Synchronously switch the state to <a href="#done-state" title="DONE state">DONE</a>.
+
+         </p></li><li>
+          <p>If <var>async</var> is set to <code>false</code> raise an
+           <code><a href="#abort-err">ABORT_ERR</a></code> exception and
+           terminate the overall algorithm.
+
+         </p></li><li>
+          <p>Synchronously dispatch a <code><a href="#readystatechange">readystatechange</a></code> event on the
+           object.
+
+         </p></li><li>
+          <p>Terminate the overall algorithm.
+        </p></li></ol>
+
+        <p class="note">It is likely that a future version of the <code><a href="#xmlhttprequest-object">XMLHttpRequest</a></code> object will
+         dispatch an <code title="">abort</code> event here as well.</p>
+
+       </dd><dt>In case of network errors
+
+       </dt><dd>
+        <p>In case of DNS errors, or other type of network errors, run the
+         following set of steps. <span class="note">This does not include HTTP
+         responses that indicate some type of error, such as HTTP status code
+         410.</span></p>
+
+        <ol>
+         <li>
+          <p>Set the <a href="#response-entity-body">response entity body</a>
+           to "null", the <a href="#error-flag">error flag</a> to "true" and
+           reset the list of request headers.
+
+         </p></li><li>
+          <p>Synchronously switch the state to <a href="#done-state" title="DONE state">DONE</a>.
+
+         </p></li><li>
+          <p>If <var>async</var> is set to <code>false</code> raise a
+           <code><a href="#network-err">NETWORK_ERR</a></code> exception and
+           terminate the overall algorithm.
+
+         </p></li><li>
+          <p>Synchronously dispatch a <code><a href="#readystatechange">readystatechange</a></code> event on the
+           object.
+
+         </p></li><li>
+          <p>Terminate the overall algorithm.
+        </p></li></ol>
+
+        <p class="note">It is likely that a future version of the <code><a href="#xmlhttprequest-object">XMLHttpRequest</a></code> object will
+         dispatch an <code>error</code> event here as well.</p>
+
+       </dd><dt>Once all HTTP headers have been received
+
+       </dt><dd>
+        <p>If all HTTP headers have been received, before receiving the
+         message body (if any), run the following steps:</p>
+
+        <ol>
+         <li>
+          <p>Synchronously switch the state to <a href="#headers-received-state" title="HEADERS_RECEIVED
+           state">HEADERS_RECEIVED</a>.
+
+         </p></li><li>
+          <p>Synchronously dispatch a <code><a href="#readystatechange">readystatechange</a></code> event on the
+           object.
+        </p></li></ol>
+
+       </dd><dt>Once the first byte (or more) of the response entity body has been
+        received
+
+       </dt><dt>If there is no response entity body
+
+       </dt><dd>
+        <ol>
+         <li>
+          <p>Synchronously switch the state to <a href="#loading-state" title="LOADING state">LOADING</a>.
+
+         </p></li><li>
+          <p>Synchronously dispatch a <code><a href="#readystatechange">readystatechange</a></code> event on the
+           object.
+        </p></li></ol>
+      </dd></dl>
+
+      <p>Finally, once the complete resource has been downloaded go to the
+       next step.</p>
+
+     </li><li>
+      <p>When the request has successfully completed loading, synchronously
+       switch the state to <a href="#done-state" title="DONE state">DONE</a>
+       and then synchronously dispatch a <code><a href="#readystatechange">readystatechange</a></code> event on the
+       object and return the method call in case of <var>async</var> being
+       <code>false</code>.
+    </p></li></ol>
+
+    <p>If the user agent allows the user to configure a proxy it <em class="ct">should</em> modify the request appropriately; <abbr title="in
+     other words">i.e.</abbr>, connect to the proxy host instead of the
+     origin server, modify the <code>Request-Line</code> and send
+     <code>Proxy-Authorization</code> headers as specified.</p>
+
+    <p>If the user agent supports HTTP Authentication it <em class="ct">should</em> consider requests originating from this object to
+     be part of the protection space that includes the accessed URIs and send
+     <code>Authorization</code> headers and handle <code>401
+     Unauthorized</code> requests appropriately. If authentication fails,
+     user agents <em class="ct">should</em> prompt the users for credentials.
+     [<cite><a href="#ref-rfc2617">RFC2617</a></cite>]</p>
+
+    <p>If the user agent supports HTTP State Management it <em class="ct">should</em> persist, discard and send cookies (as received in
+     the <code>Set-Cookie</code> and <code>Set-Cookie2</code> response
+     headers, and sent in the <code>Cookie</code> header) as applicable.
+     [<cite><a href="#ref-rfc2965">RFC2965</a></cite>]</p>
+    <!-- It has been said that RFC2965 does not match reality. -->
+    <p>If the user agent implements a HTTP cache it <em class="ct">should</em>
+     respect <code>Cache-Control</code> request headers set by the script
+     (<abbr title="for example">e.g.</abbr>, <code>Cache-Control:
+     no-cache</code> bypasses the cache). It <em class="ct">must not</em> send
+     <code>Cache-Control</code> or <code>Pragma</code> request headers
+     automatically unless the user explicitly requests such behavior
+     (<abbr>e.g.</abbr>, by (force-)reloading the page). <code>304 Not
+     Modified</code> responses that are a result of a user agent generated
+     conditional request <em class="ct">must</em> be presented as <code>200
+     OK</code> responses with the appropriate content. The user agent <em class="ct">must</em> allow scripts to override automatic cache validation
+     by setting request headers (e.g., <code>If-None-Match</code>,
+     <code>If-Modified-Since</code>), in which case <code>304 Not
+     Modified</code> responses <em class="ct">must</em> be passed through.
+     [<cite><a href="#ref-rfc2616">RFC2616</a></cite>]</p>
+
+    <p>If the user agent implements server-driven content-negotiation it <em class="ct">should</em> set <code>Accept-Encoding</code> and
+     <code>Accept-Charset</code> headers as appropriate; it <em class="ct">must
+     not</em> automatically set the <code>Accept</code>. If the
+     <code>Accept-Language</code> header is not set using <code><a href="#setrequestheader">setRequestHeader()</a></code> user agents <em class="ct">should</em> provide it. Responses to such requests <em class="ct">must</em> have the content-encodings automatically decoded.
+     [<cite><a href="#ref-rfc2616">RFC2616</a></cite>]</p>
+
+   </dd><dt><dfn id="abort"><code>abort()</code></dfn>, method
+
+   </dt><dd>
+    <p>When invoked, the user agent <em class="ct">must</em> run the following
+     steps (unless otherwise noted):</p>
+
+    <ol>
+     <li>
+      <p><a href="#abort-send-algorithm" title="abort send()">Abort the
+       <code>send()</code> algorithm</a>, set the <a href="#response-entity-body">response entity body</a> to "null", the
+       <a href="#error-flag">error flag</a> to "true" and remove any
+       registered request headers.
+
+     </p></li><li>
+      <p>The user agent <em class="ct">should</em> cancel any network activity
+       for which the object is responsible.
+
+     </p></li><li>
+      <p>If the state is <a href="#unsent-state" title="UNSENT
+       state">UNSENT</a>, <a href="#opened-state" title="OPENED
+       state">OPENED</a> and the <a href="#send-flag"><code>send()</code>
+       flag</a> is "false", or <a href="#done-state" title="DONE
+       state">DONE</a> go to the next step.</p>
+
+      <p>Otherwise, switch the state to <a href="#done-state" title="DONE
+       state">DONE</a>, set the <a href="#send-flag"><code>send()</code>
+       flag</a> to "false" and synchronously dispatch a <code><a href="#readystatechange">readystatechange</a></code> event on the
+       object.</p>
+
+     </li><li>
+      <p>Switch the state to <a href="#unsent-state" title="UNSENT
+       state">UNSENT</a>. (Do not dispatch the <code><a href="#readystatechange">readystatechange</a></code> event.)</p>
+
+      <p class="note">It is likely that a future version of the <code><a href="#xmlhttprequest-object">XMLHttpRequest</a></code> object will
+       dispatch an <code title="">abort</code> event here as well.</p>
+    </li></ol>
+
+   </dd><dt><dfn id="getallresponseheaders"><code>getAllResponseHeaders()</code></dfn>,
+    method
+
+   </dt><dd>
+    <p>When invoked, the user agent <em class="ct">must</em> run the following
+     steps:</p>
+
+    <ol>
+     <li>
+      <p>If the state is <a href="#unsent-state" title="UNSENT
+       state">UNSENT</a> or <a href="#opened-state" title="OPENED
+       state">OPENED</a> raise an <code>INVALID_STATE_ERR</code> exception
+       and terminate these steps.
+
+     </p></li><li>
+      <p>If the <a href="#error-flag">error flag</a> is "true" return the
+       empty string and terminate these steps.
+
+     </p></li><li>
+      <p>Return all the HTTP headers, as a single string, with each header
+       line separated by a U+000D (CR) U+000A (LF) pair excluding the status
+       line.
+    </p></li></ol>
+
+    <div class="example">
+     <pre><code>// The following script:
+var client = new XMLHttpRequest();
+client.open("GET", "test.txt", true);
+client.send();
+client.onreadystatechange = function() {
+ if(this.readyState == 3) {
+  print(this.getAllResponseHeaders());
+ }
+}
+
+// ...should output something similar to the following text:
+Date: Sun, 24 Oct 2004 04:58:38 GMT
+Server: Apache/1.3.31 (Unix)
+Keep-Alive: timeout=15, max=99
+Connection: Keep-Alive
+Transfer-Encoding: chunked
+Content-Type: text/plain; charset=utf-8</code></pre>
+    </div>
+
+   </dd><dt><dfn id="getresponseheader" title="getresponseheader"><code>getResponseHeader(<var>header</var>)</code></dfn>,
+    method
+
+   </dt><dd>
+    <p>When the method is invoked, the user agent <em class="ct">must</em> run
+     the following steps:</p>
+
+    <ol>
+     <li>
+      <p>If the state is <a href="#unsent-state" title="UNSENT
+       state">UNSENT</a> or <a href="#opened-state" title="OPENED
+       state">OPENED</a> raise an <code>INVALID_STATE_ERR</code> exception
+       and terminate these steps.
+
+     </p></li><li>
+      <p>If the <var>header</var> argument does not match the <a href="#field-name"><code>field-name</code> production</a> return
+       <code>null</code> and terminate these steps.
+
+     </p></li><li>
+      <p>If the <a href="#error-flag">error flag</a> is "true" return
+       <code>null</code> and terminate these steps.
+
+     </p></li><li>
+      <p>If the <var>header</var> argument <a href="#case-insensitive-match" title="case-insensitive match">case-insensitively matches</a> multiple
+       HTTP headers for the last request sent, return the values of these
+       headers as a single concatenated string separated from each other by
+       an U+002C followed by an U+0020 character and terminate these steps.
+
+     </p></li><li>
+      <p>If the <var>header</var> argument <a href="#case-insensitive-match" title="case-insensitive match">case-insensitively matches</a> a single
+       HTTP header for the last request sent return the value of that header
+       and terminate these steps.
+
+     </p></li><li>
+      <p>Return <code>null</code>.
+    </p></li></ol>
+
+    <div class="example">
+     <pre><code>// The following script:
+var client = new XMLHttpRequest();
+client.open("GET", "test.txt", true);
+client.send();
+client.onreadystatechange = function() {
+ if(this.readyState == 3) {
+  print(client.getResponseHeader("Content-Type"));
+ }
+}
+
+// ...should output something similar to the following text:
+text/plain; charset=utf-8</code></pre>
+    </div>
+
+   </dd><dt><dfn id="responsetext"><code>responseText</code></dfn> of type
+    <code>DOMString</code>, readonly
+
+   </dt><dd>
+    <p>On getting, the user agent <em class="ct">must</em> run the following
+     steps:</p>
+
+    <ol>
+     <li>
+      <p>If the state is not <a href="#loading-state" title="LOADING
+       state">LOADING</a> or <a href="#done-state" title="DONE
+       state">DONE</a> return the empty string and terminate these steps.
+
+     </p></li><li>
+      <p>Return the <a href="#text-response-entity-body">text response entity
+       body</a>.
+    </p></li></ol>
+
+   </dd><dt><dfn id="responsexml"><code>responseXML</code></dfn> of type
+    <code>Document</code>, readonly
+
+   </dt><dd>
+    <p>On getting, the user agent <em class="ct">must</em> run the following
+     steps:</p>
+
+    <ol>
+     <li>
+      <p>If the state is not <a href="#done-state" title="DONE
+       state">DONE</a> return <code>null</code> and terminate these steps.
+
+     </p></li><li>
+      <p>Return the <a href="#xml-response-entity-body">XML response entity
+       body</a>.
+    </p></li></ol>
+
+   </dd><dt><dfn id="status"><code>status</code></dfn> of type <code>unsigned
+    short</code>, readonly
+
+   </dt><dd>
+    <p>On getting, if available, it <em class="ct">must</em> return the HTTP
+     status code sent by the server (typically <code>200</code> for a
+     successful request). Otherwise, if not available, the user agent <em class="ct">must</em> raise an <code>INVALID_STATE_ERR</code> exception.</p>
+
+   </dd><dt><dfn id="statustext"><code>statusText</code></dfn> of type
+    <code>DOMString</code>, readonly
+
+   </dt><dd>
+    <p>On getting, if available, it <em class="ct">must</em> return the HTTP
+     status text sent by the server (appears after the status code).
+     Otherwise, if not available, the user agent <em class="ct">must</em> raise
+     an <code>INVALID_STATE_ERR</code> exception.</p>
+  </dd></dl>
+
+  <h3 id="events"><span class="secno">4.1 </span>Events for the <code title="">XMLHttpRequest</code> Object</h3>
+
+  <p>This section describes the various events that can be dispatched on
+   objects implementing the <code><a href="#xmlhttprequest-object">XMLHttpRequest</a></code> interface. For
+   this version of the specification only one event is defined.
+
+  </p><dl>
+   <dt><dfn id="readystatechange"><code>readystatechange</code></dfn>
+
+   </dt><dd>When the user agent dispatches a <code title="">readystatechange</code> event (as indicated above) it <em class="ct">must not</em> bubble, <em class="ct">must not</em> be cancelable
+    and <em class="ct">must</em> implement the <code>Event</code> interface.
+    Its <code>namespaceURI</code> attribute <em class="ct">must</em> be
+    <code>null</code>. [<cite><a href="#ref-dom2events">DOM2Events</a></cite>]
+  </dd></dl>
+
+  <h3 id="exceptions"><span class="secno">4.2 </span>Exceptions for the <code title="">XMLHttpRequest</code> Object</h3>
+
+  <p>Several algorithms in this specification may result in an exception
+   being thrown. These exceptions are all part of the group
+   <code>ExceptionCode</code> and use the <code>DOMException</code> object
+   which is defined in DOM Level 3 Core. In addition this specification
+   extends the <code>ExceptionCode</code> group with several new constants as
+   indicated below. [<cite><a href="#ref-dom3core">DOM3Core</a></cite>]
+
+  </p><pre class="idl">const unsigned short <a href="#security-err">SECURITY_ERR</a> = 18;
+const unsigned short <a href="#network-err">NETWORK_ERR</a> = 101;
+const unsigned short <a href="#abort-err">ABORT_ERR</a> = 102;</pre>
+
+  <p>The <dfn id="security-err"><code>SECURITY_ERR</code></dfn> exception is
+   raised if an attempt is made to perform an operation or access some data
+   in a way that would be a security risk or a violation of the user agent's
+   security policy.</p>
+  <!-- http://lists.w3.org/Archives/Public/public-webapi/2006May/0027.html -->
+
+  <p class="note">The <code title="">SECURITY_ERR</code> exception is expected
+   to be eventually folded into an update of the the DOM Level 3 Core
+   specification with an equivalent definition and identical constant value.
+   Until that happens it is defined here to guide implementors. (This is also
+   the reason the constant value is not in line with the other exceptions.)
+
+  </p><p>The <dfn id="network-err"><code>NETWORK_ERR</code></dfn> exception is
+   raised when a network error occurs in synchronous requests.
+
+  </p><p>The <dfn id="abort-err"><code>ABORT_ERR</code></dfn> exception is raised
+   when the user aborts a request in synchronous requests.
+
+  </p><h2 class="no-num" id="notcovered">Not in this Specification</h2>
+
+  <p><em>This section is non-normative.</em>
+
+  </p><p>This specification does not include the following features which are
+   being considered for a future version of this specification:
+
+  </p><ul>
+   <li><code>load</code> event and <code>onload</code> attribute;
+
+   </li><li><code>error</code> event and <code>onerror</code> attribute;
+
+   </li><li><code>progress</code> event and <code>onprogress</code> attribute;
+
+   </li><li><code title="">abort</code> event and <code>onabort</code> attribute;
+
+   </li><li>Timers have been suggested, perhaps an <code>ontimeout</code>
+    attribute;
+
+   </li><li>Property to disable following redirects;
+
+   </li><li><code title="">responseXML</code> for <code>text/html</code>
+    documents;
+
+   </li><li>Cross-site <code title="">XMLHttpRequest</code>;
+
+   </li><li><code>responseBody</code> to deal with byte streams;
+
+   </li><li><code>overrideMimeType</code> to fix up MIME types;
+
+   </li><li><code>getRequestHeader()</code> and
+    <code>removeRequestHeader()</code>.
+  </li></ul>
+
+  <h2 class="no-num" id="bibref">References</h2>
+
+  <dl>
+   <dt>[<dfn id="ref-dom2events">DOM2Events</dfn>]
+
+   </dt><dd><cite><a href="http://www.w3.org/TR/DOM-Level-2-Events/">Document
+    Object Model (DOM) Level 2 Events Specification</a></cite>, T. Pixley,
+    editor. W3C, November 2000.
+
+   </dd><dt>[<dfn id="ref-dom3core">DOM3Core</dfn>]
+
+   </dt><dd><cite><a href="http://www.w3.org/TR/DOM-Level-3-Core">Document Object
+    Model (DOM) Level 3 Core Specification</a></cite>, A. Le Hors, P. Le
+    Hégaret, L. Wood, G. Nicol, J. Robie, M. Champion, S. Byrne,
+    editors. W3C, April 2004.
+
+   </dd><dt>[<dfn id="ref-ecmascript">ECMAScript</dfn>]
+
+   </dt><dd><cite><a href="http://www.ecma-international.org/publications/standards/Ecma-262.htm">ECMAScript
+    Language Specification</a></cite>, Third Edition. ECMA, December 1999.
+
+   </dd><dt>[<dfn id="ref-html5">HTML5</dfn>]
+
+   </dt><dd><cite><a href="http://www.w3.org/html/wg/html5/">HTML&nbsp;5</a></cite> (work in
+    progress), I. Hickson, D. Hyatt, editors. W3C, 2008.
+
+   </dd><dd><cite><a href="http://www.whatwg.org/specs/web-apps/current-work/">HTML&nbsp;5</a></cite>
+    (work in progress), I. Hickson, editor. WHATWG, 2008.
+
+   </dd><dt>[<dfn id="ref-rfc2119">RFC2119</dfn>]
+
+   </dt><dd><cite><a href="http://ietf.org/rfc/rfc2119">Key words for use in RFCs
+    to Indicate Requirement Levels</a></cite>, S. Bradner. IETF, March 1997.
+
+   </dd><dt>[<dfn id="ref-rfc2616">RFC2616</dfn>]
+
+   </dt><dd><cite><a href="http://ietf.org/rfc/rfc2616">Hypertext Transfer
+    Protocol -- HTTP/1.1</a></cite>, R. Fielding, J. Gettys, J. Mogul, H.
+    Frystyk, L. Masinter, P. Leach, T. Berners-Lee, editors. IETF, June 1999.
+
+   </dd><dt>[<dfn id="ref-rfc2617">RFC2617</dfn>]
+
+   </dt><dd><cite><a href="http://ietf.org/rfc/rfc2617">HTTP Authentication: Basic
+    and Digest Access Authentication</a></cite>, P. Hallam-Baker, J.
+    Hostetler, S. Lawrence, P. Leach, A. Luotonen, L. Stewart, editors. IETF,
+    June 1999.
+
+   </dd><dt>[<dfn id="ref-rfc2965">RFC2965</dfn>]
+
+   </dt><dd><cite><a href="http://ietf.org/rfc/rfc2965">HTTP State Management
+    Mechanism</a></cite>, D. Kristol, L. Montulli, editors. IETF, October
+    2000.
+
+   </dd><dt>[<dfn id="ref-rfc3986">RFC3986</dfn>]
+
+   </dt><dd><cite><a href="http://ietf.org/rfc/rfc3986">Uniform Resource
+    Identifier (URI): Generic Syntax</a></cite>, T. Berners-Lee, R. Fielding,
+    L. Masinter, editors. IETF, January 2005.
+
+   </dd><dt>[<dfn id="ref-rfc3987">RFC3987</dfn>]
+
+   </dt><dd><cite><a href="http://ietf.org/rfc/rfc3987">Internationalized Resource
+    Identifiers (IRIs)</a></cite>, M. Duerst, M. Suignard, editors. IETF,
+    January 2005.
+
+   </dd><dt>[<dfn id="ref-xml">XML</dfn>]
+
+   </dt><dd><cite><a href="http://www.w3.org/TR/xml/">Extensible Markup Language
+    (XML) 1.0 (Fourth Edition)</a></cite>, T. Bray, J. Paoli, C.
+    Sperberg-McQueen, E. Maler, F. Yergeau, editors. W3C, September 2006.
+
+   </dd><dt>[<dfn id="ref-xmlns">XMLNS</dfn>]
+
+   </dt><dd><cite><a href="http://www.w3.org/TR/xml-names/">Namespaces in XML
+    (Second Edition)</a></cite>, T. Bray, D. Hollander, A. Layman, R. Tobin,
+    editors. W3C, August 2006.
+  </dd></dl>
+
+  <h2 class="no-num" id="acknowledgments">Acknowledgments</h2>
+
+  <p>The editor would like to thank Addison Phillips, Ahmed Kamel, Alex
+   Hopmann, Alex Vincent, Alexey Proskuryakov, Asbjørn Ulsberg, Boris
+   Zbarsky, Björn Höhrmann, Cameron McCormack, Christophe Jolif,
+   Charles McCathieNevile, Dan Winship, David Håsäther, Dean
+   Jackson, Denis Sureau, Doug Schepers, Douglas Livingstone, Elliotte
+   Harold, Eric Lawrence, Geoffrey Sneddon, Gideon Cohn, Gorm Haug Eriksen,
+   Hallvord R. M. Steen, Håkon Wium Lie, Ian Davis, Ian Hickson, Ivan
+   Herman, Jeff Walden, Jens Lindström, Jim Deegan, Jim Ley, Joe Farro,
+   Jonas Sicking, Julian Reschke, Karl Dubost, Maciej Stachowiak, Magnus
+   Kristiansen, Marc Hadley, Marcos Caceres, Mark Baker, Mark Nottingham,
+   Mohamed Zergaoui, Pawel Glowacki, Robin Berjon, Ruud Steltenpool, Simon
+   Pieters, Stewart Brodie, Sunava Dutta, Tom Magliery and Zhenbin Xu for
+   their contributions to this specification.
+
+  </p><p>Special thanks to the Microsoft employees who first implemented the
+   <code title="">XMLHttpRequest</code> interface, which was first widely
+   deployed by the Windows Internet Explorer browser.
+
+  </p><p>Special thanks also to the WHATWG for drafting an initial version of
+   this specification in their Web Applications 1.0 document (now renamed to
+   HTML&nbsp;5). [<cite><a href="#ref-html5">HTML5</a></cite>]
+
+  </p><p>Thanks also to all those who have helped to improve this specification
+   by sending suggestions and corrections. (Please, keep bugging us with your
+   issues!)
+</p></body></html>
