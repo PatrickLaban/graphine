@@ -686,6 +686,7 @@ class GraphPerformanceTest(unittest.TestCase):
 if __name__ == "__main__":
 	GraphCorrectnessTest = unittest.TestLoader().loadTestsFromTestCase(GraphCorrectnessTest)
 	GraphPropertiesTest = unittest.TestLoader().loadTestsFromTestCase(GraphPropertiesTest)
+	GraphFailureTest = unittest.TestLoader().loadTestsFromTestCase(GraphFailureTest)
 	GraphSearchTest = unittest.TestLoader().loadTestsFromTestCase(GraphSearchTest)
 	NodeCreationTest = unittest.TestLoader().loadTestsFromTestCase(NodeCreationTest)
 	EdgeCreationTest = unittest.TestLoader().loadTestsFromTestCase(EdgeCreationTest)
@@ -693,6 +694,6 @@ if __name__ == "__main__":
 	GetElementsTest = unittest.TestLoader().loadTestsFromTestCase(GetElementsTest)
 	TraversalTest = unittest.TestLoader().loadTestsFromTestCase(TraversalTest)
 	InductionTest = unittest.TestLoader().loadTestsFromTestCase(InductionTest)
-	suites = [GraphCorrectnessTest, NodeCreationTest, EdgeCreationTest, GraphPropertiesTest, GraphSearchTest, EdgeMovementTest, GetElementsTest, TraversalTest, InductionTest]
+	suites = [GraphCorrectnessTest, NodeCreationTest, EdgeCreationTest, GraphPropertiesTest, GraphSearchTest, EdgeMovementTest, GetElementsTest, TraversalTest, InductionTest, GraphFailureTest]
 	CorrectnessTest = unittest.TestSuite(suites)
 	unittest.main()
