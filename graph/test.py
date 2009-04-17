@@ -50,19 +50,11 @@ class NodeCreationTest(unittest.TestCase):
 		self.failUnlessEqual(self.ted.data, {"city":"Atlanta"})
 		self.failUnlessEqual(self.paul.data, {"city":"Austin"})
 
-	def testKey(self):
-		""" test node.key against set values """
-		self.failUnlessEqual(self.jimmy.key, frozenset({("city", "New York")}))
-		self.failUnlessEqual(self.ted.key, frozenset({("city", "Atlanta")}))
-		self.failUnlessEqual(self.dan.key, frozenset({("city", "Seattle")}))
-		self.failUnlessEqual(self.paul.key, frozenset({("city", "Austin")}))
-
 	def testEquality(self):
 		""" test for equality between nodes """
 		snowflake = self.g.add_node(city="Austin")
 		self.failIfEqual(self.dan, snowflake)
 		self.failUnlessEqual(self.paul.data, snowflake.data)
-		self.failUnlessEqual(self.paul.key, snowflake.key)
 		self.failUnlessEqual(self.paul.city, snowflake.city)
 
 	def testOrder(self):
@@ -72,10 +64,6 @@ class NodeCreationTest(unittest.TestCase):
 		self.failUnlessEqual(self.g.order(), 5)
 		self.g.remove_node(temp_node)
 		self.failUnlessEqual(self.g.order(), 4)
-
-	def testCreationFail(self):
-		""" test node creation fail points """
-		self.failUnlessRaises(TypeError, self.g.add_node, "hello")
 
 
 class EdgeCreationTest(unittest.TestCase):
@@ -128,7 +116,6 @@ class EdgeCreationTest(unittest.TestCase):
 		new_trip = self.g.add_edge(self.ted, self.dan, distance=850)
 		lame_trip = self.g.add_edge(self.jimmy, self.ted, distance=850)
 		self.failUnlessEqual(new_trip.data, lame_trip.data)
-		self.failIfEqual(new_trip.key, lame_trip.key)
 
 	def testEdgeProperties(self):
 		""" ensure that the edges properties are being set properly """
@@ -151,9 +138,9 @@ class GraphPropertiesTest(unittest.TestCase):
 	def setUp(self):
 		# WARNING: Errors is setup will cuase unkown test failures
 		self.g = Graph()
-		self.n1 = self.g.add_node(name="Geremy")
-		self.n2 = self.g.add_node(name="Bob")
-		self.n3 = self.g.add_node(name="Bill")
+		self.n1 = self.g.add_node(first_name="Geremy")
+		self.n2 = self.g.add_node(first_name="Bob")
+		self.n3 = self.g.add_node(first_name="Bill")
 		self.e1 = self.g.add_edge(self.n1, self.n2)
 		self.e2 = self.g.add_edge(self.n2, self.n3)
 		self.g.remove_node(self.n1)
@@ -166,9 +153,9 @@ class GraphPropertiesTest(unittest.TestCase):
 		self.failUnlessEqual(self.e2 in self.g, True)
 
 	def testGetItem(self):
-		self.failUnlessEqual(self.g[self.n2.key], self.n2)
-		self.failUnlessEqual(self.g[self.e2.key], self.e2)
-		self.failUnlessRaises(KeyError, lambda: self.g[self.e1.key])
+		self.failUnlessEqual(self.g[self.n2.name], self.n2)
+		self.failUnlessEqual(self.g[self.e2.name], self.e2)
+		self.failUnlessRaises(KeyError, lambda: self.g[self.e1.name])
 
 	def testOrder(self):
 		self.failUnlessEqual(self.g.order(), 2)
@@ -181,22 +168,22 @@ class GraphSearchTest(unittest.TestCase):
 
 	def setUp(self):
 		self.g = Graph()
-		self.n1 = self.g.add_node(name="Geremy")
-		self.n2 = self.g.add_node(name="Bob")
-		self.n3 = self.g.add_node(name="Bill")
-		self.n4 = self.g.add_node(name="Bill")
+		self.n1 = self.g.add_node(first_name="Geremy")
+		self.n2 = self.g.add_node(first_name="Bob")
+		self.n3 = self.g.add_node(first_name="Bill")
+		self.n4 = self.g.add_node(first_name="Bill")
 		self.e1 = self.g.add_edge(self.n1, self.n2)
 		self.e2 = self.g.add_edge(self.n2, self.n3)
 		self.e3 = self.g.add_edge(self.n4, self.n3, weight=5)
 		self.g.remove_node(self.n1)
 
 	def testNodeSearch(self):
-		l = list(self.g.search_nodes(name="Geremy"))
+		l = list(self.g.search_nodes(first_name="Geremy"))
 		self.failUnlessEqual(l, [])
-		l = list(self.g.search_nodes(name="Bob"))
+		l = list(self.g.search_nodes(first_name="Bob"))
 		self.failUnlessEqual(l, [self.n2])
-		l = list(self.g.search_nodes(name="Bill"))
-		self.failUnlessEqual(l, [self.n3, self.n4])
+		l = list(self.g.search_nodes(first_name="Bill"))
+		self.failUnlessEqual(set(l), {self.n3, self.n4})
 
 	def testEdgeSearch(self):
 		l = list(self.g.search_edges(weight=5))
@@ -210,17 +197,17 @@ class EdgeMovementTest(unittest.TestCase):
 
 	def setUp(self):
 		self.g = Graph()
-		self.geremy = self.g.add_node(name="Geremy")
-		self.bill = self.g.add_node(name="Bill")
-		self.bob = self.g.add_node(name="Bob")
-		self.tom = self.g.add_node(name="Tom")
-		self.e = self.g.add_edge(self.geremy, self.bob, name="people")
+		self.geremy = self.g.add_node(first_name="Geremy")
+		self.bill = self.g.add_node(first_name="Bill")
+		self.bob = self.g.add_node(first_name="Bob")
+		self.tom = self.g.add_node(first_name="Tom")
+		self.e = self.g.add_edge(self.geremy, self.bob, first_name="people")
 
 	def testEdgeMoving(self):
 		e2 = self.g.move_edge(self.e, start=self.bill, end=self.tom)
 		self.failUnless(self.e is e2)
 		self.failUnlessEqual(self.e, e2)
-		self.failUnlessEqual(e2.name, "people")
+		self.failUnlessEqual(e2.first_name, "people")
 		self.failUnlessEqual(e2.start, self.bill)
 		self.failUnlessEqual(e2.end, self.tom)
 
@@ -260,13 +247,13 @@ class TraversalTest(unittest.TestCase):
 		g = Graph()
 		nodes = {}
 		edges = []
-		nodes["A"] = g.add_node(name="A")
-		nodes["B"] = g.add_node(name="B")
-		nodes["C"] = g.add_node(name="C")
-		nodes["D"] = g.add_node(name="D")
-		nodes["E"] = g.add_node(name="E")
-		nodes["F"] = g.add_node(name="F")
-		nodes["G"] = g.add_node(name="G")
+		nodes["A"] = g.add_node(first_name="A")
+		nodes["B"] = g.add_node(first_name="B")
+		nodes["C"] = g.add_node(first_name="C")
+		nodes["D"] = g.add_node(first_name="D")
+		nodes["E"] = g.add_node(first_name="E")
+		nodes["F"] = g.add_node(first_name="F")
+		nodes["G"] = g.add_node(first_name="G")
 		edges += [g.add_edge(nodes["A"], nodes["B"])]
 		edges += [g.add_edge(nodes["B"], nodes["D"])]
 		edges += [g.add_edge(nodes["B"], nodes["F"])]
@@ -282,7 +269,7 @@ class TraversalTest(unittest.TestCase):
 		nodes = self.nodes
 		edges = self.edges
 		g = self.g
-		positions = {node.name:pos for pos, node in enumerate(g.depth_first_traversal(nodes["A"]))} 
+		positions = {node.first_name:pos for pos, node in enumerate(g.depth_first_traversal(nodes["A"]))} 
 		self.failUnless(positions["A"] < positions["B"])
 		self.failUnless(positions["A"] < positions["C"])
 		self.failUnless(positions["A"] < positions["E"])
@@ -291,11 +278,11 @@ class TraversalTest(unittest.TestCase):
 		self.failUnless(positions["F"] > min(positions["B"], positions["E"]))
 
 		# test for equivalence problem
-		a = g.add_node(name="A")
-		b1 = g.add_node(name="B")
-		b2 = g.add_node(name="B")
-		c = g.add_node(name="C")
-		d = g.add_node(name="D")
+		a = g.add_node(first_name="A")
+		b1 = g.add_node(first_name="B")
+		b2 = g.add_node(first_name="B")
+		c = g.add_node(first_name="C")
+		d = g.add_node(first_name="D")
 		g.add_edge(a, b1)
 		g.add_edge(a, b2)
 		g.add_edge(b1, c)
@@ -306,7 +293,7 @@ class TraversalTest(unittest.TestCase):
 		g = self.g
 		nodes = self.nodes
 		edges = self.edges
-		positions = {node.name:pos for pos, node in enumerate(g.breadth_first_traversal(nodes["A"]))}
+		positions = {node.first_name:pos for pos, node in enumerate(g.breadth_first_traversal(nodes["A"]))}
 		self.failUnless(positions["A"] < min(positions["B"], positions["C"], positions["E"]))
 		self.failUnless(max(positions["B"], positions["C"], positions["E"]) < min(positions["D"], positions["F"], positions["G"]))
 
@@ -315,10 +302,10 @@ class InductionTest(unittest.TestCase):
 
 	def setUp(self):
 		g = Graph()
-		kirk = g.add_node(name="kirk")
-		spock = g.add_node(name="spock")
-		bones = g.add_node(name="bones")
-		uhura = g.add_node(name="uhura")
+		kirk = g.add_node(first_name="kirk")
+		spock = g.add_node(first_name="spock")
+		bones = g.add_node(first_name="bones")
+		uhura = g.add_node(first_name="uhura")
 		self.e1 = g.add_edge(kirk, spock)
 		self.e2 = g.add_edge(kirk, bones)
 		self.e3 = g.add_edge(kirk, uhura)
@@ -337,12 +324,12 @@ class InductionTest(unittest.TestCase):
 		bones = self.bones
 		uhura = self.uhura
 		new_mission = g.induce_subgraph(spock, bones, uhura)
-		self.failUnlessEqual([node.name for node in new_mission.nodes], ["spock", "bones", "uhura"])
-		spock = new_mission.nodes[0]
-		bones = new_mission.nodes[1]
-		uhura = new_mission.nodes[2]
-		self.failUnlessEqual(uhura.outgoing[0].end.name, "spock")
-		self.failUnlessEqual(uhura.outgoing[1].end.name, "bones")
+		self.failUnlessEqual({node.first_name for node in new_mission.nodes}, {"spock", "bones", "uhura"})
+		spock = list(new_mission.search_nodes(first_name="spock"))[0]
+		bones = list(new_mission.search_nodes(first_name="bones"))[0]
+		uhura = list(new_mission.search_nodes(first_name="uhura"))[0]
+		self.failUnlessEqual(uhura.outgoing[0].end.first_name, "spock")
+		self.failUnlessEqual(uhura.outgoing[1].end.first_name, "bones")
 
 	def testEdgeInduction(self):
 		g = self.g
@@ -351,22 +338,18 @@ class InductionTest(unittest.TestCase):
 		bones = self.bones
 		uhura = self.uhura
 		new_mission = g.edge_induce_subgraph(self.e4, self.e5)
-		self.failUnlessEqual({node.name for node in new_mission.nodes}, {"spock", "bones", "uhura"})
-		spock = set(new_mission.search_nodes(name="spock")).pop()
-		bones = set(new_mission.search_nodes(name="bones")).pop()
-		uhura = set(new_mission.search_nodes(name="uhura")).pop()
-		self.failUnlessEqual(uhura.outgoing[0].end.name, "spock")
-		self.failUnlessEqual(uhura.outgoing[1].end.name, "bones")
+		self.failUnlessEqual({node.first_name for node in new_mission.nodes}, {"spock", "bones", "uhura"})
+		spock = set(new_mission.search_nodes(first_name="spock")).pop()
+		bones = set(new_mission.search_nodes(first_name="bones")).pop()
+		uhura = set(new_mission.search_nodes(first_name="uhura")).pop()
+		self.failUnlessEqual(uhura.outgoing[0].end.first_name, "spock")
+		self.failUnlessEqual(uhura.outgoing[1].end.first_name, "bones")
 
 
 class GraphFailureTest(unittest.TestCase):
 
 	def setUp(self):
 		self.g = Graph()
-        
-	def testUnhasableNodeData(self):
-		# node.key should fail if unhashable 
-		self.failUnlessRaises(TypeError, self.g.add_node, stuff="a")
 
 	"""
 	Tests to be written:
@@ -459,109 +442,109 @@ class GraphCorrectnessTest(unittest.TestCase):
 	def testIntersection(self):
 		g1 = Graph()
 		g2 = Graph()
-		one = g1.add_node(name=1)
-		two = g1.add_node(name=2)
-		three = g1.add_node(name=3)
+		one = g1.add_node(first_name=1)
+		two = g1.add_node(first_name=2)
+		three = g1.add_node(first_name=3)
 		g1.add_edge(one, two)
 		g1.add_edge(two, three)
 		g1.add_edge(three, one)
-		one_2 = g2.add_node(name=1)
-		three_2 = g2.add_node(name=3)
-		five = g2.add_node(name=5)
+		one_2 = g2.add_node(first_name=1)
+		three_2 = g2.add_node(first_name=3)
+		five = g2.add_node(first_name=5)
 		g2.add_edge(one_2, five)
 		g2.add_edge(five, three_2)
 		g2.add_edge(three_2, one_2)
 		one_and_three = g1 & g2
-		self.failUnlessEqual({1, 3}, {node.name for node in one_and_three.nodes})
+		self.failUnlessEqual({1, 3}, {node.first_name for node in one_and_three.nodes})
 		self.failUnlessEqual(one_and_three.order(), 2)
 		self.failUnlessEqual(one_and_three.size(), 1)
 
 	def testDifference(self):
 		g1 = Graph()
 		g2 = Graph()
-		zero = g1.add_node(name=0)
-		one = g1.add_node(name=1)
-		two = g1.add_node(name=2)
-		three = g1.add_node(name=3)
+		zero = g1.add_node(first_name=0)
+		one = g1.add_node(first_name=1)
+		two = g1.add_node(first_name=2)
+		three = g1.add_node(first_name=3)
 		g1.add_edge(zero, two)
 		g1.add_edge(one, two)
 		g1.add_edge(two, three)
 		g1.add_edge(three, one)
-		one_2 = g2.add_node(name=1)
-		three_2 = g2.add_node(name=3)
-		five = g2.add_node(name=5)
+		one_2 = g2.add_node(first_name=1)
+		three_2 = g2.add_node(first_name=3)
+		five = g2.add_node(first_name=5)
 		g2.add_edge(one_2, five)
 		g2.add_edge(five, three_2)
 		g2.add_edge(three_2, one_2)
 		diff = g1 - g2
-		self.failUnlessEqual({0, 2}, {node.name for node in diff.nodes})
+		self.failUnlessEqual({0, 2}, {node.first_name for node in diff.nodes})
 		self.failUnlessEqual(diff.order(), 2)
 		self.failUnlessEqual(diff.size(), 1)
-		self.failUnlessEqual(diff.edges[0].start.name, 0)
-		self.failUnlessEqual(diff.edges[0].end.name, 2)
+		self.failUnlessEqual(diff.edges[0].start.first_name, 0)
+		self.failUnlessEqual(diff.edges[0].end.first_name, 2)
 
 	def testMerge(self):
 		# setup
 		g1 = Graph()
 		g2 = Graph()
-		bob1 = g1.add_node(name="Bob")
-		dan = g1.add_node(name="Dan")
-		doug = g1.add_node(name="Doug")
+		bob1 = g1.add_node(first_name="Bob")
+		dan = g1.add_node(first_name="Dan")
+		doug = g1.add_node(first_name="Doug")
 		g1.add_edge(bob1, dan)
 		g1.add_edge(bob1, doug)
 		g1.add_edge(dan, doug)
-		bob2 = g2.add_node(name="Bob")
-		jeff = g2.add_node(name="Jeff")
-		paul = g2.add_node(name="Paul")
+		bob2 = g2.add_node(first_name="Bob")
+		jeff = g2.add_node(first_name="Jeff")
+		paul = g2.add_node(first_name="Paul")
 		g2.add_edge(bob2, jeff)
 		g2.add_edge(bob2, paul)
 		g2.add_edge(jeff, paul)
 		g3 = g1 + g2
 		self.failUnlessEqual(g3.order(), 5)
 		self.failUnlessEqual(g3.size(), 6)
-		self.failUnlessEqual({node.name for node in g3.nodes}, {"Bob", "Dan", "Doug", "Jeff", "Paul"})
-		bob = list(g3.search_nodes(name="Bob"))[0]
-		self.failUnlessEqual({bob.outgoing[i].end.name for i in range(4)}, {"Dan", "Doug", "Jeff", "Paul"})
+		self.failUnlessEqual({node.first_name for node in g3.nodes}, {"Bob", "Dan", "Doug", "Jeff", "Paul"})
+		bob = list(g3.search_nodes(first_name="Bob"))[0]
+		self.failUnlessEqual({bob.outgoing[i].end.first_name for i in range(4)}, {"Dan", "Doug", "Jeff", "Paul"})
 
 	def testGetAllConnected(self):
 		# setup
 		g = Graph()
 		# one connected component
-		n1 = g.add_node(name="Bob")
-		n2 = g.add_node(name="Bill")
+		n1 = g.add_node(first_name="Bob")
+		n2 = g.add_node(first_name="Bill")
 		g.add_edge(n1, n2)
-		component_1 = {n1, n2}
+		component_1 = frozenset([n1, n2])
 		# one solitary component
-		n3 = g.add_node(name="Dan")
-		component_2 = {n3}
+		n3 = g.add_node(first_name="Dan")
+		component_2 = frozenset([n3])
 		# one looped component
-		n4 = g.add_node(name="John")
+		n4 = g.add_node(first_name="John")
 		g.add_edge(n4, n4)
-		component_3 = {n4}
+		component_3 = frozenset([n4])
 		# and test
-		components = [component_1, component_2, component_3]
-		self.failUnlessEqual(g.get_connected_components(), components)
+		components = {component_1, component_2, component_3}
+		self.failUnlessEqual(set(frozenset(i) for i in g.get_connected_components()), components)
 
 	def testGetShortestPaths(self):
 		# trivial graph
 		g = Graph()
-		n1 = g.add_node(name="Geremy")
+		n1 = g.add_node(first_name="Geremy")
 		paths = g.get_shortest_paths(n1)
 		self.failUnlessEqual(paths, {n1: (0, [])})
 		# less trivial graph
 		g = Graph()
-		n1 = g.add_node(name="Geremy")
-		n2 = g.add_node(name="Bob")
-		n3 = g.add_node(name="Snowflake")
+		n1 = g.add_node(first_name="Geremy")
+		n2 = g.add_node(first_name="Bob")
+		n3 = g.add_node(first_name="Snowflake")
 		e1 = g.add_edge(n1, n2, weight=4)
 		e2 = g.add_edge(n1, n3, weight=5)
 		paths = g.get_shortest_paths(n1, get_weight=lambda e: e.weight)
 		self.failUnlessEqual(paths, {n1: (0, []), n2: (4, [e1]), n3: (5, [e2])})
 		# tricksy graph
 		g = Graph()
-		n1 = g.add_node(name="Geremy")
-		n2 = g.add_node(name="Bob")
-		n3 = g.add_node(name="Snowflake")
+		n1 = g.add_node(first_name="Geremy")
+		n2 = g.add_node(first_name="Bob")
+		n3 = g.add_node(first_name="Snowflake")
 		# normal edges
 		e1 = g.add_edge(n1, n2, weight=5)
 		e2 = g.add_edge(n2, n3, weight=1)
@@ -599,17 +582,17 @@ class GraphCorrectnessTest(unittest.TestCase):
 		g.add_edge(n6, n5)
 		# get strongly connected components
 		comp = g.get_strongly_connected()
-		self.failUnlessEqual([{n1, n2, n3}, {n4, n5, n6}], comp)
+		self.failUnlessEqual(set([frozenset([n1, n2, n3]), frozenset([n4, n5, n6])]), {frozenset(i) for i in comp})
 
 class GraphPerformanceTest(unittest.TestCase):
 
-	graph_setup = "from base import Graph; g = Graph(); n = g.add_node(name='');"
+	graph_setup = "from base import Graph; g = Graph(); n = g.add_node(first_name='');"
 
 	def testNodeAdditionPerformance(self):
 		setup = self.graph_setup
-		test = "for i in range(1000): g.add_node(name=i)"
+		test = "for i in range(1000): g.add_node(first_name=i)"
 		t1 = timeit.timeit(setup=setup, stmt=test, number=1000)
-		test = "for i in range(1000000): g.add_node(name=i)"
+		test = "for i in range(1000000): g.add_node(first_name=i)"
 		t2 = timeit.timeit(setup=setup, stmt=test, number=1)
 		tdiff = max(t1, t2) - min(t1, t2)
 		self.failUnless(tdiff < max(t1, t2)/10, msg="Performance check failed: nonlinear performance (%s, %s)" % (t1, t2))
@@ -617,10 +600,10 @@ class GraphPerformanceTest(unittest.TestCase):
 		self.failUnless(t2 < 20, msg="Performance check failed: it took %s seconds to add 1M nodes" % t2)
 
 	def testNodeIterationPerformance(self):
-		setup = self.graph_setup + "\nfor i in range(1000): \n\tg.add_node(name=i)"
+		setup = self.graph_setup + "\nfor i in range(1000): \n\tg.add_node(first_name=i)"
 		test = "for i in g.nodes: pass"
 		t1 = timeit.timeit(setup=setup, stmt=test, number=1000)
-		setup = self.graph_setup + "\nfor i in range(1000000): \n\tg.add_node(name=i)"
+		setup = self.graph_setup + "\nfor i in range(1000000): \n\tg.add_node(first_name=i)"
 		test = "for i in g.nodes: pass"
 		t2 = timeit.timeit(setup=setup, stmt=test, number=1)
 		tdiff = max(t1, t2) - min(t1, t2)
@@ -629,11 +612,11 @@ class GraphPerformanceTest(unittest.TestCase):
 		self.failUnless(t2 < 20, msg="Performance check failed: it took %s seconds to iterate through 1M nodes" % t2)
 
 	def testNodeSearchPerformance(self):
-		setup = self.graph_setup + "\nfor i in range(1000): \n\tg.add_node(name=i)"
-		test = "[i for i in g.search_nodes(name=999)]"
+		setup = self.graph_setup + "\nfor i in range(1000): \n\tg.add_node(first_name=i)"
+		test = "[i for i in g.search_nodes(first_name=999)]"
 		t1 = timeit.timeit(setup=setup, stmt=test, number=1000)
-		setup = self.graph_setup + "\nfor i in range(1000000): \n\tg.add_node(name=i)"
-		test = "[i for i in g.search_nodes(name=999999)]"
+		setup = self.graph_setup + "\nfor i in range(1000000): \n\tg.add_node(first_name=i)"
+		test = "[i for i in g.search_nodes(first_name=999999)]"
 		t2 = timeit.timeit(setup=setup, stmt=test, number=1)
 		tdiff = max(t1, t2) - min(t1, t2)
 		self.failUnless(tdiff < max(t1, t2)/10, msg="Performance check failed: nonlinear performance (%s, %s)" % (t1, t2))
@@ -642,9 +625,9 @@ class GraphPerformanceTest(unittest.TestCase):
 
 	def testEdgeAdditionPerformance(self):
 		setup = self.graph_setup
-		test = "for i in range(1000): g.add_edge(n, n, name='a')"
+		test = "for i in range(1000): g.add_edge(n, n, first_name='a')"
 		t1 = timeit.timeit(setup=setup, stmt=test, number=1000)
-		test = "for i in range(1000000): g.add_edge(n, n, name='a')"
+		test = "for i in range(1000000): g.add_edge(n, n, first_name='a')"
 		t2 = timeit.timeit(setup=setup, stmt=test, number=1)
 		tdiff = max(t1, t2) - min(t1, t2)
 		self.failUnless(tdiff < max(t1, t2)/10, msg="Performance check failed: nonlinear performance (%s, %s)" % (t1, t2))
@@ -652,10 +635,10 @@ class GraphPerformanceTest(unittest.TestCase):
 		self.failUnless(t2 < 20, msg="Performance check failed: it took %s seconds to add 1M edges" % t2)
 
 	def testEdgeIterationPerformance(self):
-		setup = self.graph_setup + "\nfor i in range(1000): \n\tg.add_edge(n, n, name='a')"
+		setup = self.graph_setup + "\nfor i in range(1000): \n\tg.add_edge(n, n, first_name='a')"
 		test = "for i in g.edges: pass"
 		t1 = timeit.timeit(setup=setup, stmt=test, number=1000)
-		setup = self.graph_setup + "\nfor i in range(1000000): \n\tg.add_edge(n, n, name='a')"
+		setup = self.graph_setup + "\nfor i in range(1000000): \n\tg.add_edge(n, n, first_name='a')"
 		test = "for i in g.edges: pass"
 		t2 = timeit.timeit(setup=setup, stmt=test, number=1)
 		tdiff = max(t1, t2) - min(t1, t2)
@@ -664,10 +647,10 @@ class GraphPerformanceTest(unittest.TestCase):
 		self.failUnless(t2 < 20, msg="Performance check failed: it took %s seconds to iterate through 1M edges" % t2)
 
 	def testEdgeSearchPerformance(self):
-		setup = self.graph_setup + "\nfor i in range(1000): \n\tg.add_edge(n, n, name='a')"
+		setup = self.graph_setup + "\nfor i in range(1000): \n\tg.add_edge(n, n, first_name='a')"
 		test = "[i for i in g.search_edges(start='')]"
 		t1 = timeit.timeit(setup=setup, stmt=test, number=1000)
-		setup = self.graph_setup + "\nfor i in range(1000000): \n\tg.add_edge(n, n, name='a')"
+		setup = self.graph_setup + "\nfor i in range(1000000): \n\tg.add_edge(n, n, first_name='a')"
 		test = "[i for i in g.search_edges(start='')]"
 		t2 = timeit.timeit(setup=setup, stmt=test, number=1)
 		tdiff = max(t1, t2) - min(t1, t2)
@@ -676,10 +659,10 @@ class GraphPerformanceTest(unittest.TestCase):
 		self.failUnless(t2 < 20, msg="Performance check failed: it took %s seconds to iterate through 1M edges" % t2)
 
 	def testTraversalPerformance(self):
-		setup = self.graph_setup + "\nfor i in range(1000): \n\tg.add_edge(n, n, name='a')"
+		setup = self.graph_setup + "\nfor i in range(1000): \n\tg.add_edge(n, n, first_name='a')"
 		test = "[i for i in g.depth_first_traversal(n)]"
 		t1 = timeit.timeit(setup=setup, stmt=test, number=1000)
-		setup = self.graph_setup + "\nfor i in range(1000000): \n\tg.add_edge(n, n, name='a')"
+		setup = self.graph_setup + "\nfor i in range(1000000): \n\tg.add_edge(n, n, first_name='a')"
 		test = "[i for i in g.depth_first_traversal(n)]"
 		t2 = timeit.timeit(setup=setup, stmt=test, number=1)
 		tdiff = max(t1, t2) - min(t1, t2)

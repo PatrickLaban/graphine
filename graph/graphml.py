@@ -103,10 +103,12 @@ class Reader(ContentHandler):
 
 	def handle_node_start(self, attrs):
 		"""Creates a new Node and puts it on the stack."""
+		# get the id
+		id = attrs["id"]
 		# create the node
-		node = self.current_graph.add_node()
+		node = self.current_graph.add_node(id)
 		# associate it with its id
-		self.ids[attrs["id"]] = node
+		self.ids[id] = node
 		# put it on the stack
 		self.elements.append(node)
 
@@ -130,7 +132,7 @@ class Reader(ContentHandler):
 		# get the edge's directed state
 		is_directed = attrs.get("directed", self.defaults["edgedefault"])
 		# build the edge
-		edge = self.current_graph.add_edge(start, end, is_directed=is_directed)
+		edge = self.current_graph.add_edge(start, end, id, is_directed=is_directed)
 		# associate its id with it
 		self.ids[id] = edge
 		# and push it onto the stack

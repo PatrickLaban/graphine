@@ -299,6 +299,7 @@ individual docstrings.
 from collections import deque, namedtuple, defaultdict
 import heapq
 import copy
+from itertools import chain
 
 class GraphElement:
 	"""Base class for Nodes and Edges.
@@ -321,6 +322,15 @@ class GraphElement:
 		"""Arbitrary comparison for sorting."""
 		return id(self) < id(other)
 
+	def __hash__(self):
+		"""Returns the name of this object to use as a hash."""
+		return self._name
+
+	@property
+	def name(self):
+		"""Returns this object's name."""
+		return self._name
+
 	@property
 	def data(self):
 		"""Returns a dictionary representing the data values of this element.
@@ -330,30 +340,31 @@ class GraphElement:
 		"""
 		return {k:v for k, v in self.__dict__.items() if not k.startswith("_")}
 
-	@property
-	def key(self):
-		"""Generates a key suitable for datawise association in a dictionary.
-
-		As with the data attribute, this does not include data values which
-		are prefixed with an underscore.
-		"""
-		return frozenset((k,v) for k, v in self.data.items())
-
 
 class Node(GraphElement):
 	"""Base node representation.
 
-	Nodes have two properties, incoming and outgoing, which are
-	tuples of the edges which are incident to the node.
+	Nodes have seven properties:
 
-	Nodes also have the key function, which provides a data view
-	of the node suitable for comparison with nodes from other graphs.
+	- incoming, which is a list of all edges coming into this node
+	- outgoing, which is a list of all edges going away from this node
+	- bidirectional, which is a list of all bidirectional edges incident
+	  to this node
+	- edges, which is a list of all edges with this node as an endpoint
+	- degree, which is the number of edges incident to this node
+	- data, which is a dictionary of all non-private (ie, user-defined)
+	  attributes of this node
+	- and name, which is a unique, non-None value optionally passed in
+	  at instantiation time, and used for hashing comparisons. 
 
-	They also inherit the data property, which provides dictionary
-	access to all the non-private portions of the node.
+	In the event that a name is not passed in, the object's id will be used.
 	"""
 
-	def __init__(self, incoming=None, outgoing=None, bidirectional=None, **kwargs):
+	def __init__(self, *name, incoming=None, outgoing=None, bidirectional=None, **kwargs):
+		if name:
+			self._name = name[0]
+		else:
+			self._name = id(self)
 		self._incoming = incoming or []
 		self._outgoing = outgoing or []
 		self._bidirectional = bidirectional or []
@@ -401,29 +412,28 @@ class Node(GraphElement):
 		"""Returns the degree of this Node, ie, the number of edges."""
 		return len(self.edges)
 
-	@property
-	def key(self):
-		"""Returns a value suitable as a key in a dictionary."""
-		attributes = tuple((k,v) for k, v in self.data.items())
-		return frozenset(attributes)
-
 
 class Edge(GraphElement):
 	"""Base edge representation.
 
 	Edges have two properties, start and end, which are
-	Node objects incident to the edge.
+	Node objects incident to the edge, as well as name
+	and data, inhierited from GraphElement, which provide
+	convenient access to the edge's application defined
+	attributes.
 
-	Edges also provide the key function, which gives a 
-	view of the edge suitable for data-centric comparison
-	with other nodes. 
-
-	They also inherit the data property, which provides
-	dictionary access to all the non-private portions of
-	the edge.
+	Because defining equality between edges in two different
+	graphs is ambiguous, the unlink() function is provided.
+	By default, this will produce an object suitable for
+	membership comparisons based on the edge's data,
+	direction, and the names of its endpoints.
 	"""
 
-	def __init__(self, start, end, is_directed=True, **kwargs):
+	def __init__(self, start, end, *name, is_directed=True, **kwargs):
+		if name:
+			self._name = name[0]
+		else:
+			self._name = id(self)
 		self._start = start
 		self._end = end
 		self._directed = is_directed
@@ -443,6 +453,14 @@ class Edge(GraphElement):
 				return self.start
 		raise AttributeError("%s has no endpoint opposite to %s" % (self, starting_point))
 
+	def unlink(self):
+		"""Allows a structural comparison between edges."""
+		direction = ("direction", self.is_directed)
+		start = ("start", self.start.name)
+		end = ("end", self.end.name)
+		name = ("name", self.name)
+		return frozenset((direction, start, end, name))
+		
 	@property
 	def start(self):
 		"""Returns the starting point for this edge."""
@@ -457,14 +475,6 @@ class Edge(GraphElement):
 	def is_directed(self):
 		"""Returns whether this is a directed edge or not."""
 		return self._directed
-
-	@property
-	def key(self):
-		"""Returns a value suitable as a key in a dictionary."""
-		endpoints = (("start", self.start.key), ("end", self.end.key))
-		direction = (("is_directed", self.is_directed),)
-		attributes = tuple((k,v) for k, v in self.data.items())
-		return frozenset(endpoints + direction + attributes)
 
 
 class Graph:
@@ -488,8 +498,8 @@ class Graph:
 		Usage:
 			>>> g = Graph()
 		"""
-		self.nodes = []
-		self.edges = []
+		self._nodes = {}
+		self._edges = {}
 
 	#################################################################
 	#			Operators				#
@@ -505,17 +515,22 @@ class Graph:
 			True
 		"""
 		if isinstance(element, self.Node):
-			return element in self.nodes
+			return element.name in self._nodes
 		else:
-			return element in self.edges
+			return element.name in self._edges
 
-	def __getitem__(self, key):
-		"""Returns the item corresponding to the given key.
+	def __getitem__(self, name):
+		"""Returns the element corresponding to the given name
 
 		Raises KeyError if it is not found.
 		"""
-		d = {n.key: n for n in self.nodes + self.edges}
-		return d[key]
+		try:
+			try:
+				return self._nodes[name]
+			except KeyError:
+				return self._edges[name]
+		except KeyError:
+			raise KeyError("%s contains no element named %s" % (self, name))
 
 	def __and__(self, other):
 		"""Maps the & operator to the intersection operation."""
@@ -534,23 +549,43 @@ class Graph:
 		return self.merge(other)
 
 	#################################################################
+	#			Properties				#
+	#################################################################
+
+	@property
+	def nodes(self):
+		return self._nodes.values()
+
+	@property
+	def edges(self):
+		return self._edges.values()
+
+	#################################################################
 	#		    Graph Construction Tools			#
 	#################################################################
 
-	def add_node(self, **kwargs):
+	def add_node(self, *name, **kwargs):
 		"""Adds a node with no edges to the current graph.
+
+		The name argument, if given, should be hashable and
+		unique in this graph.
 
 		Usage:
 			>>> g = Graph()
 			>>> g.add_node(weight=5)
 			Node(weight=5)
 		"""
-		node = self.Node(**kwargs)
-		self.nodes.append(node)
+		node = self.Node(*name, **kwargs)
+		self._nodes[node.name] = node
 		return node
 
-	def add_edge(self, start, end, is_directed=True, **kwargs):
+	def add_edge(self, start, end, *name, is_directed=True, **kwargs):
 		"""Adds an edge to the current graph.
+
+		The start and end arguments can be either nodes or node names.
+
+		The name argument, if given, should be hashable and unique
+		in this graph.
 
 		The optional argument "is_directed" specifies whether
 		the given edge should be directed or undirected.
@@ -561,9 +596,14 @@ class Graph:
 			>>> g.add_edge(n1, n2, weight=5)
 			Edge(weight=5)			
 		"""
+		# get the start and end points
+		if not isinstance(start, self.Node):
+			start = self[start]
+		if not isinstance(end, self.Node):
+			end = self[end]
 		# build the edge
-		edge = self.Edge(start, end, is_directed=is_directed, **kwargs)
-		self.edges.append(edge)
+		edge = self.Edge(start, end, *name, is_directed=is_directed, **kwargs)
+		self._edges[edge.name] = edge
 		# take care of adjacency tracking
 		if is_directed:
 			start._outgoing.append(edge)
@@ -585,9 +625,9 @@ class Graph:
 		"""
 		# remove it from adjacency tracking
 		for edge in node.edges:
-			self.edges.remove(edge)
+			del self._edges[edge.name]
 		# remove it from storage
-		n = self.nodes.remove(node)
+		n = self._nodes.pop(node.name)
 		return n
 
 	def remove_edge(self, edge):
@@ -611,7 +651,7 @@ class Graph:
 			start._bidirectional.remove(edge)
 			end._bidirectional.remove(edge)
 		# remove it from storage
-		e = self.edges.remove(edge)
+		e = self._edges.pop(edge.name)
 		return e
 
 	#########################################################################
@@ -1058,51 +1098,22 @@ class Graph:
 	#			Graph Comparison Tools				#
 	#########################################################################
 
-	def get_equivalent_elements(self, other):
-		"""Returns a dictionary of element -> {equivalence set} mappings.
-
-		Usage:
-			>>> g1 = Graph()
-			>>> g2 = Graph()
-			>>> n1 = g1.add_node(name="Geremy")
-			>>> n2 = g2.add_node(name="Geremy")
-			>>> d = g1.get_equivalent_elements(g2)
-			>>> d[n1]
-			{Node(name="Geremy")}
-		"""
-		equivalent_nodes = {}
-		equivalent_edges = {}
-		for element in self.nodes:
-			equivalent_nodes[element.key] = set()
-		for element in self.edges:
-			equivalent_edges[element.key] = set()
-		for element in other.nodes:
-			k = element.key
-			if k in equivalent_nodes:
-				equivalent_nodes[k].add(element)
-		for element in other.edges:
-			k = element.key
-			attrs = dict(k)
-			if k in equivalent_edges:
-				equivalent_edges[k].add(element)
-		return equivalent_nodes, equivalent_edges
-
 	def union(self, other):
 		"""Returns a new graph with all nodes and edges in either of its parents.
 
 		Usage:
 			>>> g1 = Graph()
 			>>> g2 = Graph()
-			>>> a = g1.add_node(value=1)
-			>>> b = g1.add_node(value=3)
-			>>> c = g1.add_node(value=5)
-			>>> ab = g1.add_edge(a, b, value=2)
-			>>> bc = g1.add_edge(b, c, value=4)
-			>>> d = g2.add_node(value=3)
-			>>> e = g2.add_node(value=5)
-			>>> f = g2.add_node(value=7)
-			>>> de = g2.add_edge(d, e, value=4)
-			>>> ef = g2.add_edge(e, f, value=6)
+			>>> a = g1.add_node(1)
+			>>> b = g1.add_node(3)
+			>>> c = g1.add_node(5)
+			>>> ab = g1.add_edge(a, b, 2)
+			>>> bc = g1.add_edge(b, c, 4)
+			>>> d = g2.add_node(3)
+			>>> e = g2.add_node(5)
+			>>> f = g2.add_node(7)
+			>>> de = g2.add_edge(d, e, 4)
+			>>> ef = g2.add_edge(e, f, 6)
 			>>> g3 = g1 | g2
 			>>> [node.value for node in g3.nodes]
 			[1, 3, 5, 3, 5, 7]
@@ -1111,15 +1122,19 @@ class Graph:
 		"""
 		# create the graph
 		g = type(self)()
-		# add all of our nodes and edges
-		translation_table = {}
-		for node in self.nodes + other.nodes:
-			n = g.add_node(**node.data)
-			translation_table[node] = n
-		for edge in self.edges + other.edges:
-			start = translation_table[edge.start]
-			end = translation_table[edge.end]
-			g.add_edge(start, end, **edge.data)
+		# add our nodes
+		for node in chain(self.nodes, other.nodes):
+			name = node.name
+			data = node.data
+			g.add_node(name, **data)
+		# and for edges
+		for edge in chain(self.edges, other.edges):
+			start = edge.start.name
+			end = edge.end.name
+			name = edge.name
+			is_directed = edge.is_directed
+			data = edge.data
+			g.add_edge(start, end, name, is_directed=is_directed, **data)
 		return g
 
 	def intersection(self, other):
