@@ -319,12 +319,20 @@ class GraphElement:
 		return "%s(%s)" % (classname, attrs)
 
 	def __lt__(self, other):
-		"""Arbitrary comparison for sorting."""
-		return id(self) < id(other)
+		"""Name-based comparison for sorting."""
+		return self.name < other.name
 
 	def __hash__(self):
-		"""Returns the name of this object to use as a hash."""
-		return self._name
+		"""Returns the hash of this object's name."""
+		return hash(self._name)
+
+	def __eq__(self, other):
+		"""Compares the two elements based on name and data."""
+		return self.name == other.name and self.data == other.data
+
+	def __ne__(self, other):
+		"""Compares the two elements based on name."""
+		return not self == other
 
 	@property
 	def name(self):
@@ -623,6 +631,9 @@ class Graph:
 			>>> n in g
 			False
 		"""
+		# get the actual node if a name is passed in
+		if not isinstance(node, self.Node):
+			node = self[node]
 		# remove it from adjacency tracking
 		for edge in node.edges:
 			del self._edges[edge.name]
@@ -641,6 +652,9 @@ class Graph:
 			>>> e in g
 			False
 		"""
+		# get the actual edge if a name is passed
+		if not isinstance(edge, self.Edge):
+			edge = self[edge]
 		# remove it from adjacency tracking
 		start = edge.start
 		end = edge.end
@@ -672,6 +686,8 @@ class Graph:
 		desired_properties = set(kwargs.items())
 		for node in self.nodes:
 			properties = set(node.data.items())
+			if "name" in kwargs:
+				properties.add(("name", node.name))
 			if properties.issuperset(desired_properties):
 				yield node
 
@@ -690,6 +706,8 @@ class Graph:
 		desired_properties = set(kwargs.items())
 		for edge in self.edges:
 			attrs = set(edge.data.items())
+			if "name" in kwargs:
+				attrs.add(("name", edge.name))
 			if "start" in kwargs:
 				attrs.add(("start", edge.start))
 			if "end" in kwargs:
@@ -708,6 +726,11 @@ class Graph:
 			>>> g.get_common_edges(n1, n2)
 			{Edge(name="Fluffy")}
 		"""
+		# get the actual nodes if names are passed in
+		if not isinstance(n1, self.Node):
+			n1 = self[n1]
+		if not isinstance(n2, self.Node):
+			n2 = self[n2]
 		n1_edges = set(n1.incoming + n1.outgoing)
 		n2_edges = set(n2.incoming + n2.outgoing)
 		return n1_edges & n2_edges
@@ -759,6 +782,9 @@ class Graph:
 			Node(name="A")
 			Node(name="B")
 		"""
+		# handle the its-a-name case
+		if not isinstance(root, self.Node): root = self[root]
+		# stores nodes that are known to the algorithm but not yet visited
 		discovered = []
 		visited = set()
 		discovered.append(root)
@@ -921,6 +947,8 @@ class Graph:
 			>>> d[n4]
 			(1, [Edge(weight=1)])
 		"""
+		# handle the its-a-name case
+		if not isinstance(source, self.Node): source = self[source]
 		# create the paths table
 		paths = defaultdict(lambda: (float("inf"), []))
 		paths[source] = (0, [])
@@ -981,6 +1009,8 @@ class Graph:
 
 		Does not reverse direction.
 		"""
+		# get the edge if its a name
+		if not isinstance(edge, self.Edge): edge = self[edge]
 		if edge.is_directed:
 			edge.start._outgoing.remove(edge)
 			edge.end._incoming.remove(edge)
@@ -1003,6 +1033,8 @@ class Graph:
 		node_data should be a callable that returns a dictionary.
 		That dictionary will be used to initialize the new node.
 		"""
+		# get the edge if its a name
+		if not isinstance(edge, self.Edge): edge = self[edge]
 		# check to make sure that the given edge is the only edge between
 		# it endpoints
 		start = edge.start
@@ -1060,29 +1092,32 @@ class Graph:
 			2
 			>>> new_mission.size()
 			0			
-		"""
+		"""	
 		g = type(self)()
-		node_translator = {}
 		for node in nodes:
-			# copies node data
-			n = g.add_node(**node.data)
-			node_translator[node] = n
+			if not isinstance(node, self.Node):
+				node = self[node]
+			name = node.name
+			data = node.data
+			n = g.add_node(name, **data)
 		for edge in self.edges:
-			if edge.start in nodes:
-				if edge.end in nodes:
-					start = node_translator[edge.start]
-					end = node_translator[edge.end]
-					# copies edge data
-					g.add_edge(start, end, **node.data)
+			if edge.start in g:
+				if edge.end in g:
+					name = edge.name
+					start = edge.start.name
+					end = edge.end.name
+					is_directed = edge.is_directed
+					data = edge.data
+					g.add_edge(start, end, name, **data)
 		return g
 
 	def edge_induce_subgraph(self, *edges):
 		"""Similar to induce_subgraph but accepting edges rather than nodes."""
 		# create the new graph
 		g = type(self)()
-		# get all common nodes
-		nodes = {}
 		for edge in edges:
+			if not isinstance(edge, self.Edge):
+				edge = self[edge]
 			# and add them if they don't already exist
 			if edge.start not in nodes:
 				nodes[edge.start] = g.add_node(**edge.start.data)
@@ -1091,7 +1126,7 @@ class Graph:
 		# iterate over the provided edges
 		for edge in edges:
 			# and add them, translating nodes as we go
-			g.add_edge(nodes[edge.start], nodes[edge.end], **edge.data)
+			g.add_edge(edge.start.name, edge.end.name, edge.name, **edge.data)
 		return g
 			
 	#########################################################################
@@ -1116,25 +1151,18 @@ class Graph:
 			>>> ef = g2.add_edge(e, f, 6)
 			>>> g3 = g1 | g2
 			>>> [node.value for node in g3.nodes]
-			[1, 3, 5, 3, 5, 7]
+			[1, 3, 5, 7]
 			>>> [edge.value for edge in g3.edges]
-			[2, 4, 4, 6]
+			[2, 4, 6]
 		"""
 		# create the graph
 		g = type(self)()
 		# add our nodes
 		for node in chain(self.nodes, other.nodes):
-			name = node.name
-			data = node.data
-			g.add_node(name, **data)
+			g.add_node(node.name, **node.data)
 		# and for edges
 		for edge in chain(self.edges, other.edges):
-			start = edge.start.name
-			end = edge.end.name
-			name = edge.name
-			is_directed = edge.is_directed
-			data = edge.data
-			g.add_edge(start, end, name, is_directed=is_directed, **data)
+			g.add_edge(start.name, end.name, edge.name, is_directed, **node.data)
 		return g
 
 	def intersection(self, other):
@@ -1163,23 +1191,37 @@ class Graph:
 		"""
 		# create the graph
 		g = type(self)()
-		# get the equivalent elements
-		equivalent_nodes, equivalent_edges = self.get_equivalent_elements(other)
-		# create the translation tables
-		translator = {}
-		# create all the equivalent nodes
-		for k, v in equivalent_nodes.items():
-			if v:
-				translator[k] = g.add_node(**dict(k))
-		# create all the equivalent edges
-		for k, v in equivalent_edges.items():
-			if v:
-				attributes = dict(k)
-				start = translator.get(attributes.pop("start"), False)
-				end = translator.get(attributes.pop("end"), False)
-				if start and end:
-					g.add_edge(start, end, **attributes)
-		return g
+		# iterate through our nodes
+		for node in self.nodes:
+			if node in other:
+				name = node.name
+				data = node.data
+				g.add_node(name, **data)
+		# and theirs
+		for node in other.nodes:
+			if node in self:
+				name = node.name
+				data = node.data
+				g.add_node(name, **data)
+		# ...and our edges...
+		for edge in self.edges:
+			if edge in other:
+				name = edge.name
+				start = edge.start
+				end = edge.end
+				if start in g and end in g:
+					is_directed = edge.is_directed
+					data = edge.data
+					g.add_edge(start.name, end.name, name, is_directed=is_directed, **data)
+		# ...and theirs
+		for edge in other.edges:
+			if edge in self:
+				name = edge.name
+				start = edge.start.label
+				end = edge.end.label
+				is_directed = edge.is_directed
+				data = edge.data
+				g.add_edge(start, end, name, is_directed=is_directed, **data)
 	
 	def difference(self, other):
 		"""Return a graph composed of the nodes and edges not in the other.
@@ -1187,16 +1229,16 @@ class Graph:
 		Usage:
 			>>> g1 = Graph()
 			>>> g2 = Graph()
-			>>> a = g1.add_node(value=1)
-			>>> b = g1.add_node(value=3)
-			>>> c = g1.add_node(value=5)
-			>>> ab = g1.add_edge(a, b, value=2)
-			>>> bc = g1.add_edge(b, c, value=4)
-			>>> d = g2.add_node(value=3)
-			>>> e = g2.add_node(value=5)
-			>>> f = g2.add_node(value=7)
-			>>> de = g2.add_edge(d, e, value=4)
-			>>> ef = g2.add_edge(e, f, value=6)
+			>>> a = g1.add_node(1)
+			>>> b = g1.add_node(3)
+			>>> c = g1.add_node(5)
+			>>> ab = g1.add_edge(a, b, 2)
+			>>> bc = g1.add_edge(b, c, 4)
+			>>> d = g2.add_node(3)
+			>>> e = g2.add_node(5)
+			>>> f = g2.add_node(7)
+			>>> de = g2.add_edge(d, e, 4)
+			>>> ef = g2.add_edge(e, f, 6)
 			>>> g3 = g1 & g2
 			>>> [node.value for node in g3.nodes]
 			[1]
@@ -1205,70 +1247,13 @@ class Graph:
 		"""
 		# create the graph
 		g = type(self)()
-		# get the equivalent elements
-		equivalent_nodes, equivalent_edges = self.get_equivalent_elements(other)
-		# create the translation tables
-		translator = {}
 		# create all the equivalent nodes
-		for k, v in equivalent_nodes.items():
-			if not v:
-				translator[k] = g.add_node(**dict(k))
+		for node in self.nodes:
+			if node not in other:
+				g.add_node(node.name, **node.data)
 		# create all the equivalent edges
-		for k, v in equivalent_edges.items():
-			if not v:
-				attributes = dict(k)
-				start = translator.get(attributes.pop("start"), False)
-				end = translator.get(attributes.pop("end"), False)
-				if start and end:
-					g.add_edge(start, end, **attributes)
-		return g
-
-	def merge(self, other):
-		"""Returns a new graph with its nodes and edges merged by data equality.
-
-		Usage:
-			>>> g1 = Graph()
-			>>> g2 = Graph()
-			>>> a = g1.add_node(value=1)
-			>>> b = g1.add_node(value=3)
-			>>> c = g1.add_node(value=5)
-			>>> ab = g1.add_edge(a, b, value=2)
-			>>> bc = g1.add_edge(b, c, value=4)
-			>>> d = g2.add_node(value=3)
-			>>> e = g2.add_node(value=5)
-			>>> f = g2.add_node(value=7)
-			>>> de = g2.add_edge(d, e, value=4)
-			>>> ef = g2.add_edge(e, f, value=6)
-			>>> g3 = g1 | g2
-			>>> [node.value for node in g3.nodes]
-			[1, 3, 5, 7]
-			>>> [edge.value for edge in g3.edges]
-			[2, 4, 6]
-		"""
-		# create the new graph
-		g = type(self)()
-		# create the translation table
-		translator = {}
-		# get equivalent elements
-		my_nodes, my_edges = self.get_equivalent_elements(other)
-		other_nodes, other_edges = other.get_equivalent_elements(self)
-		equivalent_nodes = {}
-		equivalent_edges = {}
-		for k, v in my_nodes.items():
-			equivalent_nodes.setdefault(k, set()).union(v)
-		for k, v in other_nodes.items():
-			equivalent_nodes.setdefault(k, set()).union(v)
-		for k, v in my_edges.items():
-			equivalent_edges.setdefault(k, set()).union(v)
-		for k, v in other_edges.items():
-			equivalent_edges.setdefault(k, set()).union(v)
-		# add all the equivalent nodes
-		for node in equivalent_nodes:
-			translator[node] = g.add_node(**dict(node))
-		# add all the equivalent edges
-		for edge in equivalent_edges:
-			attributes = dict(edge)
-			start = translator[attributes.pop("start")]
-			end = translator[attributes.pop("end")]
-			g.add_edge(start, end, **attributes)
+		for edge in self.edges:
+			if edge not in other:
+				if start in g and end in g:
+					g.add_edge(start, end, edge.name, **attributes)
 		return g

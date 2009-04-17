@@ -421,16 +421,14 @@ class GraphCorrectnessTest(unittest.TestCase):
 	def testUnion(self):
 		evens = Graph()
 		odds = Graph()
-		evens_table = {}
-		odds_table = {}
-		for i in range(0, 10, 2): evens_table[i] = evens.add_node(label=i)
-		for i in range(1, 10, 2): odds_table[i] = odds.add_node(label=i)
+		for i in range(0, 10, 2): evens.add_node(i)
+		for i in range(1, 10, 2): odds.add_node(i)
 		for i in range(0, 10, 2):
 			for j in range(0, 10, 2):
-				evens.add_edge(evens_table[i], evens_table[j], weight=i-j)
+				evens.add_edge(i, j, weight=i-j)
 		for i in range(1, 10, 2):
 			for j in range(1, 10, 2):
-				odds.add_edge(odds_table[i], odds_table[j], weight=i-j+1)
+				odds.add_edge(i, j, weight=i-j+1)
 		digits = evens | odds
 		numerals = {node.label for node in digits.nodes}
 		self.failUnlessEqual(numerals, {i for i in range(10)})
