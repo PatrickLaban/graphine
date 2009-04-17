@@ -368,15 +368,13 @@ class Node(GraphElement):
 	In the event that a name is not passed in, the object's id will be used.
 	"""
 
-	def __init__(self, name=[], incoming=None, outgoing=None, bidirectional=None, **kwargs):
-		# remember, names must be hashable, thus [] is an invalid name
-		if name != []: self._name = name
+	def __init__(self, name=None, **kwargs):
+		if name is not None: self._name = name
 		else: self._name = id(self)
-		self._incoming = incoming or []
-		self._outgoing = outgoing or []
-		self._bidirectional = bidirectional or []
-		for k, v in kwargs.items():
-			setattr(self, k, v)
+		self._incoming = []
+		self._outgoing = []
+		self._bidirectional = []
+		self.__dict__.update(kwargs)
 
 	@property
 	def incoming(self):
@@ -436,15 +434,14 @@ class Edge(GraphElement):
 	direction, and the names of its endpoints.
 	"""
 
-	def __init__(self, start, end, name=[], is_directed=True, **kwargs):
+	def __init__(self, start, end, name=None, is_directed=True, **kwargs):
 		# remember, name must be hashable, therefore [] is invalid
-		if name != []: self._name = name
+		if name is not None: self._name = name
 		else: self._name = id(self)
 		self._start = start
 		self._end = end
 		self._directed = is_directed
-		for k, v in kwargs.items():
-			setattr(self, k, v)
+		self.__dict__.update(kwargs)
 
 	def other_end(self, starting_point):
 		"""Returns the other end of the edge from the given point.
@@ -570,7 +567,7 @@ class Graph:
 	#		    Graph Construction Tools			#
 	#################################################################
 
-	def add_node(self, name=[], **kwargs):
+	def add_node(self, name=None, **kwargs):
 		"""Adds a node with no edges to the current graph.
 
 		The name argument, if given, should be hashable and
@@ -585,7 +582,7 @@ class Graph:
 		self._nodes[node.name] = node
 		return node
 
-	def add_edge(self, start, end, name=[], is_directed=True, **kwargs):
+	def add_edge(self, start, end, name=None, is_directed=True, **kwargs):
 		"""Adds an edge to the current graph.
 
 		The start and end arguments can be either nodes or node names.

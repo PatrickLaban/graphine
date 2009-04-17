@@ -571,8 +571,8 @@ class GraphPerformanceTest(unittest.TestCase):
 		t2 = timeit.timeit(setup=setup, stmt=test, number=1)
 		tdiff = max(t1, t2) - min(t1, t2)
 		self.failUnless(tdiff < max(t1, t2)/10, msg="Performance check failed: nonlinear performance (%s, %s)" % (t1, t2))
-		self.failUnless(t1 < 20, msg="Performance check failed: it took %s seconds to add 1M nodes" % t1)
-		self.failUnless(t2 < 20, msg="Performance check failed: it took %s seconds to add 1M nodes" % t2)
+		self.failUnless(t1 < 5, msg="Performance check failed: it took %s seconds to add 1M nodes" % t1)
+		self.failUnless(t2 < 5, msg="Performance check failed: it took %s seconds to add 1M nodes" % t2)
 
 	def testNodeIterationPerformance(self):
 		setup = self.graph_setup + "\nfor i in range(1000): \n\tg.add_node(first_name=i)"
@@ -583,8 +583,8 @@ class GraphPerformanceTest(unittest.TestCase):
 		t2 = timeit.timeit(setup=setup, stmt=test, number=1)
 		tdiff = max(t1, t2) - min(t1, t2)
 		self.failUnless(tdiff < max(t1, t2)/10, msg="Performance check failed: nonlinear performance (%s, %s)" % (t1, t2))
-		self.failUnless(t1 < 20, msg="Performance check failed: it took %s seconds to iterate through 1M nodes" % t1)
-		self.failUnless(t2 < 20, msg="Performance check failed: it took %s seconds to iterate through 1M nodes" % t2)
+		self.failUnless(t1 < 5, msg="Performance check failed: it took %s seconds to iterate through 1M nodes" % t1)
+		self.failUnless(t2 < 5, msg="Performance check failed: it took %s seconds to iterate through 1M nodes" % t2)
 
 	def testNodeSearchPerformance(self):
 		setup = self.graph_setup + "\nfor i in range(1000): \n\tg.add_node(first_name=i)"
@@ -595,8 +595,8 @@ class GraphPerformanceTest(unittest.TestCase):
 		t2 = timeit.timeit(setup=setup, stmt=test, number=1)
 		tdiff = max(t1, t2) - min(t1, t2)
 		self.failUnless(tdiff < max(t1, t2)/10, msg="Performance check failed: nonlinear performance (%s, %s)" % (t1, t2))
-		self.failUnless(t1 < 20, msg="Performance check failed: it took %s seconds to iterate through 1M nodes" % t1)
-		self.failUnless(t2 < 20, msg="Performance check failed: it took %s seconds to iterate through 1M nodes" % t2)
+		self.failUnless(t1 < 5, msg="Performance check failed: it took %s seconds to iterate through 1M nodes" % t1)
+		self.failUnless(t2 < 5, msg="Performance check failed: it took %s seconds to iterate through 1M nodes" % t2)
 
 	def testEdgeAdditionPerformance(self):
 		setup = self.graph_setup
@@ -606,8 +606,8 @@ class GraphPerformanceTest(unittest.TestCase):
 		t2 = timeit.timeit(setup=setup, stmt=test, number=1)
 		tdiff = max(t1, t2) - min(t1, t2)
 		self.failUnless(tdiff < max(t1, t2)/10, msg="Performance check failed: nonlinear performance (%s, %s)" % (t1, t2))
-		self.failUnless(t1 < 20, msg="Performance check failed: it took %s seconds to add 1M edges" % t1)
-		self.failUnless(t2 < 20, msg="Performance check failed: it took %s seconds to add 1M edges" % t2)
+		self.failUnless(t1 < 5, msg="Performance check failed: it took %s seconds to add 1M edges" % t1)
+		self.failUnless(t2 < 5, msg="Performance check failed: it took %s seconds to add 1M edges" % t2)
 
 	def testEdgeIterationPerformance(self):
 		setup = self.graph_setup + "\nfor i in range(1000): \n\tg.add_edge(n, n, first_name='a')"
@@ -618,8 +618,8 @@ class GraphPerformanceTest(unittest.TestCase):
 		t2 = timeit.timeit(setup=setup, stmt=test, number=1)
 		tdiff = max(t1, t2) - min(t1, t2)
 		self.failUnless(tdiff < max(t1, t2)/10, msg="Performance check failed: nonlinear performance (%s, %s)" % (t1, t2))
-		self.failUnless(t1 < 20, msg="Performance check failed: it took %s seconds to iterate through 1M edges" % t1)
-		self.failUnless(t2 < 20, msg="Performance check failed: it took %s seconds to iterate through 1M edges" % t2)
+		self.failUnless(t1 < 5, msg="Performance check failed: it took %s seconds to iterate through 1M edges" % t1)
+		self.failUnless(t2 < 5, msg="Performance check failed: it took %s seconds to iterate through 1M edges" % t2)
 
 	def testEdgeSearchPerformance(self):
 		setup = self.graph_setup + "\nfor i in range(1000): \n\tg.add_edge(n, n, first_name='a')"
@@ -630,8 +630,8 @@ class GraphPerformanceTest(unittest.TestCase):
 		t2 = timeit.timeit(setup=setup, stmt=test, number=1)
 		tdiff = max(t1, t2) - min(t1, t2)
 		self.failUnless(tdiff < max(t1, t2)/10, msg="Performance check failed: nonlinear performance (%s, %s)" % (t1, t2))
-		self.failUnless(t1 < 20, msg="Performance check failed: it took %s seconds to iterate through 1M edges" % t1)
-		self.failUnless(t2 < 20, msg="Performance check failed: it took %s seconds to iterate through 1M edges" % t2)
+		self.failUnless(t1 < 5, msg="Performance check failed: it took %s seconds to iterate through 1M edges" % t1)
+		self.failUnless(t2 < 5, msg="Performance check failed: it took %s seconds to iterate through 1M edges" % t2)
 
 	def testTraversalPerformance(self):
 		setup = self.graph_setup + "\nfor i in range(1000): \n\tg.add_edge(n, n, first_name='a')"
@@ -642,8 +642,8 @@ class GraphPerformanceTest(unittest.TestCase):
 		t2 = timeit.timeit(setup=setup, stmt=test, number=1)
 		tdiff = max(t1, t2) - min(t1, t2)
 		self.failUnless(tdiff < max(t1, t2)/10, msg="Performance check failed: nonlinear performance (%s, %s)" % (t1, t2))
-		self.failUnless(t1 < 20, msg="Performance check failed: it took %s seconds to traverse 1M node graphs" % t1)
-		self.failUnless(t2 < 20, msg="Performance check failed: it took %s seconds to traverse 1M node graphs" % t2)
+		self.failUnless(t1 < 5, msg="Performance check failed: it took %s seconds to traverse 1M node graphs" % t1)
+		self.failUnless(t2 < 5, msg="Performance check failed: it took %s seconds to traverse 1M node graphs" % t2)
 
 
 if __name__ == "__main__":
