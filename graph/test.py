@@ -419,90 +419,67 @@ class GraphCorrectnessTest(unittest.TestCase):
 		self.failUnlessEqual(g.size(), 12)
 
 	def testUnion(self):
-		evens = Graph()
-		odds = Graph()
-		for i in range(0, 10, 2): evens.add_node(i)
-		for i in range(1, 10, 2): odds.add_node(i)
-		for i in range(0, 10, 2):
-			for j in range(0, 10, 2):
-				evens.add_edge(i, j, weight=i-j)
-		for i in range(1, 10, 2):
-			for j in range(1, 10, 2):
-				odds.add_edge(i, j, weight=i-j+1)
-		digits = evens | odds
-		numerals = {node.label for node in digits.nodes}
-		self.failUnlessEqual(numerals, {i for i in range(10)})
-		difference = [edge.weight for edge in digits.edges]
-		differences = {diff for diff in difference}
-		self.failUnlessEqual(len(difference), 50)
-		self.failUnlessEqual(differences, {d for d in range(-8, 10, 1)})
+		g1 = Graph()
+		g2 = Graph()
+		g1.add_node(1)
+		g1.add_node(2)
+		g1.add_node(3)
+		g1.add_edge(1, 2, 12)
+		g1.add_edge(2, 3, 23)
+		g1.add_edge(3, 1, 31)
+		g2.add_node(3)
+		g2.add_node(4)
+		g2.add_node(5)
+		g2.add_edge(3, 4, 34)
+		g2.add_edge(4, 5, 45)
+		g2.add_edge(5, 3, 53)
+		union = g1 | g2
+		self.failUnlessEqual({1, 2, 3, 4, 5}, {node.name for node in union.nodes})
+		self.failUnlessEqual({12, 23, 31, 34, 45, 53}, {edge.name for edge in union.edges})
+		self.failUnlessEqual(union.order(), 5)
+		self.failUnlessEqual(union.size(), 6)
 
 	def testIntersection(self):
 		g1 = Graph()
 		g2 = Graph()
-		one = g1.add_node(first_name=1)
-		two = g1.add_node(first_name=2)
-		three = g1.add_node(first_name=3)
-		g1.add_edge(one, two)
-		g1.add_edge(two, three)
-		g1.add_edge(three, one)
-		one_2 = g2.add_node(first_name=1)
-		three_2 = g2.add_node(first_name=3)
-		five = g2.add_node(first_name=5)
-		g2.add_edge(one_2, five)
-		g2.add_edge(five, three_2)
-		g2.add_edge(three_2, one_2)
+		one = g1.add_node(1)
+		two = g1.add_node(2)
+		three = g1.add_node(3)
+		g1.add_edge(one, two, 12)
+		g1.add_edge(two, three, 13)
+		g1.add_edge(three, one, 31)
+		one_2 = g2.add_node(1)
+		three_2 = g2.add_node(3)
+		five = g2.add_node(5)
+		g2.add_edge(one_2, five, 15)
+		g2.add_edge(five, three_2, 53)
+		g2.add_edge(three_2, one_2, 31)
 		one_and_three = g1 & g2
-		self.failUnlessEqual({1, 3}, {node.first_name for node in one_and_three.nodes})
+		self.failUnlessEqual({1, 3}, {node.name for node in one_and_three.nodes})
 		self.failUnlessEqual(one_and_three.order(), 2)
 		self.failUnlessEqual(one_and_three.size(), 1)
 
 	def testDifference(self):
 		g1 = Graph()
 		g2 = Graph()
-		zero = g1.add_node(first_name=0)
-		one = g1.add_node(first_name=1)
-		two = g1.add_node(first_name=2)
-		three = g1.add_node(first_name=3)
+		zero = g1.add_node(0)
+		one = g1.add_node(1)
+		two = g1.add_node(2)
+		three = g1.add_node(3)
 		g1.add_edge(zero, two)
 		g1.add_edge(one, two)
 		g1.add_edge(two, three)
 		g1.add_edge(three, one)
-		one_2 = g2.add_node(first_name=1)
-		three_2 = g2.add_node(first_name=3)
-		five = g2.add_node(first_name=5)
+		one_2 = g2.add_node(1)
+		three_2 = g2.add_node(3)
+		five = g2.add_node(5)
 		g2.add_edge(one_2, five)
 		g2.add_edge(five, three_2)
 		g2.add_edge(three_2, one_2)
 		diff = g1 - g2
-		self.failUnlessEqual({0, 2}, {node.first_name for node in diff.nodes})
+		self.failUnlessEqual({0, 2}, {node.name for node in diff.nodes})
 		self.failUnlessEqual(diff.order(), 2)
 		self.failUnlessEqual(diff.size(), 1)
-		self.failUnlessEqual(diff.edges[0].start.first_name, 0)
-		self.failUnlessEqual(diff.edges[0].end.first_name, 2)
-
-	def testMerge(self):
-		# setup
-		g1 = Graph()
-		g2 = Graph()
-		bob1 = g1.add_node(first_name="Bob")
-		dan = g1.add_node(first_name="Dan")
-		doug = g1.add_node(first_name="Doug")
-		g1.add_edge(bob1, dan)
-		g1.add_edge(bob1, doug)
-		g1.add_edge(dan, doug)
-		bob2 = g2.add_node(first_name="Bob")
-		jeff = g2.add_node(first_name="Jeff")
-		paul = g2.add_node(first_name="Paul")
-		g2.add_edge(bob2, jeff)
-		g2.add_edge(bob2, paul)
-		g2.add_edge(jeff, paul)
-		g3 = g1 + g2
-		self.failUnlessEqual(g3.order(), 5)
-		self.failUnlessEqual(g3.size(), 6)
-		self.failUnlessEqual({node.first_name for node in g3.nodes}, {"Bob", "Dan", "Doug", "Jeff", "Paul"})
-		bob = list(g3.search_nodes(first_name="Bob"))[0]
-		self.failUnlessEqual({bob.outgoing[i].end.first_name for i in range(4)}, {"Dan", "Doug", "Jeff", "Paul"})
 
 	def testGetAllConnected(self):
 		# setup

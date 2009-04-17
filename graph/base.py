@@ -368,11 +368,10 @@ class Node(GraphElement):
 	In the event that a name is not passed in, the object's id will be used.
 	"""
 
-	def __init__(self, *name, incoming=None, outgoing=None, bidirectional=None, **kwargs):
-		if name:
-			self._name = name[0]
-		else:
-			self._name = id(self)
+	def __init__(self, name=[], incoming=None, outgoing=None, bidirectional=None, **kwargs):
+		# remember, names must be hashable, thus [] is an invalid name
+		if name != []: self._name = name
+		else: self._name = id(self)
 		self._incoming = incoming or []
 		self._outgoing = outgoing or []
 		self._bidirectional = bidirectional or []
@@ -437,11 +436,10 @@ class Edge(GraphElement):
 	direction, and the names of its endpoints.
 	"""
 
-	def __init__(self, start, end, *name, is_directed=True, **kwargs):
-		if name:
-			self._name = name[0]
-		else:
-			self._name = id(self)
+	def __init__(self, start, end, name=[], is_directed=True, **kwargs):
+		# remember, name must be hashable, therefore [] is invalid
+		if name != []: self._name = name
+		else: self._name = id(self)
 		self._start = start
 		self._end = end
 		self._directed = is_directed
@@ -572,7 +570,7 @@ class Graph:
 	#		    Graph Construction Tools			#
 	#################################################################
 
-	def add_node(self, *name, **kwargs):
+	def add_node(self, name=[], **kwargs):
 		"""Adds a node with no edges to the current graph.
 
 		The name argument, if given, should be hashable and
@@ -583,11 +581,11 @@ class Graph:
 			>>> g.add_node(weight=5)
 			Node(weight=5)
 		"""
-		node = self.Node(*name, **kwargs)
+		node = self.Node(name, **kwargs)
 		self._nodes[node.name] = node
 		return node
 
-	def add_edge(self, start, end, *name, is_directed=True, **kwargs):
+	def add_edge(self, start, end, name=[], is_directed=True, **kwargs):
 		"""Adds an edge to the current graph.
 
 		The start and end arguments can be either nodes or node names.
@@ -610,7 +608,7 @@ class Graph:
 		if not isinstance(end, self.Node):
 			end = self[end]
 		# build the edge
-		edge = self.Edge(start, end, *name, is_directed=is_directed, **kwargs)
+		edge = self.Edge(start, end, name, is_directed=is_directed, **kwargs)
 		self._edges[edge.name] = edge
 		# take care of adjacency tracking
 		if is_directed:
@@ -1119,10 +1117,10 @@ class Graph:
 			if not isinstance(edge, self.Edge):
 				edge = self[edge]
 			# and add them if they don't already exist
-			if edge.start not in nodes:
-				nodes[edge.start] = g.add_node(**edge.start.data)
-			if edge.end not in nodes:
-				nodes[edge.end] = g.add_node(**edge.end.data)
+			if edge.start not in g:
+				g.add_node(edge.start.name, **edge.start.data)
+			if edge.end not in g:
+				g.add_node(edge.end.name, **edge.end.data)
 		# iterate over the provided edges
 		for edge in edges:
 			# and add them, translating nodes as we go
@@ -1162,7 +1160,7 @@ class Graph:
 			g.add_node(node.name, **node.data)
 		# and for edges
 		for edge in chain(self.edges, other.edges):
-			g.add_edge(start.name, end.name, edge.name, is_directed, **node.data)
+			g.add_edge(edge.start.name, edge.end.name, edge.name, edge.is_directed, **node.data)
 		return g
 
 	def intersection(self, other):
@@ -1212,16 +1210,18 @@ class Graph:
 				if start in g and end in g:
 					is_directed = edge.is_directed
 					data = edge.data
-					g.add_edge(start.name, end.name, name, is_directed=is_directed, **data)
+					g.add_edge(start.name, end.name, name, is_directed, **data)
 		# ...and theirs
 		for edge in other.edges:
 			if edge in self:
 				name = edge.name
-				start = edge.start.label
-				end = edge.end.label
-				is_directed = edge.is_directed
-				data = edge.data
-				g.add_edge(start, end, name, is_directed=is_directed, **data)
+				start = edge.start
+				end = edge.end
+				if start in g and end in g:
+					is_directed = edge.is_directed
+					data = edge.data
+					g.add_edge(start.name, end.name, name, is_directed, **data)
+		return g
 	
 	def difference(self, other):
 		"""Return a graph composed of the nodes and edges not in the other.
@@ -1254,6 +1254,6 @@ class Graph:
 		# create all the equivalent edges
 		for edge in self.edges:
 			if edge not in other:
-				if start in g and end in g:
-					g.add_edge(start, end, edge.name, **attributes)
+				if edge.start in g and edge.end in g:
+					g.add_edge(edge.start, edge.end, edge.name, **edge.data)
 		return g
