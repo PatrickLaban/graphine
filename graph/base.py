@@ -388,17 +388,23 @@ class Node(GraphElement):
 
 		If provided, outgoing and incoming should be booleans.
 		"""
-		edges = []
-		if outgoing:
-			edges += self.outgoing
-		if incoming:
-			edges += self.incoming
 		adjacent = []
 		seen = set()
-		for edge in edges:
-			if edge not in seen:
-				adjacent.append(edge.other_end(self))
-				seen.add(edge)
+		if outgoing:
+			for edge in self._outgoing:
+				if edge not in seen:
+					adjacent.append(edge.end)
+					seen.add(edge)
+		if incoming:
+			for edge in self._incoming:
+				if edge not in seen:
+					adjacent.append(edge.start)
+					seen.add(edge)
+		if outgoing or incoming:
+			for edge in self._bidirectional:
+				if edge not in seen:
+					adjacent.append(edge.other_end(self))
+					seen.add(edge)
 		return adjacent 
 
 	@property
@@ -563,13 +569,10 @@ class Graph:
 		"""
 		name = self.get_name(name)
 		# get the element if it exists
-		try:
-			try:
-				return self._nodes[name]
-			except KeyError:
-				return self._edges[name]
-		except KeyError:
-			raise KeyError("%s contains no element named %s" % (self, name))
+		element = self._nodes.get(name, False)
+		element = element or self._edges.get(name, False)
+		if not element: raise KeyError("%s not in %s" % (name, self))
+		return element
 
 	def __and__(self, other):
 		"""Maps the & operator to the intersection operation."""
@@ -599,23 +602,35 @@ class Graph:
 	#		     Convenience Functions			#
 	#################################################################
 
-	def get_element(self, element_or_name):
+	def get_element(self, item):
 		"""Takes an element or a name and returns an element.
 
 		If no element corresponds to the given name, raises
 		KeyError.
 		"""
-		if isinstance(element_or_name, GraphElement):
-			return element_or_name
+		if isinstance(item, GraphElement):
+			if item.name in self._nodes: return item
+			if item.name in self._edges: return item
+			raise KeyError("%s not in %s" % (item, self))
 		else:
-			return self[element_or_name]
+			element = self._edges.get(item, False)
+			element = element or self._nodes.get(item, False)
+			if not element: raise KeyError("%s not in %s" % (item, self))
+			return element
 
-	def get_name(self, element_or_name):
-		"""Takes an element or a name and returns a name."""
-		if isinstance(element_or_name, GraphElement):
-			return element_or_name.name
+	def get_name(self, item):
+		"""Takes an element or a name and returns a name.
+
+		If no element corresponds to the given name, raises
+		KeyError
+		"""
+		if isinstance(item, GraphElement):
+			item = item.name
 		else:
-			return element_or_name
+			item = item
+		if item in self._nodes: return item
+		if item in self._edges: return item
+		raise KeyError("%s not in %s" % (item, self))
 
 	#################################################################
 	#		    Graph Construction Tools			#
