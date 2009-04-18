@@ -380,7 +380,14 @@ class Node(GraphElement):
 			setattr(self, k, v)
 
 	def get_adjacent(self, outgoing=True, incoming=False):
-		"""Returns a list of all adjacent nodes."""
+		"""Returns a list of all adjacent nodes.
+
+		The optional arguments outgoing and incoming indicate
+		whether to include those edge sets in the search field.
+		Their defaults are True and False, accordingly.
+
+		If provided, outgoing and incoming should be booleans.
+		"""
 		edges = []
 		if outgoing:
 			edges += self.outgoing
