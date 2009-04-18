@@ -384,8 +384,14 @@ class Node(GraphElement):
 		if outgoing:
 			edges += self.outgoing
 		if incoming:
-			edges += self.incoming	
-		return [edge.other_end(self) for edge in edges]
+			edges += self.incoming
+		adjacent = []
+		seen = set()
+		for edge in edges:
+			if edge not in seen:
+				adjacent.append(edge.end)
+				seen.add(edge)
+		return adjacent 
 
 	@property
 	def incoming(self):
