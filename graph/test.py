@@ -42,7 +42,7 @@ class NodeCreationTest(unittest.TestCase):
 		self.g = Graph()
 
 	def testNodeCreation(self):
-		""" test the create node function fully """
+		""" test Graph.add_node fully """
 		self.node_1 = self.g.add_node()
 		self.node_2 = self.g.add_node("node2")
 		self.node_3 = self.g.add_node(foo="stuff")
@@ -61,6 +61,7 @@ class NodeCreationTest(unittest.TestCase):
 		self.failUnlessEqual(self.node_5.incoming, [])
 		self.failUnlessEqual(self.node_5.bidirectional, [])
 		self.failUnlessEqual(self.node_5.degree, 0)
+		self.failUnlessEqual(self.node_5.get_adjacent(), [])
 
 	def testNodeCreationFailPoints(self):
 		""" ensure that node creation fails when it's supposed to """
@@ -71,68 +72,80 @@ class NodeCreationTest(unittest.TestCase):
 class EdgeCreationTest(unittest.TestCase):
 
 	def setUp(self):
-		# WARNING: Errors in setup will cuase unkown test failures
+		# WARNING: g = Graph() MUST work to perform tests
 		self.g = Graph()
-		g = self.g
-		# create nodes
-		self.jimmy = g.add_node(city="New York")
-		self.ted = g.add_node(city="Atlanta")
-		self.dan = g.add_node(city="Seattle")
-		self.paul = g.add_node(city="Austin")
-		self.zeke = g.add_node(city="LA")
-		self.kurt = g.add_node(city="Chicago")
-		# create edges
-		self.j_to_t = g.add_edge(self.jimmy, self.ted, distance=850)
-		self.t_to_d = g.add_edge(self.ted, self.dan, distance=2150)
-		self.d_to_p = g.add_edge(self.dan, self.paul, distance=2850)
-		# for directional tests
-		self.z_to_k = g.add_edge(self.zeke, self.kurt, distance=1300, is_directed=False)
+		self.node_1 = self.g.add_node()
+		self.node_2 = self.g.add_node()
+		self.node_3 = self.g.add_node("node3", foo="stuff")
+		self.node_4 = self.g.add_node("node4", hello="world")
+		
 
-	def testAdjacency(self):
-		""" ensure adjacency list is correct """
-		self.failUnlessEqual(self.jimmy.incoming, [])
-		self.failUnlessEqual(self.jimmy.outgoing, [self.j_to_t])
-		self.failUnlessEqual(self.ted.incoming, [self.j_to_t])
-		self.failUnlessEqual(self.ted.outgoing, [self.t_to_d])
-		self.failUnlessEqual(self.ted.bidirectional, [])
-		self.failUnlessEqual(self.dan.incoming, [self.t_to_d])
-		self.failUnlessEqual(self.dan.outgoing, [self.d_to_p])
-		self.failUnlessEqual(self.paul.incoming, [self.d_to_p])
-		self.failUnlessEqual(self.zeke.incoming, [self.z_to_k])
-		self.failUnlessEqual(self.zeke.outgoing, [self.z_to_k])
-		self.failUnlessEqual(self.zeke.bidirectional, [self.z_to_k])
-		self.failUnlessEqual(self.kurt.incoming, [self.z_to_k])
-		self.failUnlessEqual(self.kurt.outgoing, [self.z_to_k])
-		self.failUnlessEqual(self.kurt.bidirectional, [self.z_to_k])
-		self.failUnlessEqual(self.paul.outgoing, [])
-		# and after deletion
-		self.g.remove_edge(self.t_to_d)
-		self.failUnlessEqual(self.ted.outgoing, [])
-		self.failUnlessEqual(self.dan.incoming, [])
-		new_trip = self.g.add_edge(self.ted, self.dan, distance=850)
-		self.failUnlessEqual(self.ted.outgoing, [new_trip])
-		self.failUnlessEqual(self.dan.incoming, [new_trip])
+	def testEdgeCreation(self):
+		""" test Graph.add_edge fully """
+		self.edge_1 = self.g.add_edge(self.node_1, self.node_2)
+		self.edge_2 = self.g.add_edge(self.node_1, self.node_2, "edge2")
+		self.edge_3 = self.g.add_edge(self.node_1, self.node_2, foo="stuff")
+		self.edge_4 = self.g.add_edge(self.node_1, self.node_2, "edge4", foo="stuff")
+		self.edge_5 = self.g.add_edge(self.node_1, self.node_2, "edge5", foo="stuff", hello="world")
+		self.edge_6 = self.g.add_edge(self.node_1, self.node_2, "edge6", False, foo="stuff", hello="world")			
+		self.edge_7 = self.g.add_edge(self.node_1, self.node_1, "edge7", False, foo="stuff", hello="world")
+		self.edge_8 = self.g.add_edge("node3", "node4", "edge8", foo="stuff", hello="world")
+		self.failUnlessEqual(self.edge_1.start, self.node_1) 
+		self.failUnlessEqual(self.edge_1.end, self.node_2)
+		self.failUnless(self.edge_1 in self.node_1.outgoing) 
+		self.failUnlessEqual(self.edge_1 in self.node_1.incoming, False) 
+		self.failUnless(self.edge_1 in self.node_2.incoming) 
+		self.failUnlessEqual(self.edge_1 in self.node_2.outgoing, False)
+		self.failUnlessEqual(self.edge_1.data, {})
+		self.failUnlessEqual(self.edge_2.name, "edge2")
+		self.failUnlessEqual(self.edge_2.data, {})
+		self.failUnlessEqual(self.edge_3.data, {"foo": "stuff"})
+		self.failUnlessEqual(self.edge_4.data, {"foo": "stuff"})
+		self.failUnlessEqual(self.edge_4.name, "edge4")
+		self.failUnlessEqual(self.edge_5.name, "edge5")
+		self.failUnlessEqual(self.edge_5.data, {"foo": "stuff", "hello":"world"})
+		self.failUnlessEqual(self.edge_5.start, self.node_1) 
+		self.failUnlessEqual(self.edge_5.end, self.node_2)
+		self.failUnless(self.edge_5 in self.node_1.outgoing) 
+		self.failUnlessEqual(self.edge_5 in self.node_1.incoming, False) 
+		self.failUnless(self.edge_5 in self.node_2.incoming) 
+		self.failUnlessEqual(self.edge_5 in self.node_2.outgoing, False)
+		self.failUnlessEqual(self.edge_5 in self.node_3.outgoing, False)
+		self.failUnlessEqual(self.edge_5 in self.node_3.incoming, False)
+		self.failUnlessEqual(self.edge_6.name, "edge6")
+		self.failUnlessEqual(self.edge_6.data, {"foo": "stuff", "hello":"world"})
+		self.failUnlessEqual(self.edge_6.start, self.node_1) 
+		self.failUnlessEqual(self.edge_6.end, self.node_2)
+		self.failUnless(self.edge_6 in self.node_1.outgoing) 
+		self.failUnless(self.edge_6 in self.node_1.incoming) 
+		self.failUnless(self.edge_6 in self.node_2.incoming) 
+		self.failUnless(self.edge_6 in self.node_2.outgoing)
+		self.failUnlessEqual(self.edge_7.name, "edge7")
+		self.failUnlessEqual(self.edge_7.data, {"foo": "stuff", "hello":"world"})
+		self.failUnlessEqual(self.edge_7.start, self.node_1) 
+		self.failUnlessEqual(self.edge_7.end, self.node_1)
+		self.failUnless(self.edge_7 in self.node_1.outgoing) 
+		self.failUnless(self.edge_7 in self.node_1.incoming) 
+		self.failUnlessEqual(self.edge_7 in self.node_2.incoming, False) 
+		self.failUnlessEqual(self.edge_7 in self.node_2.outgoing, False)
+		self.failUnlessEqual(self.edge_8.name, "edge8")
+		self.failUnlessEqual(self.edge_8.data, {"foo": "stuff", "hello":"world"})
+		self.failUnlessEqual(self.edge_8.start, self.node_3) 
+		self.failUnlessEqual(self.edge_8.end, self.node_4)
+		self.failUnless(self.edge_8 in self.node_3.outgoing) 
+		self.failUnlessEqual(self.edge_8 in self.node_1.incoming, False) 
+		self.failUnless(self.edge_8 in self.node_4.incoming) 
+		self.failUnlessEqual(self.edge_8 in self.node_4.outgoing, False)
+		self.failUnlessEqual(self.edge_8 in self.node_1.outgoing, False)
+		self.failUnlessEqual(self.edge_8 in self.node_1.incoming, False)
 
-	def testEquivalence(self):
-		""" test equivalence """
-		new_trip = self.g.add_edge(self.ted, self.dan, distance=850)
-		lame_trip = self.g.add_edge(self.jimmy, self.ted, distance=850)
-		self.failUnlessEqual(new_trip.data, lame_trip.data)
+	def testEdgeCreationFailPoints(self):
+		""" ensure that edge creation fails when it's supposed to """
+		self.test_dict = {"a":"b", "b":"c"}
+		self.failUnlessRaises(TypeError, self.g.add_edge, self.node_1, self.node_2, self.test_dict)
 
-	def testEdgeProperties(self):
-		""" ensure that the edges properties are being set properly """
-		self.failUnlessEqual(self.t_to_d.data, {"distance": 2150})
-		self.failUnlessEqual(self.d_to_p.data, {"distance": 2850})
-		self.failUnlessEqual(self.z_to_k.data, {"distance": 1300})
 
-	def testSize(self):
-		""" check size against known number of edges """
-		self.failUnlessEqual(self.g.size(), 4)
-
-	def testBidirection(self):
-		""" test bidirectional link  """
-		self.failUnlessEqual(self.zeke.outgoing[-1].other_end(self.zeke).city, "Chicago")
-		self.failUnlessEqual(self.kurt.outgoing[-1].other_end(self.kurt).city, "LA")
+		
 
 
 class GraphPropertiesTest(unittest.TestCase):
