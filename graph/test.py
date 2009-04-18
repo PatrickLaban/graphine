@@ -766,6 +766,18 @@ class OneNodeDirectedTest(unittest.TestCase):
 		self.failUnlessRaises(KeyError, self.g.__getitem__, self.A)
 		# make sure it removes all the edges
 		self.failUnlessEqual(self.g.size(), 0)
+
+	def testSearchNodes(self):
+		self.failUnlessEqual(list(self.g.search_nodes(name="A")), [self.A])
+		self.failUnlessEqual(list(self.g.search_nodes(value="bob")), [])
+
+	def testSearchEdges(self):
+		self.failUnlessEqual(list(self.g.search_edges(name="AA")), [self.AA])
+		self.failUnlessEqual(list(self.g.search_edges(start="A")), [self.AA])
+		self.failUnlessEqual(list(self.g.search_edges(end="A")), [self.AA])
+		self.failUnlessEqual(list(self.g.search_edges(start=self.A)), [self.AA])
+		self.failUnlessEqual(list(self.g.search_edges(end=self.A)), [self.AA])
+		self.failUnlessEqual(list(self.g.search_edges(name="AA", start=self.A, end=self.A)), [self.AA])
 		
 
 class GraphPerformanceTest(unittest.TestCase):
