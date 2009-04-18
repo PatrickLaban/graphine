@@ -794,6 +794,12 @@ class OneNodeDirectedTest(unittest.TestCase):
 		self.failUnlessEqual(list(self.g.search_edges(start=self.A)), [self.AA])
 		self.failUnlessEqual(list(self.g.search_edges(end=self.A)), [self.AA])
 		self.failUnlessEqual(list(self.g.search_edges(name="AA", start=self.A, end=self.A)), [self.AA])
+
+	def testGetCommonEdges(self):
+		self.failUnlessEqual(self.g.get_common_edges(self.A, self.A), set(self.A.edges))
+		self.failUnlessEqual(self.g.get_common_edges("A", "A"), set(self.A.edges))
+		self.failUnlessRaises(KeyError, self.g.get_common_edges, self.A, Node("B"))
+		self.failUnlessRaises(KeyError, self.g.get_common_edges, "A", "B")
 		
 
 class GraphPerformanceTest(unittest.TestCase):

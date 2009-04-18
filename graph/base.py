@@ -599,23 +599,32 @@ class Graph:
 	#		     Convenience Functions			#
 	#################################################################
 
-	def get_element(self, element_or_name):
+	def get_element(self, item):
 		"""Takes an element or a name and returns an element.
 
 		If no element corresponds to the given name, raises
 		KeyError.
 		"""
-		if isinstance(element_or_name, GraphElement):
-			return element_or_name
+		if isinstance(item, GraphElement):
+			if item.name in self._nodes: return item
+			if item.name in self._edges: return item
+			raise KeyError("%s not in %s" % (item, self))
 		else:
-			return self[element_or_name]
+			return self[item]
 
-	def get_name(self, element_or_name):
-		"""Takes an element or a name and returns a name."""
-		if isinstance(element_or_name, GraphElement):
-			return element_or_name.name
+	def get_name(self, item):
+		"""Takes an element or a name and returns a name.
+
+		If no element corresponds to the given name, raises
+		KeyError
+		"""
+		if isinstance(item, GraphElement):
+			item = item.name
 		else:
-			return element_or_name
+			item = item
+		if item in self._nodes: return item
+		if item in self._edges: return item
+		raise KeyError("%s not in %s" % (item, self))
 
 	#################################################################
 	#		    Graph Construction Tools			#
