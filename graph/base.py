@@ -329,6 +329,7 @@ class GraphElement:
 
 	def __eq__(self, other):
 		"""Compares the two elements based on name and data."""
+		if type(self) != type(other): return False
 		return self.name == other.name and self.data == other.data
 
 	def __ne__(self, other):
@@ -740,6 +741,10 @@ class Graph:
 			... 	print(edge)
 			Edge(weight=5)
 		"""
+		if "start" in kwargs:
+			kwargs["start"] = self.get_element(kwargs["start"])
+		if "end" in kwargs:
+			kwargs["end"] = self.get_element(kwargs["end"])
 		desired_properties = set(kwargs.items())
 		for edge in self.edges:
 			attrs = set(edge.data.items())
