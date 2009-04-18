@@ -849,6 +849,14 @@ class OneNodeDirectedTest(unittest.TestCase):
 		self.failUnlessRaises(KeyError, next, w1)
 		self.failUnlessRaises(KeyError, next, w2)
 
+	def testHeuristicWalk(self):
+		def heuristic(nodes, iterations=[0]):
+			if iterations[0] < 5:
+				iterations[0] += 1
+				if nodes: return nodes.pop()
+			return None
+		self.failUnlessEqual(list(self.g.heuristic_walk(self.A, heuristic)), [self.A, self.A, self.A, self.A])
+
 class GraphPerformanceTest(unittest.TestCase):
 
 	graph_setup = "from base import Graph; g = Graph(); n = g.add_node(first_name='');"

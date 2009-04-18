@@ -829,8 +829,9 @@ class Graph:
 		w = walker()
 		candidates = next(w)
 		while 1:
-			selection = yield(candidates)
+			selection = (yield candidates)
 			candidates = w.send(selection)
+			yield
 
 	def walk_edges(self, start):
 		"""Provides a generator for application-defined walks.
@@ -850,8 +851,9 @@ class Graph:
 		w = walker()
 		candidates = next(w)
 		while 1:
-			selection = yield(candidates)
+			selection = (yield candidates)
 			candidates = w.send(selection)
+			yield
 
 	def heuristic_walk(self, start, selector, reverse=False):
 		"""Traverses the graph using selector as a selection filter on the adjacent nodes.
@@ -874,8 +876,8 @@ class Graph:
 		w = self.walk_nodes(start, reverse=reverse)
 		for candidates in w:
 			selection = selector(candidates)
-			w.send(selection)
 			yield selection
+			w.send(selection)
 			
 	def heuristic_traversal(self, root, selector):
 		"""Traverses the graph using selector as a selection filter on the unvisited nodes.
