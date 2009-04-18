@@ -47,12 +47,12 @@ class NodeCreationTest(unittest.TestCase):
 
 	def testNodeCreation(self):
 		""" test Graph.add_node fully """
-		self.node_1 = self.g.add_node()
-		self.node_2 = self.g.add_node("node2")
-		self.node_3 = self.g.add_node(foo="stuff")
-		self.node_4 =  self.g.add_node("node4", foo="stuff")
-		self.node_5 =  self.g.add_node("node5", foo="stuff", hello="world")
-		self.failUnlessEqual(self.node_1.data, {})
+		self.node_1 = self.g.add_node() # basic node
+		self.node_2 = self.g.add_node("node2") # node with name, no data
+		self.node_3 = self.g.add_node(foo="stuff") # data, no name
+		self.node_4 =  self.g.add_node("node4", foo="stuff") # data and name
+		self.node_5 =  self.g.add_node("node5", foo="stuff", hello="world") # mutiple data attributes and name
+		self.failUnlessEqual(self.node_1.data, {}) # data is empty
 		self.failUnlessEqual(self.node_2.name, "node2") 
 		self.failUnlessEqual(self.node_2.data, {})
 		self.failUnlessEqual(self.node_3.data, {"foo": "stuff"})
@@ -60,12 +60,12 @@ class NodeCreationTest(unittest.TestCase):
 		self.failUnlessEqual(self.node_4.data, {"foo": "stuff"})
 		self.failUnlessEqual(self.node_5.name, "node5")
 		self.failUnlessEqual(self.node_5.data, {"foo": "stuff", "hello":"world"})
-		self.failUnlessEqual(self.node_5.incoming, [])
+		self.failUnlessEqual(self.node_5.incoming, []) # no edges connected
 		self.failUnlessEqual(self.node_5.outgoing, [])
 		self.failUnlessEqual(self.node_5.incoming, [])
 		self.failUnlessEqual(self.node_5.bidirectional, [])
 		self.failUnlessEqual(self.node_5.degree, 0)
-		self.failUnlessEqual(self.node_5.get_adjacent(), [])
+		self.failUnlessEqual(self.node_5.get_adjacent(), []) # no adjacent nodes
 
 	def testNodeCreationFailPoints(self):
 		""" ensure that node creation fails when it's supposed to """
@@ -142,12 +142,32 @@ class EdgeCreationTest(unittest.TestCase):
 		self.failUnlessEqual(self.edge_8 in self.node_4.outgoing, False)
 		self.failUnlessEqual(self.edge_8 in self.node_1.outgoing, False)
 		self.failUnlessEqual(self.edge_8 in self.node_1.incoming, False)
-
+		
 	def testEdgeCreationFailPoints(self):
 		""" ensure that edge creation fails when it's supposed to """
 		self.test_dict = {"a":"b", "b":"c"}
 		self.failUnlessRaises(TypeError, self.g.add_edge, self.node_1, self.node_2, self.test_dict)
 
+
+class NodeAndEdgePropertiesTest(unittest.TestCase):
+	
+	def setUp(self):
+		# WARNING: g = Graph() MUST work to perform tests
+		self.g = Graph()
+		
+	def testAdjacency(self):
+		""" test the node.get_adjacent """
+		self.node_1 = self.g.add_node()
+		self.node_2 = self.g.add_node()
+		self.node_3 = self.g.add_node()
+		self.edge_1 = self.g.add_edge(self.node_1, self.node_2)
+		self.edge_2 = self.g.add_edge(self.node_1, self.node_3, is_directed=False)
+		self.edge_3 = self.g.add_edge(self.node_2, self.node_2)
+		self.failUnless((self.node_2 and self.node_3) in self.node_1.get_adjacent())
+		self.failUnlessEqual(self.node_1 in self.node_1.get_adjacent(), False)
+		self.failUnlessEqual(self.node_2.get_adjacent(), [])
+		self.failUnless(self.node_1 in self.node_3.get_adjacent())
+		self.failUnlessEqual((self.node_2 and self.node_3) in self.node_3.get_adjacent(), False)
 
 		
 
@@ -867,8 +887,9 @@ if __name__ == "__main__":
 	TraversalTest = unittest.TestLoader().loadTestsFromTestCase(TraversalTest)
 	InductionTest = unittest.TestLoader().loadTestsFromTestCase(InductionTest)
 	ZeroNodeTest = unittest.TestLoader().loadTestsFromTestCase(ZeroNodeTest)
+	NodeAndEdgePropertiesTest = unittest.TestLoader().loadTestsFromTestCase(NodeAndEdgePropertiesTest)
 	OneNodeDirectedTest = unittest.TestLoader().loadTestsFromTestCase(OneNodeDirectedTest)
-	suites = [GraphCorrectnessTest, NodeCreationTest, EdgeCreationTest, GraphPropertiesTest, GraphSearchTest, EdgeMovementTest, GetElementsTest, TraversalTest, InductionTest, GraphFailureTest]
+	suites = [GraphCorrectnessTest, NodeCreationTest, EdgeCreationTest, GraphPropertiesTest, GraphSearchTest, EdgeMovementTest, GetElementsTest, TraversalTest, InductionTest, GraphFailureTest, NodeAndEdgePropertiesTest]
 	suites += [ZeroNodeTest]
 	suites += [OneNodeDirectedTest]
 	CorrectnessTest = unittest.TestSuite(suites)
