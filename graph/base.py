@@ -316,7 +316,7 @@ class GraphElement:
 		"""Pretty prints this element."""
 		classname = type(self).__name__
 		name = "name=%s, " % self.name
-		attrs = name.join(("%s=%s, " % (k, v) for k, v in self.data.items()))[:-2]
+		attrs = name + ''.join(("%s=%s, " % (k, v) for k, v in self.data.items()))[:-2]
 		return "%s(%s)" % (classname, attrs)
 
 	def __lt__(self, other):
@@ -421,7 +421,9 @@ class Node(GraphElement):
 		Note that the list returned is a copy, so modifying it doesn't
 		impact the structure of the graph.
 		"""
-		return copy.copy(self._incoming + self._outgoing + self._bidirectional)
+		# we have to ensure that all these elements are unique, since loops can be
+		# both incoming and outgoing.
+		return copy.copy(list(set(self._incoming + self._outgoing + self._bidirectional)))
 
 	@property
 	def degree(self):
@@ -928,7 +930,7 @@ class Graph:
 			[{Node(group=1), Node(group=1)}, {Node(group=2)}]
 		"""
 		# set of all connected components
-		connected = [set()]
+		connected = []
 		# iterate over the nodes
 		for node in self.nodes:
 			# get all the nodes that are reachable from this node
@@ -975,7 +977,6 @@ class Graph:
 			visited = [node for node in self.depth_first_traversal(arbitrary)]
 			# reverse the direction of the edges in the graph
 			self.transpose()
-			current_component = set()
 			# while there are still elements which aren't reachable
 			while visited:
 				current_component = set()
