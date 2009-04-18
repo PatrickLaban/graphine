@@ -33,38 +33,64 @@ This contains all the test data for Graphine.
 import unittest
 import timeit
 from base import Graph
-
-class NodeCreationTest(unittest.TestCase):
-
-	def setUp(self):
-		# WARNING: g = Graph() & g.add_node() MUST work to perform tests
-		self.g = Graph()
+"""
 		self.jimmy = self.g.add_node(city="New York")
 		self.ted = self.g.add_node(city="Atlanta")
 		self.dan = self.g.add_node(city="Seattle")
 		self.paul = self.g.add_node(city="Austin")
+"""
+def testData(self):
+	""" test node.data against set values """
+	self.failUnlessEqual(self.jimmy.data, {"city":"New York"})
+	self.failUnlessEqual(self.ted.data, {"city":"Atlanta"})
+	self.failUnlessEqual(self.paul.data, {"city":"Austin"})
 
-	def testData(self):
-		""" test node.data against set values """
-		self.failUnlessEqual(self.jimmy.data, {"city":"New York"})
-		self.failUnlessEqual(self.ted.data, {"city":"Atlanta"})
-		self.failUnlessEqual(self.paul.data, {"city":"Austin"})
+def testEquality(self):
+	""" test for equality between nodes """
+	snowflake = self.g.add_node(city="Austin")
+	self.failIfEqual(self.dan, snowflake)
+	self.failUnlessEqual(self.paul.data, snowflake.data)
+	self.failUnlessEqual(self.paul.city, snowflake.city)
 
-	def testEquality(self):
-		""" test for equality between nodes """
-		snowflake = self.g.add_node(city="Austin")
-		self.failIfEqual(self.dan, snowflake)
-		self.failUnlessEqual(self.paul.data, snowflake.data)
-		self.failUnlessEqual(self.paul.city, snowflake.city)
+def testOrder(self):
+	""" compare order to known number of nodes """
+	self.failUnlessEqual(self.g.order(), 4)
+	temp_node = self.g.add_node()
+	self.failUnlessEqual(self.g.order(), 5)
+	self.g.remove_node(temp_node)
+	self.failUnlessEqual(self.g.order(), 4)
 
-	def testOrder(self):
-		""" compare order to known number of nodes """
-		self.failUnlessEqual(self.g.order(), 4)
-		temp_node = self.g.add_node()
-		self.failUnlessEqual(self.g.order(), 5)
-		self.g.remove_node(temp_node)
-		self.failUnlessEqual(self.g.order(), 4)
 
+class NodeCreationTest(unittest.TestCase):
+
+	def setUp(self):
+		# WARNING: g = Graph() MUST work to perform tests
+		self.g = Graph()
+
+	def testNodeCreation(self):
+		""" test the create node function fully """
+		self.node_1 = self.g.add_node()
+		self.node_2 = self.g.add_node("node2")
+		self.node_3 = self.g.add_node(foo="stuff")
+		self.node_4 =  self.g.add_node("node4", foo="stuff")
+		self.node_5 =  self.g.add_node("node5", foo="stuff", hello="world")
+		self.failUnlessEqual(self.node_1.data, {})
+		self.failUnlessEqual(self.node_2.name, "node2") 
+		self.failUnlessEqual(self.node_2.data, {})
+		self.failUnlessEqual(self.node_3.data, {"foo": "stuff"})
+		self.failUnlessEqual(self.node_4.name, "node4")
+		self.failUnlessEqual(self.node_4.data, {"foo": "stuff"})
+		self.failUnlessEqual(self.node_5.name, "node5")
+		self.failUnlessEqual(self.node_5.data, {"foo": "stuff", "hello":"world"})
+		self.failUnlessEqual(self.node_5.incoming, [])
+		self.failUnlessEqual(self.node_5.outgoing, [])
+		self.failUnlessEqual(self.node_5.incoming, [])
+		self.failUnlessEqual(self.node_5.bidirectional, [])
+		self.failUnlessEqual(self.node_5.degree, 0)
+
+	def testNodeCreationFailPoints(self):
+		""" ensure that node creation fails when it's supposed to """
+		pass
 
 class EdgeCreationTest(unittest.TestCase):
 
