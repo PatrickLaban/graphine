@@ -32,8 +32,12 @@ This contains all the test data for Graphine.
 
 import unittest
 import timeit
-from base import Graph
+from base import Graph, Node, Edge, GraphElement
 
+
+#########################################################################################
+#      				     COMPONENT TESTS					#	
+#########################################################################################
 
 class NodeCreationTest(unittest.TestCase):
 
@@ -562,6 +566,80 @@ class GraphCorrectnessTest(unittest.TestCase):
 		comp = g.get_strongly_connected()
 		self.failUnlessEqual(set([frozenset([n1, n2, n3]), frozenset([n4, n5, n6])]), {frozenset(i) for i in comp})
 
+#########################################################################################################################################
+#								SCENARIO TESTS								#
+#########################################################################################################################################
+
+"""
+TODO:
+	- 1 node directed edge test
+	- 1 node undirected edge test
+	- 1 node disconnected test
+	- 2 node directed edge test
+	- 2 node undirected edge test
+	- 2 node disconnected test
+	- 3 node directed cycle test
+	- 3 node undirected cycle test
+	- 3 node disconnected test
+	- hodgepodge test
+		- one five node directed cycle component
+		- one undirected k5 component
+		- one five node undirected cycle with a loop on each node
+		- one five node directed tree
+		- one five node undirected tree
+"""
+
+class ZeroNodeTest(unittest.TestCase):
+	# tests all applicable operations with the zero node case
+
+	def setUp(self):
+		self.g = Graph()
+
+	def testContainers(self):
+		# test to make sure that the containers are okay
+		self.failUnlessEqual({}, self.g._nodes)
+		self.failUnlessEqual({}, self.g._edges)
+
+	def testContains(self):
+		# tests the in operator for names
+		self.failUnlessEqual("A" in self.g, False)
+		# tests the in operator for elements
+		n = Node("B")
+		self.failUnlessEqual(n in self.g, False)
+
+	def testGetItem(self):
+		# tests the [] operator for names
+		self.failUnlessRaises(KeyError, self.g.__getitem__, "A")
+		# and for elements
+		n = Node("B")
+		self.failUnlessRaises(KeyError, self.g.__getitem__, n)
+
+	def testNodes(self):
+		# test to ensure that the nodes property works
+		self.failUnlessEqual(list(self.g.nodes), [])
+
+	def testEdges(self):
+		# test to ensure that the edges property works
+		self.failUnlessEqual(list(self.g.edges), [])
+
+	def testSearchNodes(self):
+		self.failUnlessEqual(list(self.g.search_nodes(value="bob")), [])
+
+	def testSearchEdges(self):
+		self.failUnlessEqual(list(self.g.search_edges(value="bob")), [])
+
+	def testGetConnectedComponents(self):
+		self.failUnlessEqual(self.g.get_connected_components(), [])
+
+	def testGetStronglyConnected(self):
+		self.failUnlessEqual(self.g.get_strongly_connected(), [])
+
+	def testSize(self):
+		self.failUnlessEqual(self.g.size(), 0)
+
+	def testOrder(self):
+		self.failUnlessEqual(self.g.order(), 0)
+
 class GraphPerformanceTest(unittest.TestCase):
 
 	graph_setup = "from base import Graph; g = Graph(); n = g.add_node(first_name='');"
@@ -660,6 +738,8 @@ if __name__ == "__main__":
 	GetElementsTest = unittest.TestLoader().loadTestsFromTestCase(GetElementsTest)
 	TraversalTest = unittest.TestLoader().loadTestsFromTestCase(TraversalTest)
 	InductionTest = unittest.TestLoader().loadTestsFromTestCase(InductionTest)
+	ZeroNodeTest = unittest.TestLoader().loadTestsFromTestCase(ZeroNodeTest)
 	suites = [GraphCorrectnessTest, NodeCreationTest, EdgeCreationTest, GraphPropertiesTest, GraphSearchTest, EdgeMovementTest, GetElementsTest, TraversalTest, InductionTest, GraphFailureTest]
+	suites += [ZeroNodeTest]
 	CorrectnessTest = unittest.TestSuite(suites)
 	unittest.main()

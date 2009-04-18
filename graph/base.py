@@ -928,7 +928,7 @@ class Graph:
 			[{Node(group=1), Node(group=1)}, {Node(group=2)}]
 		"""
 		# set of all connected components
-		connected = [set()]
+		connected = []
 		# iterate over the nodes
 		for node in self.nodes:
 			# get all the nodes that are reachable from this node
@@ -975,7 +975,6 @@ class Graph:
 			visited = [node for node in self.depth_first_traversal(arbitrary)]
 			# reverse the direction of the edges in the graph
 			self.transpose()
-			current_component = set()
 			# while there are still elements which aren't reachable
 			while visited:
 				current_component = set()
