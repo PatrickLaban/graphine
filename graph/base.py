@@ -389,7 +389,7 @@ class Node(GraphElement):
 		seen = set()
 		for edge in edges:
 			if edge not in seen:
-				adjacent.append(edge.end)
+				adjacent.append(edge.other_end(self))
 				seen.add(edge)
 		return adjacent 
 

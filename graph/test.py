@@ -157,19 +157,15 @@ class NodeAndEdgePropertiesTest(unittest.TestCase):
 		
 	def testAdjacency(self):
 		""" test the node.get_adjacent """
-		self.node_1 = self.g.add_node()
-		self.node_2 = self.g.add_node()
-		self.node_3 = self.g.add_node()
+		self.node_1 = self.g.add_node("node1")
+		self.node_2 = self.g.add_node("node2")
+		self.node_3 = self.g.add_node("node3")
 		self.edge_1 = self.g.add_edge(self.node_1, self.node_2)
-		self.edge_2 = self.g.add_edge(self.node_1, self.node_3, is_directed=False)
+		self.edge_2 = self.g.add_edge(self.node_1, self.node_3, "hello", is_directed=False)
 		self.edge_3 = self.g.add_edge(self.node_2, self.node_2)
-		self.failUnless((self.node_2 and self.node_3) in self.node_1.get_adjacent())
-		self.failUnlessEqual(self.node_1 in self.node_1.get_adjacent(), False)
-		self.failUnlessEqual(self.node_2.get_adjacent(), [])
-		self.failUnless(self.node_1 in self.node_3.get_adjacent())
-		self.failUnlessEqual((self.node_2 and self.node_3) in self.node_3.get_adjacent(), False)
-
-		
+		self.failUnlessEqual(set(self.node_1.get_adjacent()), {self.node_2, self.node_3})
+		self.failUnlessEqual(set(self.node_2.get_adjacent()), {self.node_2})
+		self.failUnlessEqual(set(self.node_3.get_adjacent()), {self.node_1})
 
 
 class GraphPropertiesTest(unittest.TestCase):
