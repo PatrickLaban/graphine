@@ -572,6 +572,7 @@ class GraphCorrectnessTest(unittest.TestCase):
 
 """
 TODO:
+	- 0 node binary operations
 	- 1 node directed edge test
 	- 1 node undirected edge test
 	- 1 node disconnected test
@@ -639,6 +640,121 @@ class ZeroNodeTest(unittest.TestCase):
 
 	def testOrder(self):
 		self.failUnlessEqual(self.g.order(), 0)
+
+
+class OneNodeDirectedTest(unittest.TestCase):
+
+	def setUp(self):
+		self.g = Graph()
+		self.A = self.g.add_node("A")
+		self.AA = self.g.add_edge("A", "A", "AA")
+
+	def testContainers(self):
+		self.failUnlessEqual(self.g._nodes, {"A": self.A})
+		self.failUnlessEqual(self.g._edges, {"AA": self.AA})
+
+	def testContains(self):
+		# make sure that node membership by name works
+		self.failUnlessEqual("A" in self.g, True)
+		# make sure that edge membership by name works
+		self.failUnlessEqual("AA" in self.g, True)
+		# make sure that a name not in the graph does not work
+		self.failUnlessEqual("B" in self.g, False)
+		# make sure that node membership by node works
+		self.failUnlessEqual(self.A in self.g, True)
+		# make sure that edge membership by edge works
+		self.failUnlessEqual(self.AA in self.g, True)
+		# make sure that an element not in the graph does not work
+		n = Node("Z")
+		self.failUnlessEqual(n in self.g, False)
+		# make sure that an element matching one in the graph
+		# will still return true
+		n = Node("A")
+		self.failUnlessEqual(n in self.g, True)
+
+	def testGetItem(self):
+		# make sure that getting nodes by name works
+		self.failUnlessEqual(self.g["A"], self.A)
+		# make sure that getting edges by name works
+		self.failUnlessEqual(self.g["AA"], self.AA)
+		# make sure that getting nodes by element works
+		self.failUnlessEqual(self.g[self.A], self.A)
+		# make sure that getting edges by element works
+		self.failUnlessEqual(self.g[self.AA], self.AA)
+		# make sure that getting a nonexistant element by name fails
+		self.failUnlessRaises(KeyError, self.g.__getitem__, "B")
+		# and that getting a nonmember element by element fails
+		n = Node("B")
+		self.failUnlessRaises(KeyError, self.g.__getitem__, n)
+		# test to make sure that a nonmember element which tests equal
+		# to a member element will retrieve the member element
+		n = Node("A")
+		e = Edge(self.g["A"], self.g["A"], "AA")
+		self.failUnless(self.g[n] is self.A)
+		self.failUnless(self.g[e] is self.AA)
+
+	def testNodes(self):
+		self.failUnlessEqual(list(self.g.nodes), [self.A])
+	
+	def testEdges(self):
+		self.failUnlessEqual(list(self.g.edges), [self.AA])
+
+	def testAddNode(self):
+		# make sure that making a new node succeeds
+		B = self.g.add_node("B")
+		self.failUnlessEqual(self.g["B"], B)
+		self.failUnless(self.g["B"] is B)
+		self.failUnlessEqual(self.g.order(), 2)
+		self.failUnlessEqual(B in set(self.g.nodes), True)
+		# make sure that adding a new node overwrites the old one
+		# if they share a name
+		A = self.g.add_node("A")
+		# equality
+		self.failUnlessEqual(self.g["A"], A)
+		# identity
+		self.failUnless(self.g["A"] is A)
+		# membership
+		self.failUnlessEqual(A in self.g, True)
+		# data store membership
+		self.failUnlessEqual(A in self.g._nodes.values(), True)
+		# order- it should have added B, then replaced self.A with A,
+		# thus 2
+		self.failUnlessEqual(self.g.order(), 2)
+
+	def testAddEdge(self):
+		# make sure that adding a new edge by node names succeeds
+		aa = self.g.add_edge("A", "A", "aa")
+		self.failUnlessEqual(self.g["aa"], aa)
+		self.failUnless(self.g["aa"] is aa)
+		self.failUnlessEqual(aa in self.g, True)
+		self.failUnlessEqual("aa" in self.g, True)
+		self.failUnlessEqual(self.g.size(), 2)
+		self.failUnlessEqual(aa in set(self.g.edges), True)
+		self.failUnlessEqual(aa in self.g._edges.values(), True)
+		# make sure that adding a new edge by node succeeds
+		# also check to make sure that overwriting occurs
+		aa = self.g.add_edge(self.A, self.A, "aa")
+		self.failUnlessEqual(self.g["aa"], aa)
+		self.failUnless(self.g["aa"] is aa)
+		self.failUnlessEqual(aa in self.g, True)
+		self.failUnlessEqual("aa" in self.g, True)
+		self.failUnlessEqual(self.g.size(), 2)
+		self.failUnlessEqual(aa in set(self.g.edges), True)
+		self.failUnlessEqual(aa in self.g._edges.values(), True)
+
+	def testRemoveNode(self):
+		print(self.A.outgoing)
+		# make sure node removal works by name
+		A = self.g.remove_node("A")
+		self.failUnlessEqual(self.A, A)
+		self.failUnlessEqual(self.g.order(), 0)
+		self.failIf(A in self.g)
+		self.failIf(A.name in self.g)
+		self.failUnlessRaises(KeyError, self.g.__getitem__, "A")
+		self.failUnlessRaises(KeyError, self.g.__getitem__, self.A)
+		# make sure it removes all the edges
+		self.failUnless(self.g.size(), 0)
+		
 
 class GraphPerformanceTest(unittest.TestCase):
 
@@ -739,7 +855,9 @@ if __name__ == "__main__":
 	TraversalTest = unittest.TestLoader().loadTestsFromTestCase(TraversalTest)
 	InductionTest = unittest.TestLoader().loadTestsFromTestCase(InductionTest)
 	ZeroNodeTest = unittest.TestLoader().loadTestsFromTestCase(ZeroNodeTest)
+	OneNodeDirectedTest = unittest.TestLoader().loadTestsFromTestCase(OneNodeDirectedTest)
 	suites = [GraphCorrectnessTest, NodeCreationTest, EdgeCreationTest, GraphPropertiesTest, GraphSearchTest, EdgeMovementTest, GetElementsTest, TraversalTest, InductionTest, GraphFailureTest]
 	suites += [ZeroNodeTest]
+	suites += [OneNodeDirectedTest]
 	CorrectnessTest = unittest.TestSuite(suites)
 	unittest.main()
