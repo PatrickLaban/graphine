@@ -804,7 +804,27 @@ class OneNodeDirectedTest(unittest.TestCase):
 		self.failUnlessEqual(self.g.get_common_edges("A", "A"), set(self.A.edges))
 		self.failUnlessRaises(KeyError, self.g.get_common_edges, self.A, Node("B"))
 		self.failUnlessRaises(KeyError, self.g.get_common_edges, "A", "B")
-		
+
+	def testWalkNodes(self):
+		walked = []
+		w = self.g.walk_nodes(self.A)
+		iteration = 0
+		for candidates in w:
+			if iteration < 5:
+				self.failUnlessEqual(candidates, [self.A])
+				w.send(candidates.pop())
+			else:
+				break
+		w = self.g.walk_nodes("A")
+		iteration = 0
+		for candidates in w:
+			if iteration < 5:
+				self.failUnlessEqual(candidates, [self.A])
+				w.send(candidates.pop())
+			else:
+				break
+		self.failUnlessRaises(KeyError, self.g.walk_nodes, "B")
+		self.failUnlessRaises(KeyError, self.g.walk_nodes, Node("B"))
 
 class GraphPerformanceTest(unittest.TestCase):
 
