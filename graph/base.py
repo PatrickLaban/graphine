@@ -458,10 +458,10 @@ class Edge(GraphElement):
 		If the point given is not an endpoint on this edge or the 
 		endpoint on a directed edge, this raises AttributeError.
 		"""
-		if starting_point is self.start:
+		if starting_point is self.start or is self.start.name:
 			return self.end
 		elif not self.is_directed:
-			if starting_point is self.end:
+			if starting_point is self.end or is self.end.name:
 				return self.start
 		raise AttributeError("%s has no endpoint opposite to %s" % (self, starting_point))
 
@@ -536,18 +536,14 @@ class Graph:
 		else:
 			return element in self._nodes or element in self._edges
 
-	def __getitem__(self, element_or_name):
+	def __getitem__(self, name):
 		"""Returns the element corresponding to the given name or the
 		given element's name.
 
 		Raises KeyError if it is not found.
 		"""
-		# get the element's name if it is an element
-		try:
-			name = element_or_name.name
-		except:
-			pass
-		# get the 
+		name = self.get_name(name)
+		# get the element if it exists
 		try:
 			try:
 				return self._nodes[name]
@@ -643,10 +639,8 @@ class Graph:
 			Edge(weight=5)			
 		"""
 		# get the start and end points
-		if not isinstance(start, self.Node):
-			start = self[start]
-		if not isinstance(end, self.Node):
-			end = self[end]
+		start = self.get_element(start)
+		end = self.get_element(end)
 		# build the edge
 		edge = self.Edge(start, end, name, is_directed=is_directed, **kwargs)
 		self._edges[edge.name] = edge
@@ -670,8 +664,7 @@ class Graph:
 			False
 		"""
 		# get the actual node if a name is passed in
-		if not isinstance(node, self.Node):
-			node = self[node]
+		node = self.get_element(node)
 		# remove it from adjacency tracking
 		for edge in node.edges:
 			del self._edges[edge.name]
@@ -691,8 +684,7 @@ class Graph:
 			False
 		"""
 		# get the actual edge if a name is passed
-		if not isinstance(edge, self.Edge):
-			edge = self[edge]
+		edge = self.get_element(edge)
 		# remove it from adjacency tracking
 		start = edge.start
 		end = edge.end
@@ -765,10 +757,8 @@ class Graph:
 			{Edge(name="Fluffy")}
 		"""
 		# get the actual nodes if names are passed in
-		if not isinstance(n1, self.Node):
-			n1 = self[n1]
-		if not isinstance(n2, self.Node):
-			n2 = self[n2]
+		n1 = self.get_element(n1)
+		n2 = self.get_element(n2)
 		n1_edges = set(n1.incoming + n1.outgoing)
 		n2_edges = set(n2.incoming + n2.outgoing)
 		return n1_edges & n2_edges
@@ -792,7 +782,7 @@ class Graph:
 			>>>	w.send(next_node)
 		"""
 		# make sure we have a real node
-		if not isinstance(start, self.Node): start = self[start]
+		start = self.get_element(start)
 		# the actual generator function, wrapped for prettitude
 		def walker():
 			next = start
@@ -814,7 +804,7 @@ class Graph:
 		and yields, Edges in the place of Nodes.
 		"""
 		# make sure we have a real edge
-		if not isinstance(start, self.Edge): start = self[start]
+		start = self.get_element(start)
 		# the actual generator function
 		def walker():
 			next = start
@@ -865,7 +855,7 @@ class Graph:
 			Node(name="B")
 		"""
 		# handle the its-a-name case
-		if not isinstance(root, self.Node): root = self[root]
+		root = self.get_element(root)
 		# stores nodes that are known to the algorithm but not yet visited
 		discovered = []
 		visited = set()
@@ -1030,7 +1020,7 @@ class Graph:
 			(1, [Edge(weight=1)])
 		"""
 		# handle the its-a-name case
-		if not isinstance(source, self.Node): source = self[source]
+		source = self.get_element(source)
 		# create the paths table
 		paths = defaultdict(lambda: (float("inf"), []))
 		paths[source] = (0, [])
@@ -1092,7 +1082,7 @@ class Graph:
 		Does not reverse direction.
 		"""
 		# get the edge if its a name
-		if not isinstance(edge, self.Edge): edge = self[edge]
+		edge = self.get_element(edge)
 		if edge.is_directed:
 			edge.start._outgoing.remove(edge)
 			edge.end._incoming.remove(edge)
@@ -1116,7 +1106,7 @@ class Graph:
 		That dictionary will be used to initialize the new node.
 		"""
 		# get the edge if its a name
-		if not isinstance(edge, self.Edge): edge = self[edge]
+		edge = self.get_element(edge)
 		# check to make sure that the given edge is the only edge between
 		# it endpoints
 		start = edge.start
@@ -1177,8 +1167,7 @@ class Graph:
 		"""	
 		g = type(self)()
 		for node in nodes:
-			if not isinstance(node, self.Node):
-				node = self[node]
+			node = self.get_elements(node)
 			name = node.name
 			data = node.data
 			n = g.add_node(name, **data)
@@ -1198,8 +1187,7 @@ class Graph:
 		# create the new graph
 		g = type(self)()
 		for edge in edges:
-			if not isinstance(edge, self.Edge):
-				edge = self[edge]
+			edge = self.get_element(edge)
 			# and add them if they don't already exist
 			if edge.start not in g:
 				g.add_node(edge.start.name, **edge.start.data)
