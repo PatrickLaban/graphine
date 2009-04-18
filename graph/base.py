@@ -316,7 +316,8 @@ class GraphElement:
 		"""Pretty prints this element."""
 		classname = type(self).__name__
 		name = "name=%s, " % self.name
-		attrs = name + ''.join(("%s=%s, " % (k, v) for k, v in self.data.items()))[:-2]
+		attrs = name + ''.join(("%s=%s, " % (k, v) for k, v in self.data.items()))
+		attrs = attrs[:-2]
 		return "%s(%s)" % (classname, attrs)
 
 	def __lt__(self, other):
