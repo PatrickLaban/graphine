@@ -315,7 +315,8 @@ class GraphElement:
 	def __repr__(self):
 		"""Pretty prints this element."""
 		classname = type(self).__name__
-		attrs = ''.join(("%s=%s, " % (k, v) for k, v in self.data.items()))[:-2]
+		name = "name=%s, " % self.name
+		attrs = name.join(("%s=%s, " % (k, v) for k, v in self.data.items()))[:-2]
 		return "%s(%s)" % (classname, attrs)
 
 	def __lt__(self, other):
@@ -458,10 +459,10 @@ class Edge(GraphElement):
 		If the point given is not an endpoint on this edge or the 
 		endpoint on a directed edge, this raises AttributeError.
 		"""
-		if starting_point is self.start or is self.start.name:
+		if starting_point is self.start or starting_point is self.start.name:
 			return self.end
 		elif not self.is_directed:
-			if starting_point is self.end or is self.end.name:
+			if starting_point is self.end or starting_point is self.end.name:
 				return self.start
 		raise AttributeError("%s has no endpoint opposite to %s" % (self, starting_point))
 
@@ -590,14 +591,14 @@ class Graph:
 		If no element corresponds to the given name, raises
 		KeyError.
 		"""
-		if issubclass(element_or_name, GraphElement):
+		if isinstance(element_or_name, GraphElement):
 			return element_or_name
 		else:
 			return self[element_or_name]
 
 	def get_name(self, element_or_name):
 		"""Takes an element or a name and returns a name."""
-		if issubclass(element_or_name, GraphElement):
+		if isinstance(element_or_name, GraphElement):
 			return element_or_name.name
 		else:
 			return element_or_name
@@ -1167,7 +1168,7 @@ class Graph:
 		"""	
 		g = type(self)()
 		for node in nodes:
-			node = self.get_elements(node)
+			node = self.get_element(node)
 			name = node.name
 			data = node.data
 			n = g.add_node(name, **data)
