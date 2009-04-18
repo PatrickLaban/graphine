@@ -806,7 +806,6 @@ class OneNodeDirectedTest(unittest.TestCase):
 		self.failUnlessRaises(KeyError, self.g.get_common_edges, "A", "B")
 
 	def testWalkNodes(self):
-		walked = []
 		w = self.g.walk_nodes(self.A)
 		iteration = 0
 		for candidates in w:
@@ -825,6 +824,28 @@ class OneNodeDirectedTest(unittest.TestCase):
 				break
 		w1 = self.g.walk_nodes("B")
 		w2 = self.g.walk_nodes(Node("B"))
+		self.failUnlessRaises(KeyError, next, w1)
+		self.failUnlessRaises(KeyError, next, w2)
+
+	def testWalkEdges(self):
+		w = self.g.walk_edges(self.AA)
+		iteration = 0
+		for candidates in w:
+			if iteration < 5:
+				self.failUnlessEqual(candidates, [self.AA])
+				w.send(candidates.pop())
+			else:
+				break
+		w = self.g.walk_edges("AA")
+		iteration = 0
+		for candidates in w:
+			if iteration < 5:
+				self.failUnlessEqual(candidates, [self.AA])
+				w.send(candidates.pop())
+			else:
+				break
+		w1 = self.g.walk_edges("B")
+		w2 = self.g.walk_edges(Node("B"))
 		self.failUnlessRaises(KeyError, next, w1)
 		self.failUnlessRaises(KeyError, next, w2)
 

@@ -844,7 +844,7 @@ class Graph:
 		def walker():
 			next = start
 			while next:
-				incident = set(next.other_end(next.start).outgoing)
+				incident = list(next.other_end(next.start).outgoing)
 				next = yield(incident)
 		# convenience wrapper
 		w = walker()
