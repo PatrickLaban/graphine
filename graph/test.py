@@ -823,8 +823,10 @@ class OneNodeDirectedTest(unittest.TestCase):
 				w.send(candidates.pop())
 			else:
 				break
-		self.failUnlessRaises(KeyError, self.g.walk_nodes, "B")
-		self.failUnlessRaises(KeyError, self.g.walk_nodes, Node("B"))
+		w1 = self.g.walk_nodes("B")
+		w2 = self.g.walk_nodes(Node("B"))
+		self.failUnlessRaises(KeyError, next, w1)
+		self.failUnlessRaises(KeyError, next, w2)
 
 class GraphPerformanceTest(unittest.TestCase):
 
