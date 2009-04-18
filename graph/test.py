@@ -141,6 +141,7 @@ class EdgeCreationTest(unittest.TestCase):
 		self.failUnlessEqual(self.edge_8 in self.node_4.outgoing, False)
 		self.failUnlessEqual(self.edge_8 in self.node_1.outgoing, False)
 		self.failUnlessEqual(self.edge_8 in self.node_1.incoming, False)
+		self.failUnlessEqual(set(self.node_2.bidirectional), {self.edge_6})
 		
 	def testEdgeCreationFailPoints(self):
 		""" ensure that edge creation fails when it's supposed to """
