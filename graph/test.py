@@ -328,8 +328,9 @@ class InductionTest(unittest.TestCase):
 		spock = list(new_mission.search_nodes(first_name="spock"))[0]
 		bones = list(new_mission.search_nodes(first_name="bones"))[0]
 		uhura = list(new_mission.search_nodes(first_name="uhura"))[0]
-		self.failUnlessEqual(uhura.outgoing[0].end.first_name, "spock")
-		self.failUnlessEqual(uhura.outgoing[1].end.first_name, "bones")
+		self.failUnless("spock" in {edge.end.first_name for edge in uhura.outgoing})
+		self.failUnless("bones" in {edge.end.first_name for edge in uhura.outgoing})
+		self.failIf("kirk" in {edge.end.first_name for edge in uhura.outgoing})
 
 	def testEdgeInduction(self):
 		g = self.g

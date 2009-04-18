@@ -376,6 +376,15 @@ class Node(GraphElement):
 		self._bidirectional = []
 		self.__dict__.update(kwargs)
 
+	def get_adjacent(self, outgoing=True, incoming=False):
+		"""Returns a list of all adjacent nodes."""
+		edges = []
+		if outgoing:
+			edges += self.outgoing
+		if incoming:
+			edges += self.incoming	
+		return [edge.other_end(self) for edge in edges]
+
 	@property
 	def incoming(self):
 		"""Returns a list of all the incoming edges for this node.
@@ -517,16 +526,28 @@ class Graph:
 			>>> n in g
 			True
 		"""
+		# if its a node
 		if isinstance(element, self.Node):
 			return element.name in self._nodes
-		else:
+		# if its an edge
+		elif isinstance(element, self.Edge):
 			return element.name in self._edges
+		# if its a name
+		else:
+			return element in self._nodes or element in self._edges
 
-	def __getitem__(self, name):
-		"""Returns the element corresponding to the given name
+	def __getitem__(self, element_or_name):
+		"""Returns the element corresponding to the given name or the
+		given element's name.
 
 		Raises KeyError if it is not found.
 		"""
+		# get the element's name if it is an element
+		try:
+			name = element_or_name.name
+		except:
+			pass
+		# get the 
 		try:
 			try:
 				return self._nodes[name]
@@ -562,6 +583,28 @@ class Graph:
 	@property
 	def edges(self):
 		return self._edges.values()
+
+	#################################################################
+	#		     Convenience Functions			#
+	#################################################################
+
+	def get_element(self, element_or_name):
+		"""Takes an element or a name and returns an element.
+
+		If no element corresponds to the given name, raises
+		KeyError.
+		"""
+		if issubclass(element_or_name, GraphElement):
+			return element_or_name
+		else:
+			return self[element_or_name]
+
+	def get_name(self, element_or_name):
+		"""Takes an element or a name and returns a name."""
+		if issubclass(element_or_name, GraphElement):
+			return element_or_name.name
+		else:
+			return element_or_name
 
 	#################################################################
 	#		    Graph Construction Tools			#
@@ -730,8 +773,13 @@ class Graph:
 		n2_edges = set(n2.incoming + n2.outgoing)
 		return n1_edges & n2_edges
 
-	def walk_nodes(self):
+	def walk_nodes(self, start, reverse=False):
 		"""Provides a generator for application-defined walks.
+
+		The start argument can be either a name or a label.
+
+		The optional reverse argument can be used to do a reverse
+		walk, ie, only walking down incoming edges.
 
 		Usage:
 			>>> g = Graph()
@@ -739,33 +787,72 @@ class Graph:
 			>>> n2 = g.add_node()
 			>>> e1 = g.add_edge(n1, n2)
 			>>> w = g.walk_nodes()
-			>>> w.next()
-			>>> candidates = w.send(n1)
-			>>> candidates
-			{Node()}
-			>>> w.send(candidates.pop())
-			set()
-			>>> w.send(None)
-			...
-			StopIteration
+			>>> for adjacent_nodes in w:
+			>>> 	next_node = adjacent_nodes.pop()
+			>>>	w.send(next_node)
 		"""
-		next = (yield)
-		while next:
-			adjacent = {edge.other_end(next) for edge in next.outgoing}
-			next = (yield adjacent)
+		# make sure we have a real node
+		if not isinstance(start, self.Node): start = self[start]
+		# the actual generator function, wrapped for prettitude
+		def walker():
+			next = start
+			while next:
+				if not reverse: adjacent = next.get_adjacent()
+				else: adjacent = next.get_adjacent(outgoing=False, incoming=True)
+				next = yield(adjacent)
+		# the wrapper
+		w = walker()
+		candidates = next(w)
+		while 1:
+			selection = yield(candidates)
+			candidates = w.send(selection)
 
-	def walk_edges(self):
+	def walk_edges(self, start):
 		"""Provides a generator for application-defined walks.
 
 		Usage is identical to walk_nodes, excepting only that it accepts,
 		and yields, Edges in the place of Nodes.
 		"""
-		next = (yield)
-		while next:
-			incident = set(next.other_end(next.start).outgoing)
-			next = (yield incident)
+		# make sure we have a real edge
+		if not isinstance(start, self.Edge): start = self[start]
+		# the actual generator function
+		def walker():
+			next = start
+			while next:
+				incident = set(next.other_end(next.start).outgoing)
+				next = yield(incident)
+		# convenience wrapper
+		w = walker()
+		candidates = next(w)
+		while 1:
+			selection = yield(candidates)
+			candidates = w.send(selection)
 
-	def a_star_traversal(self, root, selector):
+	def heuristic_walk(self, start, selector, reverse=False):
+		"""Traverses the graph using selector as a selection filter on the adjacent nodes.
+
+		The optional reverse argument allows you to do a reverse walk, ie, only finding
+		adjacencies according to incoming edges rather than outgoing edges.
+
+		Usage:
+			>>> g = Graph()
+			>>> g.add_node("A")
+			>>> g.add_node("B")
+			>>> g.add_edge("A", "B", "AB")
+			>>> def selector(adjacent_nodes):
+			...	return adjacent_nodes.pop()
+			...
+			>>> for node in g.heuristic_walk("A", selector):
+			... 	print(node.name)
+			B
+		"""
+		w = self.walk_nodes(start, reverse=reverse)
+		for candidates in w:
+			selection = selector(candidates)
+			w.send(selection)
+			yield selection
+			
+	def heuristic_traversal(self, root, selector):
 		"""Traverses the graph using selector as a selection filter on the unvisited nodes.
 
 		Usage:
@@ -791,7 +878,7 @@ class Graph:
 			# visit it
 			visited.add(next)
 			# get the adjacent nodes
-			adjacent = {edge.other_end(next) for edge in next.outgoing}
+			adjacent = set(next.get_adjacent())
 			# filter it against those we've already visited
 			not_yet_visited = adjacent - visited
 			# make sure we're not double-adding
@@ -815,7 +902,7 @@ class Graph:
 			Node(name="D")
 			Node(name="C")
 		"""
-		for node in self.a_star_traversal(root, lambda s: s.pop()):
+		for node in self.heuristic_traversal(root, lambda s: s.pop()):
 			yield node
 		
 	def breadth_first_traversal(self, root):
@@ -834,7 +921,7 @@ class Graph:
 			Node(name="C")
 			Node(name="D")
 		"""
-		for node in self.a_star_traversal(root, lambda s: s.pop(0)):
+		for node in self.heuristic_traversal(root, lambda s: s.pop(0)):
 			yield node
 
 	def get_connected_components(self):
