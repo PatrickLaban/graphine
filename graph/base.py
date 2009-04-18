@@ -331,7 +331,7 @@ class GraphElement:
 		return self.name == other.name and self.data == other.data
 
 	def __ne__(self, other):
-		"""Compares the two elements based on name."""
+		"""Compares the two elements based on name and data."""
 		return not self == other
 
 	@property
@@ -579,7 +579,7 @@ class Graph:
 			Node(weight=5)
 		"""
 		node = self.Node(name, **kwargs)
-		self._nodes[node.name] = node
+		self._nodes[node._name] = node
 		return node
 
 	def add_edge(self, start, end, name=None, is_directed=True, **kwargs):
