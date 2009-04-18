@@ -44,14 +44,14 @@ class NodeCreationTest(unittest.TestCase):
 	def setUp(self):
 		# WARNING: g = Graph() MUST work to perform tests
 		self.g = Graph()
-
-	def testNodeCreation(self):
-		""" test Graph.add_node fully """
 		self.node_1 = self.g.add_node() # basic node
 		self.node_2 = self.g.add_node("node2") # node with name, no data
 		self.node_3 = self.g.add_node(foo="stuff") # data, no name
 		self.node_4 =  self.g.add_node("node4", foo="stuff") # data and name
 		self.node_5 =  self.g.add_node("node5", foo="stuff", hello="world") # mutiple data attributes and name
+
+	def testNodeCreation(self):
+		""" test Graph.add_node fully """
 		self.failUnlessEqual(self.node_1.data, {}) # data is empty
 		self.failUnlessEqual(self.node_2.name, "node2") 
 		self.failUnlessEqual(self.node_2.data, {})
@@ -82,10 +82,6 @@ class EdgeCreationTest(unittest.TestCase):
 		self.node_2 = self.g.add_node()
 		self.node_3 = self.g.add_node("node3", foo="stuff")
 		self.node_4 = self.g.add_node("node4", hello="world")
-		
-
-	def testEdgeCreation(self):
-		""" test Graph.add_edge fully """
 		self.edge_1 = self.g.add_edge(self.node_1, self.node_2)
 		self.edge_2 = self.g.add_edge(self.node_1, self.node_2, "edge2")
 		self.edge_3 = self.g.add_edge(self.node_1, self.node_2, foo="stuff")
@@ -94,6 +90,9 @@ class EdgeCreationTest(unittest.TestCase):
 		self.edge_6 = self.g.add_edge(self.node_1, self.node_2, "edge6", False, foo="stuff", hello="world")			
 		self.edge_7 = self.g.add_edge(self.node_1, self.node_1, "edge7", False, foo="stuff", hello="world")
 		self.edge_8 = self.g.add_edge("node3", "node4", "edge8", foo="stuff", hello="world")
+
+	def testEdgeCreation(self):
+		""" test Graph.add_edge fully """
 		self.failUnlessEqual(self.edge_1.start, self.node_1) 
 		self.failUnlessEqual(self.edge_1.end, self.node_2)
 		self.failUnless(self.edge_1 in self.node_1.outgoing) 
@@ -149,24 +148,29 @@ class EdgeCreationTest(unittest.TestCase):
 		self.failUnlessRaises(TypeError, self.g.add_edge, self.node_1, self.node_2, self.test_dict)
 
 
-class NodeAndEdgePropertiesTest(unittest.TestCase):
+class AdjacencyTest(unittest.TestCase):
 	
 	def setUp(self):
 		# WARNING: g = Graph() MUST work to perform tests
 		self.g = Graph()
-		
-	def testAdjacency(self):
-		""" test the node.get_adjacent """
 		self.node_1 = self.g.add_node("node1")
 		self.node_2 = self.g.add_node("node2")
 		self.node_3 = self.g.add_node("node3")
-		self.edge_1 = self.g.add_edge(self.node_1, self.node_2)
-		self.edge_2 = self.g.add_edge(self.node_1, self.node_3, "hello", is_directed=False)
-		self.edge_3 = self.g.add_edge(self.node_2, self.node_2)
+		self.edge_1 = self.g.add_edge(self.node_1, self.node_2, "edge1")
+		self.edge_2 = self.g.add_edge(self.node_1, self.node_3, "edge2", is_directed=False)
+		self.edge_3 = self.g.add_edge(self.node_2, self.node_2, "edge3")		
+	
+	def testAdjacency(self):
+		""" test the node.get_adjacent """
 		self.failUnlessEqual(set(self.node_1.get_adjacent()), {self.node_2, self.node_3})
 		self.failUnlessEqual(set(self.node_2.get_adjacent()), {self.node_2})
 		self.failUnlessEqual(set(self.node_3.get_adjacent()), {self.node_1})
-
+		self.failUnlessEqual(set(self.node_1.get_adjacent(False, True)), {self.node_3})
+		self.failUnlessEqual(set(self.node_2.get_adjacent(False, True)), {self.node_1, self.node_2})
+		self.failUnlessEqual(set(self.node_3.get_adjacent(False, True)), {self.node_1})
+		self.failUnlessEqual(set(self.node_1.get_adjacent(True, True)), {self.node_2, self.node_3})
+		self.failUnlessEqual(set(self.node_2.get_adjacent(True, True)), {self.node_1, self.node_2})
+		self.failUnlessEqual(set(self.node_3.get_adjacent(True, True)), {self.node_1})
 
 class GraphPropertiesTest(unittest.TestCase):
 
@@ -895,9 +899,9 @@ if __name__ == "__main__":
 	TraversalTest = unittest.TestLoader().loadTestsFromTestCase(TraversalTest)
 	InductionTest = unittest.TestLoader().loadTestsFromTestCase(InductionTest)
 	ZeroNodeTest = unittest.TestLoader().loadTestsFromTestCase(ZeroNodeTest)
-	NodeAndEdgePropertiesTest = unittest.TestLoader().loadTestsFromTestCase(NodeAndEdgePropertiesTest)
+	AdjacencyTest = unittest.TestLoader().loadTestsFromTestCase(AdjacencyTest)
 	OneNodeDirectedTest = unittest.TestLoader().loadTestsFromTestCase(OneNodeDirectedTest)
-	suites = [GraphCorrectnessTest, NodeCreationTest, EdgeCreationTest, GraphPropertiesTest, GraphSearchTest, EdgeMovementTest, GetElementsTest, TraversalTest, InductionTest, GraphFailureTest, NodeAndEdgePropertiesTest]
+	suites = [GraphCorrectnessTest, NodeCreationTest, EdgeCreationTest, GraphPropertiesTest, GraphSearchTest, EdgeMovementTest, GetElementsTest, TraversalTest, InductionTest, GraphFailureTest, AdjacencyTest]
 	suites += [ZeroNodeTest]
 	suites += [OneNodeDirectedTest]
 	CorrectnessTest = unittest.TestSuite(suites)
