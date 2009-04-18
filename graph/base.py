@@ -421,7 +421,9 @@ class Node(GraphElement):
 		Note that the list returned is a copy, so modifying it doesn't
 		impact the structure of the graph.
 		"""
-		return copy.copy(self._incoming + self._outgoing + self._bidirectional)
+		# we have to ensure that all these elements are unique, since loops can be
+		# both incoming and outgoing.
+		return copy.copy(list(set(self._incoming + self._outgoing + self._bidirectional)))
 
 	@property
 	def degree(self):

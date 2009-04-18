@@ -743,7 +743,6 @@ class OneNodeDirectedTest(unittest.TestCase):
 		self.failUnlessEqual(aa in self.g._edges.values(), True)
 
 	def testRemoveNode(self):
-		print(self.A.outgoing)
 		# make sure node removal works by name
 		A = self.g.remove_node("A")
 		self.failUnlessEqual(self.A, A)
@@ -753,7 +752,7 @@ class OneNodeDirectedTest(unittest.TestCase):
 		self.failUnlessRaises(KeyError, self.g.__getitem__, "A")
 		self.failUnlessRaises(KeyError, self.g.__getitem__, self.A)
 		# make sure it removes all the edges
-		self.failUnless(self.g.size(), 0)
+		self.failUnlessEqual(self.g.size(), 0)
 		
 
 class GraphPerformanceTest(unittest.TestCase):
