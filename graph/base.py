@@ -374,7 +374,8 @@ class Node(GraphElement):
 		self._incoming = []
 		self._outgoing = []
 		self._bidirectional = []
-		self.__dict__.update(kwargs)
+		for k, v in kwargs.items():
+			setattr(self, k, v)
 
 	@property
 	def incoming(self):
@@ -441,7 +442,8 @@ class Edge(GraphElement):
 		self._start = start
 		self._end = end
 		self._directed = is_directed
-		self.__dict__.update(kwargs)
+		for k, v in kwargs.items():
+			setattr(self, k, v)
 
 	def other_end(self, starting_point):
 		"""Returns the other end of the edge from the given point.
@@ -546,10 +548,6 @@ class Graph:
 	def __sub__(self, other):
 		"""Maps the - operator to the difference operation."""
 		return self.difference(other)
-
-	def __add__(self, other):
-		"""Maps the + operator to the merge operation."""
-		return self.merge(other)
 
 	#################################################################
 	#			Properties				#
