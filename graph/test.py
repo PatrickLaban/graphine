@@ -810,6 +810,7 @@ class OneNodeDirectedTest(unittest.TestCase):
 		iteration = 0
 		for candidates in w:
 			if iteration < 5:
+				iteration += 1
 				self.failUnlessEqual(candidates, [self.A])
 				w.send(candidates.pop())
 			else:
@@ -818,6 +819,7 @@ class OneNodeDirectedTest(unittest.TestCase):
 		iteration = 0
 		for candidates in w:
 			if iteration < 5:
+				iteration += 1
 				self.failUnlessEqual(candidates, [self.A])
 				w.send(candidates.pop())
 			else:
@@ -832,6 +834,7 @@ class OneNodeDirectedTest(unittest.TestCase):
 		iteration = 0
 		for candidates in w:
 			if iteration < 5:
+				iteration += 1
 				self.failUnlessEqual(candidates, [self.AA])
 				w.send(candidates.pop())
 			else:
@@ -840,6 +843,7 @@ class OneNodeDirectedTest(unittest.TestCase):
 		iteration = 0
 		for candidates in w:
 			if iteration < 5:
+				iteration += 1
 				self.failUnlessEqual(candidates, [self.AA])
 				w.send(candidates.pop())
 			else:
@@ -854,8 +858,8 @@ class OneNodeDirectedTest(unittest.TestCase):
 			if iterations[0] < 5:
 				iterations[0] += 1
 				if nodes: return nodes.pop()
-			return None
-		self.failUnlessEqual(list(self.g.heuristic_walk(self.A, heuristic)), [self.A, self.A, self.A, self.A])
+			return []
+		self.failUnlessEqual(list(self.g.heuristic_walk(self.A, heuristic)), [self.A, self.A, self.A, self.A, self.A])
 
 class GraphPerformanceTest(unittest.TestCase):
 

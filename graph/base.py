@@ -876,8 +876,8 @@ class Graph:
 		w = self.walk_nodes(start, reverse=reverse)
 		for candidates in w:
 			selection = selector(candidates)
-			yield selection
 			w.send(selection)
+			yield selection
 			
 	def heuristic_traversal(self, root, selector):
 		"""Traverses the graph using selector as a selection filter on the unvisited nodes.
