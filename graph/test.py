@@ -854,12 +854,32 @@ class OneNodeDirectedTest(unittest.TestCase):
 		self.failUnlessRaises(KeyError, next, w2)
 
 	def testHeuristicWalk(self):
-		def heuristic(nodes, iterations=[0]):
-			if iterations[0] < 5:
-				iterations[0] += 1
-				if nodes: return nodes.pop()
-			return []
-		self.failUnlessEqual(list(self.g.heuristic_walk(self.A, heuristic)), [self.A, self.A, self.A, self.A, self.A])
+		class Heuristic:
+			def __init__(self):
+				self.iterations = 0
+				self.iter_max = 5
+			def __call__(self, candidates):
+				if self.iterations < self.iter_max:
+					if candidates:
+						self.iterations += 1
+						return candidates.pop()
+				return None
+		self.failUnlessEqual(list(self.g.heuristic_walk(self.A, Heuristic())), [self.A, self.A, self.A, self.A, self.A])
+		self.failUnlessEqual(list(self.g.heuristic_walk("A", Heuristic())), [self.A, self.A, self.A, self.A, self.A])
+		self.failUnlessEqual(list(self.g.heuristic_walk(self.A, Heuristic(), reverse=True)), [self.A, self.A, self.A, self.A, self.A])
+		self.failUnlessEqual(list(self.g.heuristic_walk("A", Heuristic(), reverse=True)), [self.A, self.A, self.A, self.A, self.A])
+		self.failUnlessEqual(list(self.g.heuristic_walk(Node("A"), Heuristic(), reverse=True)), [self.A, self.A, self.A, self.A, self.A])
+		self.failUnlessRaises(KeyError, self.g.heuristic_walk, "B", Heuristic())
+		self.failUnlessRaises(KeyError, self.g.heuristic_walk, Node("B"), Heuristic())
+
+	def testHeuristicTraversal(self):
+		# should only yield one node, no matter what
+		self.failUnlessEqual(list(self.g.heuristic_traversal(self.A, lambda s: s.pop())), [self.A])
+		self.failUnlessEqual(list(self.g.heuristic_traversal("A", lambda s: s.pop())), [self.A])
+		self.failUnlessEqual(list(self.g.heuristic_traversal(self.A, lambda s: s.pop(0))), [self.A])
+		self.failUnlessEqual(list(self.g.heuristic_traversal("A", lambda s: s.pop(0))), [self.A])
+		self.failUnlessRaises(KeyError, self.g.heuristic_traversal, "B", lambda s: s.pop())
+		self.failUnlessRaises(KeyError, self.g.heuristic_traversal, Node("B"), lambda s: s.pop())
 
 class GraphPerformanceTest(unittest.TestCase):
 

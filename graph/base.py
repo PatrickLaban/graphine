@@ -610,9 +610,10 @@ class Graph:
 		KeyError.
 		"""
 		if isinstance(item, GraphElement):
-			if item.name in self._nodes: return item
-			if item.name in self._edges: return item
-			raise KeyError("%s not in %s" % (item, self))
+			element = self._edges.get(item.name, False)
+			element = element or self._nodes.get(item.name, False)
+			if not element: raise KeyError("%s not in %s" % (item, self))
+			return element
 		else:
 			element = self._edges.get(item, False)
 			element = element or self._nodes.get(item, False)
