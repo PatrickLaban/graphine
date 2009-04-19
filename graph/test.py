@@ -283,6 +283,7 @@ class GraphSearchTest(unittest.TestCase):
 		l = list(self.g.search_edges(start=self.n2))
 		self.failUnlessEqual(l, [self.e2])
 
+
 class EdgeMovementTest(unittest.TestCase):
 
 	def setUp(self):
@@ -859,7 +860,65 @@ class ZeroNodeTest(unittest.TestCase):
 			j = (i + 1) % 5
 			G.add_edge(i, j, (i,j))
 		G2 = self.g - G
-		self.failUnlessEqual((set(self.g.nodes) - set(G.nodes), set(self.g.edges) - set(G.edges)), (set(G2.nodes), set(G2.edges)))	
+		self.failUnlessEqual((set(self.g.nodes) - set(G.nodes), set(self.g.edges) - set(G.edges)), (set(G2.nodes), set(G2.edges)))
+
+	def testContains(self):
+		# test it on ourselves
+		self.failUnlessEqual(self.g.contains(self.g), True)
+		self.failUnlessEqual(self.g > self.g, False)
+		self.failUnlessEqual(self.g < self.g, False)
+		self.failUnlessEqual(self.g, self.g)
+		# test it on a graph with one node with a loop
+		G = Graph()
+		G.add_node(1)
+		G.add_edge(1, 1, 11)
+		self.failUnlessEqual(self.g.contains(G), False)
+		self.failUnlessEqual(G.contains(self.g), True)
+		self.failUnlessEqual(self.g < G, True)
+		self.failUnlessEqual(self.g > G, False)
+		self.failUnlessEqual(G < self.g, False)
+		self.failUnlessEqual(G > self.g, True)
+		self.failIfEqual(G, self.g)
+		# test it on a graph with two nodes
+		G = Graph()
+		G.add_node(1)
+		G.add_node(2)
+		self.failUnlessEqual(self.g.contains(G), False)
+		self.failUnlessEqual(G.contains(self.g), True)
+		self.failUnlessEqual(self.g < G, True)
+		self.failUnlessEqual(self.g > G, False)
+		self.failUnlessEqual(G < self.g, False)
+		self.failUnlessEqual(G > self.g, True)
+		self.failIfEqual(G, self.g)
+		# test it on a graph with three nodes in a directed cycle
+		G = Graph()
+		G.add_node(1)
+		G.add_node(2)
+		G.add_node(3)
+		G.add_edge(1, 2, (1,2))
+		G.add_edge(2, 3, (2,3))
+		G.add_edge(3, 1, (3,1))
+		self.failUnlessEqual(self.g.contains(G), False)
+		self.failUnlessEqual(G.contains(self.g), True)
+		self.failUnlessEqual(self.g < G, True)
+		self.failUnlessEqual(self.g > G, False)
+		self.failUnlessEqual(G < self.g, False)
+		self.failUnlessEqual(G > self.g, True)
+		self.failIfEqual(G, self.g)
+		# test it on a graph with five nodes in an undirected cycle
+		G = Graph()
+		for i in range(5):
+			G.add_node(i)
+		for i in range(5):
+			j = (i + 1) % 5
+			G.add_edge(i, j, (i,j))
+		self.failUnlessEqual(self.g.contains(G), False)
+		self.failUnlessEqual(G.contains(self.g), True)
+		self.failUnlessEqual(self.g < G, True)
+		self.failUnlessEqual(self.g > G, False)
+		self.failUnlessEqual(G < self.g, False)
+		self.failUnlessEqual(G > self.g, True)
+		self.failIfEqual(G, self.g)
 
 
 class OneNodeDirectedTest(unittest.TestCase):
