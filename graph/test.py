@@ -606,8 +606,6 @@ class GraphCorrectnessTest(unittest.TestCase):
 
 """
 TODO:
-	- 0 node binary operations
-	- 1 node directed edge test
 	- 1 node undirected edge test
 	- 1 node disconnected test
 	- 2 node directed edge test
@@ -1140,7 +1138,14 @@ class OneNodeDirectedTest(unittest.TestCase):
 			j = (i + 1) % 5
 			G.add_edge(i, j, (i,j))
 		G2 = self.g - G
-		self.failUnlessEqual((set(self.g.nodes) - set(G.nodes), set(self.g.edges) - set(G.edges)), (set(G2.nodes), set(G2.edges)))	
+		self.failUnlessEqual((set(self.g.nodes) - set(G.nodes), set(self.g.edges) - set(G.edges)), (set(G2.nodes), set(G2.edges)))
+
+class OneNodeUndirectedTest(OneNodeDirectedTest):
+
+	def setUp(self):
+		self.g = Graph()
+		self.A = self.g.add_node("A")
+		self.AA = self.g.add_edge("A", "A", "AA", is_directed=False)
 
 
 class GraphPerformanceTest(unittest.TestCase):
@@ -1244,8 +1249,10 @@ if __name__ == "__main__":
 	ZeroNodeTest = unittest.TestLoader().loadTestsFromTestCase(ZeroNodeTest)
 	AdjacencyTest = unittest.TestLoader().loadTestsFromTestCase(AdjacencyTest)
 	OneNodeDirectedTest = unittest.TestLoader().loadTestsFromTestCase(OneNodeDirectedTest)
+	OneNodeUndirectedTest = unittest.TestLoader().loadTestsFromTestCase(OneNodeUndirectedTest)
 	suites = [GraphCorrectnessTest, NodeCreationTest, EdgeCreationTest, GraphPropertiesTest, GraphSearchTest, EdgeMovementTest, GetElementsTest, TraversalTest, InductionTest, GraphFailureTest, AdjacencyTest]
 	suites += [ZeroNodeTest]
 	suites += [OneNodeDirectedTest]
+	suites += [OneNodeUndirectedTest]
 	CorrectnessTest = unittest.TestSuite(suites)
 	unittest.main()
