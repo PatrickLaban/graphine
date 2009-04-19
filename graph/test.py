@@ -1367,6 +1367,65 @@ class OneNodeDoubleDirectedTest(OneNodeDoubleUndirectedTest):
 		self.AA_2 = self.g.add_edge("A", "A", "AA_2")
 
 
+class TwoNodeUnconnectedTest(unittest.TestCase):
+
+	def setUp(self):
+		self.g = Graph()
+		self.A = self.g.add_node("A")
+		self.B = self.g.add_node("B")
+
+	def testContainers(self):
+		self.failUnlessEqual(self.g._nodes, {"A": self.A, "B": self.B})
+		self.failUnlessEqual(self.g._edges, {})
+
+	def testNodes(self):
+		self.failUnlessEqual(set(self.g.nodes), {self.A, self.B})
+
+	def testEdges(self):
+		self.failUnlessEqual(set(self.g.edges), set())
+
+	def testContains(self):
+		self.failUnlessEqual(self.A in self.g, True)
+		self.failUnlessEqual(self.B in self.g, True)
+		self.failUnlessEqual("A" in self.g, True)
+		self.failUnlessEqual("B" in self.g, True)
+		self.failUnlessEqual(Node("A") in self.g, True)
+		self.failUnlessEqual(Node("B") in self.g, True)
+		self.failUnlessEqual("C" in self.g, False)
+		self.failUnlessEqual(Node("C") in self.g, False)
+
+	def testGetItem(self):
+		self.failUnless(self.A is self.g[self.A])
+		self.failUnless(self.B is self.g[self.B])
+		self.failUnless(self.A is self.g["A"])
+		self.failUnless(self.B is self.g["B"])
+		self.failUnless(self.A is self.g[Node("A")])
+		self.failUnless(self.B is self.g[Node("B")])
+		self.failUnlessRaises(KeyError, self.g.__getitem__, "C")
+		self.failUnlessRaises(KeyError, self.g.__getitem__, Node("C"))
+		self.failUnlessRaises(KeyError, self.g.__getitem__, Edge(self.A, self.B, "C"))
+
+	def testSearchNodes(self):
+		self.failUnlessEqual(set(self.g.search_nodes(name="A")), {self.A})
+		self.failUnlessEqual(set(self.g.search_nodes(name="B")), {self.B})
+		self.failUnlessEqual(set(self.g.search_nodes(name="C")), set())
+		self.failUnlessEqual(set(self.g.search_nodes(value=5)), set())
+
+	def testSearchEdges(self):
+		self.failUnlessEqual(set(self.g.search_edges(name="AA")), set())
+		self.failUnlessEqual(set(self.g.search_edges(value=5)), set())
+
+	def testGetCommonEdges(self):
+		self.failUnlessEqual(self.g.get_common_edges(self.A, self.B), set())
+		self.failUnlessEqual(self.g.get_common_edges("A", "B"), set())
+		self.failUnlessEqual(self.g.get_common_edges(self.B, self.A), set())
+		self.failUnlessEqual(self.g.get_common_edges(self.A, self.A), set())
+		self.failUnlessEqual(self.g.get_common_edges("A", "A"), set())
+		self.failUnlessEqual(self.g.get_common_edges(self.B, self.B), set())
+		self.failUnlessEqual(self.g.get_common_edges("B", "B"), set())
+		self.failUnlessRaises(KeyError, self.g.get_common_edges, Node("C"), Node("D"))
+
+	
 class GraphPerformanceTest(unittest.TestCase):
 
 	graph_setup = "from base import Graph; g = Graph(); n = g.add_node(first_name='');"
@@ -1471,11 +1530,13 @@ if __name__ == "__main__":
 	OneNodeUndirectedTest = unittest.TestLoader().loadTestsFromTestCase(OneNodeUndirectedTest)
 	OneNodeDoubleUndirectedTest = unittest.TestLoader().loadTestsFromTestCase(OneNodeDoubleUndirectedTest)
 	OneNodeDoubleDirectedTest = unittest.TestLoader().loadTestsFromTestCase(OneNodeDoubleDirectedTest)
+	TwoNodeUnconnectedTest = unittest.TestLoader().loadTestsFromTestCase(TwoNodeUnconnectedTest)
 	suites = [GraphCorrectnessTest, NodeCreationTest, EdgeCreationTest, GraphPropertiesTest, GraphSearchTest, EdgeMovementTest, GetElementsTest, TraversalTest, InductionTest, GraphFailureTest, AdjacencyTest]
 	suites += [ZeroNodeTest]
 	suites += [OneNodeDirectedTest]
 	suites += [OneNodeUndirectedTest]
 	suites += [OneNodeDoubleUndirectedTest]
 	suites += [OneNodeDoubleDirectedTest]
+	suites += [TwoNodeUnconnectedTest]
 	CorrectnessTest = unittest.TestSuite(suites)
 	unittest.main()
