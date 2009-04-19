@@ -670,7 +670,12 @@ class Graph:
 			>>> g.add_node(weight=5)
 			Node(weight=5)
 		"""
+		# create the new node
 		node = self.Node(name, **kwargs)
+		# remove any otherwise identical nodes
+		try: self.remove_node(node)
+		except: pass
+		# add the node to the backing data store
 		self._nodes[node._name] = node
 		return node
 
@@ -696,8 +701,12 @@ class Graph:
 		end = self.get_element(end)
 		# build the edge
 		edge = self.Edge(start, end, name, is_directed=is_directed, **kwargs)
+		# remove any otherwise identical edges
+		try: self.remove_edge(edge)
+		except: pass
+		# and add the edge to the backing data store
 		self._edges[edge.name] = edge
-		# take care of adjacency tracking
+		# now take care of adjacency tracking
 		if is_directed:
 			start._outgoing.append(edge)
 			end._incoming.append(edge)

@@ -320,6 +320,7 @@ class GraphSearchTest(unittest.TestCase):
 		l = list(self.g.search_edges(start=self.n2))
 		self.failUnlessEqual(l, [self.e2])
 
+
 class EdgeMovementTest(unittest.TestCase):
 
 	def setUp(self):
@@ -720,7 +721,7 @@ class ZeroNodeTest(unittest.TestCase):
 		self.failUnlessEqual({}, self.g._nodes)
 		self.failUnlessEqual({}, self.g._edges)
 
-	def testContains(self):
+	def testIn(self):
 		# tests the in operator for names
 		self.failUnlessEqual("A" in self.g, False)
 		# tests the in operator for elements
@@ -896,7 +897,65 @@ class ZeroNodeTest(unittest.TestCase):
 			j = (i + 1) % 5
 			G.add_edge(i, j, (i,j))
 		G2 = self.g - G
-		self.failUnlessEqual((set(self.g.nodes) - set(G.nodes), set(self.g.edges) - set(G.edges)), (set(G2.nodes), set(G2.edges)))	
+		self.failUnlessEqual((set(self.g.nodes) - set(G.nodes), set(self.g.edges) - set(G.edges)), (set(G2.nodes), set(G2.edges)))
+
+	def testContains(self):
+		# test it on ourselves
+		self.failUnlessEqual(self.g.contains(self.g), True)
+		self.failUnlessEqual(self.g > self.g, False)
+		self.failUnlessEqual(self.g < self.g, False)
+		self.failUnlessEqual(self.g, self.g)
+		# test it on a graph with one node with a loop
+		G = Graph()
+		G.add_node(1)
+		G.add_edge(1, 1, 11)
+		self.failUnlessEqual(self.g.contains(G), False)
+		self.failUnlessEqual(G.contains(self.g), True)
+		self.failUnlessEqual(self.g < G, True)
+		self.failUnlessEqual(self.g > G, False)
+		self.failUnlessEqual(G < self.g, False)
+		self.failUnlessEqual(G > self.g, True)
+		self.failIfEqual(G, self.g)
+		# test it on a graph with two nodes
+		G = Graph()
+		G.add_node(1)
+		G.add_node(2)
+		self.failUnlessEqual(self.g.contains(G), False)
+		self.failUnlessEqual(G.contains(self.g), True)
+		self.failUnlessEqual(self.g < G, True)
+		self.failUnlessEqual(self.g > G, False)
+		self.failUnlessEqual(G < self.g, False)
+		self.failUnlessEqual(G > self.g, True)
+		self.failIfEqual(G, self.g)
+		# test it on a graph with three nodes in a directed cycle
+		G = Graph()
+		G.add_node(1)
+		G.add_node(2)
+		G.add_node(3)
+		G.add_edge(1, 2, (1,2))
+		G.add_edge(2, 3, (2,3))
+		G.add_edge(3, 1, (3,1))
+		self.failUnlessEqual(self.g.contains(G), False)
+		self.failUnlessEqual(G.contains(self.g), True)
+		self.failUnlessEqual(self.g < G, True)
+		self.failUnlessEqual(self.g > G, False)
+		self.failUnlessEqual(G < self.g, False)
+		self.failUnlessEqual(G > self.g, True)
+		self.failIfEqual(G, self.g)
+		# test it on a graph with five nodes in an undirected cycle
+		G = Graph()
+		for i in range(5):
+			G.add_node(i)
+		for i in range(5):
+			j = (i + 1) % 5
+			G.add_edge(i, j, (i,j))
+		self.failUnlessEqual(self.g.contains(G), False)
+		self.failUnlessEqual(G.contains(self.g), True)
+		self.failUnlessEqual(self.g < G, True)
+		self.failUnlessEqual(self.g > G, False)
+		self.failUnlessEqual(G < self.g, False)
+		self.failUnlessEqual(G > self.g, True)
+		self.failIfEqual(G, self.g)
 
 
 class OneNodeDirectedTest(unittest.TestCase):
@@ -910,7 +969,7 @@ class OneNodeDirectedTest(unittest.TestCase):
 		self.failUnlessEqual(self.g._nodes, {"A": self.A})
 		self.failUnlessEqual(self.g._edges, {"AA": self.AA})
 
-	def testContains(self):
+	def testIn(self):
 		# make sure that node membership by name works
 		self.failUnlessEqual("A" in self.g, True)
 		# make sure that edge membership by name works
@@ -1473,7 +1532,7 @@ class TwoNodeUnconnectedTest(unittest.TestCase):
 	def testEdges(self):
 		self.failUnlessEqual(set(self.g.edges), set())
 
-	def testContains(self):
+	def testIn(self):
 		self.failUnlessEqual(self.A in self.g, True)
 		self.failUnlessEqual(self.B in self.g, True)
 		self.failUnlessEqual("A" in self.g, True)
