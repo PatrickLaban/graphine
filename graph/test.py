@@ -920,6 +920,12 @@ class OneNodeDirectedTest(unittest.TestCase):
 		self.failUnlessRaises(KeyError, self.g.get_shortest_paths, Node("B"))
 		self.failUnlessRaises(KeyError, self.g.get_shortest_paths, "B")
 
+	def testOrder(self):
+		self.failUnlessEqual(self.g.order(), 1)
+
+	def testSize(self):
+		self.failUnlessEqual(self.g.size(), 1)
+
 
 class GraphPerformanceTest(unittest.TestCase):
 
