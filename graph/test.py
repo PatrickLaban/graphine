@@ -684,7 +684,7 @@ class ZeroNodeTest(unittest.TestCase):
 		self.failUnlessEqual({}, self.g._nodes)
 		self.failUnlessEqual({}, self.g._edges)
 
-	def testContains(self):
+	def testIn(self):
 		# tests the in operator for names
 		self.failUnlessEqual("A" in self.g, False)
 		# tests the in operator for elements
@@ -932,7 +932,7 @@ class OneNodeDirectedTest(unittest.TestCase):
 		self.failUnlessEqual(self.g._nodes, {"A": self.A})
 		self.failUnlessEqual(self.g._edges, {"AA": self.AA})
 
-	def testContains(self):
+	def testIn(self):
 		# make sure that node membership by name works
 		self.failUnlessEqual("A" in self.g, True)
 		# make sure that edge membership by name works
@@ -1495,7 +1495,7 @@ class TwoNodeUnconnectedTest(unittest.TestCase):
 	def testEdges(self):
 		self.failUnlessEqual(set(self.g.edges), set())
 
-	def testContains(self):
+	def testIn(self):
 		self.failUnlessEqual(self.A in self.g, True)
 		self.failUnlessEqual(self.B in self.g, True)
 		self.failUnlessEqual("A" in self.g, True)
