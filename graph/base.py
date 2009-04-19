@@ -587,6 +587,27 @@ class Graph:
 		"""Maps the - operator to the difference operation."""
 		return self.difference(other)
 
+	def __eq__(self, other):
+		"""Compares based on node and edge names."""
+		if set(self._nodes.keys()) == set(other._nodes.keys()):
+			if set(self._edges.keys()) == set(other._edges.keys()):
+				return True
+		return False
+
+	def __lt__(self, other):
+		"""Compares based on containment.
+
+		This returns True if this graph is contained in other.
+		"""
+		return other.contains(self) and not self.contains(other)
+
+	def __gt__(self, other):
+		"""Compares baed on containment.
+
+		This returns True if it contains other, False otherwise.
+		"""
+		return self.contains(other) and not other.contains(self)
+
 	#################################################################
 	#			Properties				#
 	#################################################################
@@ -1388,3 +1409,13 @@ class Graph:
 				if edge.start in g and edge.end in g:
 					g.add_edge(edge.start, edge.end, edge.name, **edge.data)
 		return g
+
+	def contains(self, other):
+		"""Tests to see if other is a subgraph of this graph.
+
+		Comparison is based on names, and compares both nodes and edges.
+		"""
+		if set(self._nodes.keys()).issuperset(other._nodes.keys()):
+			if set(self._edges.keys()).issuperset(other._edges.keys()):
+				return True
+		return False
