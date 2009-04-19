@@ -854,6 +854,21 @@ class OneNodeDirectedTest(unittest.TestCase):
 		self.failUnlessRaises(KeyError, next, w1)
 		self.failUnlessRaises(KeyError, next, w2)
 
+	def testUnion(self):
+		# test it on ourselves
+		G = self.g | self.g
+		self.failUnlessEqual((set(self.g.nodes), set(self.g.edges)), (set(G.nodes), set(G.edges)))
+		# test it on a graph with one node with a loop
+		G = Graph()
+		n = G.add_node(1)
+		e = G.add_edge(1, 1, 11)
+		G2 = self.g | G
+		self.failUnlessEqual((set(self.g.nodes) | set(G.nodes), set(self.g.edges) | set(G.edges)), (set(G2.nodes), set(G2.edges)))
+		# test it on a graph with two nodes
+		# test it on a graph with three nodes in a directed cycle
+		# test it on a graph with five nodes in an undirected cycle
+		
+
 	def testHeuristicWalk(self):
 		class Heuristic:
 			def __init__(self):
