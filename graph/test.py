@@ -177,8 +177,17 @@ class RemovalTest(unittest.TestCase):
 	
 	def setUp(self):
 		self.g = Graph()
-		self.node_1 = self.g.add_node()
+		self.node_1 = self.g.add_node("node1")
+		self.node_2 = self.g.add_node("node2")
+		self.node_3 = self.g.add_node("node3")
 
+	def testRemoveNodeDirected(self):
+		# remove an node with a directed edge
+		self.edge_1 = self.g.add_edge(self.node_1, self.node_2)
+		self.edge_2 = self.g.add_edge(self.node_2, self.node_3)
+		self.g.remove_node(self.node_1)
+		self.failUnlessEqual(set(self.g.nodes), {self.node_2, self.node_3})		
+		
 
 class GraphPropertiesTest(unittest.TestCase):
 
@@ -1642,8 +1651,9 @@ if __name__ == "__main__":
 	OneNodeDoubleUndirectedTest = unittest.TestLoader().loadTestsFromTestCase(OneNodeDoubleUndirectedTest)
 	OneNodeDoubleDirectedTest = unittest.TestLoader().loadTestsFromTestCase(OneNodeDoubleDirectedTest)
 	TwoNodeUnconnectedTest = unittest.TestLoader().loadTestsFromTestCase(TwoNodeUnconnectedTest)
+	RemovalTest = unittest.TestLoader().loadTestsFromTestCase(RemovalTest)
 	suites = [GraphCorrectnessTest, NodeCreationTest, EdgeCreationTest, GraphPropertiesTest, GraphSearchTest, EdgeMovementTest, GetElementsTest, TraversalTest, InductionTest, GraphFailureTest, AdjacencyTest]
-	suites += [ZeroNodeTest]
+	suites += [ZeroNodeTest, RemovalTest]
 	suites += [OneNodeDirectedTest]
 	suites += [OneNodeUndirectedTest]
 	suites += [OneNodeDoubleUndirectedTest]
