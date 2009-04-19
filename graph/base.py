@@ -723,7 +723,7 @@ class Graph:
 		node = self.get_element(node)
 		# remove it from adjacency tracking
 		for edge in node.edges:
-			del self._edges[edge.name]
+			self.remove_edge(edge)
 		# remove it from storage
 		n = self._nodes.pop(node.name)
 		return n
