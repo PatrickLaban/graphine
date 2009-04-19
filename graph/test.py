@@ -869,8 +869,10 @@ class OneNodeDirectedTest(unittest.TestCase):
 		self.failUnlessEqual(list(self.g.heuristic_walk(self.A, Heuristic(), reverse=True)), [self.A, self.A, self.A, self.A, self.A])
 		self.failUnlessEqual(list(self.g.heuristic_walk("A", Heuristic(), reverse=True)), [self.A, self.A, self.A, self.A, self.A])
 		self.failUnlessEqual(list(self.g.heuristic_walk(Node("A"), Heuristic(), reverse=True)), [self.A, self.A, self.A, self.A, self.A])
-		self.failUnlessRaises(KeyError, self.g.heuristic_walk, "B", Heuristic())
-		self.failUnlessRaises(KeyError, self.g.heuristic_walk, Node("B"), Heuristic())
+		w = self.g.heuristic_walk("B", Heuristic())
+		w2 = self.g.heuristic_walk(Node("B"), Heuristic())
+		self.failUnlessRaises(KeyError, list, w)
+		self.failUnlessRaises(KeyError, list, w2)
 
 	def testHeuristicTraversal(self):
 		# should only yield one node, no matter what
@@ -878,8 +880,11 @@ class OneNodeDirectedTest(unittest.TestCase):
 		self.failUnlessEqual(list(self.g.heuristic_traversal("A", lambda s: s.pop())), [self.A])
 		self.failUnlessEqual(list(self.g.heuristic_traversal(self.A, lambda s: s.pop(0))), [self.A])
 		self.failUnlessEqual(list(self.g.heuristic_traversal("A", lambda s: s.pop(0))), [self.A])
-		self.failUnlessRaises(KeyError, self.g.heuristic_traversal, "B", lambda s: s.pop())
-		self.failUnlessRaises(KeyError, self.g.heuristic_traversal, Node("B"), lambda s: s.pop())
+		self.failUnlessEqual(list(self.g.heuristic_traversal(Node("A"), lambda s: s.pop())), [self.A])
+		t = self.g.heuristic_traversal("B", lambda s: s.pop())
+		t2 = self.g.heuristic_traversal(Node("B"), lambda s: s.pop())
+		self.failUnlessRaises(KeyError, list, t)
+		self.failUnlessRaises(KeyError, list, t2)
 
 class GraphPerformanceTest(unittest.TestCase):
 
