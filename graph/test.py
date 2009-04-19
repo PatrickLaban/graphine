@@ -1358,6 +1358,15 @@ class OneNodeDoubleUndirectedTest(OneNodeDirectedTest):
 		self.failUnlessRaises(KeyError, next, w1)
 		self.failUnlessRaises(KeyError, next, w2)
 
+class OneNodeDoubleDirectedTest(OneNodeDoubleUndirectedTest):
+
+	def setUp(self):
+		self.g = Graph()
+		self.A = self.g.add_node("A")
+		self.AA = self.g.add_edge("A", "A", "AA")
+		self.AA_2 = self.g.add_edge("A", "A", "AA_2")
+
+
 class GraphPerformanceTest(unittest.TestCase):
 
 	graph_setup = "from base import Graph; g = Graph(); n = g.add_node(first_name='');"
@@ -1461,10 +1470,12 @@ if __name__ == "__main__":
 	OneNodeDirectedTest = unittest.TestLoader().loadTestsFromTestCase(OneNodeDirectedTest)
 	OneNodeUndirectedTest = unittest.TestLoader().loadTestsFromTestCase(OneNodeUndirectedTest)
 	OneNodeDoubleUndirectedTest = unittest.TestLoader().loadTestsFromTestCase(OneNodeDoubleUndirectedTest)
+	OneNodeDoubleDirectedTest = unittest.TestLoader().loadTestsFromTestCase(OneNodeDoubleDirectedTest)
 	suites = [GraphCorrectnessTest, NodeCreationTest, EdgeCreationTest, GraphPropertiesTest, GraphSearchTest, EdgeMovementTest, GetElementsTest, TraversalTest, InductionTest, GraphFailureTest, AdjacencyTest]
 	suites += [ZeroNodeTest]
 	suites += [OneNodeDirectedTest]
 	suites += [OneNodeUndirectedTest]
 	suites += [OneNodeDoubleUndirectedTest]
+	suites += [OneNodeDoubleDirectedTest]
 	CorrectnessTest = unittest.TestSuite(suites)
 	unittest.main()
