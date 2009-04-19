@@ -1125,8 +1125,11 @@ class Graph:
 			edge.start._outgoing.remove(edge)
 			edge.end._incoming.remove(edge)
 		else:
-			edge.start._bidirectional.remove(edge)
-			edge.end._bidirectional.remove(edge)
+			try:
+				edge.start._bidirectional.remove(edge)
+				edge.end._bidirectional.remove(edge)
+			except:
+				pass
 		edge._start = start or edge.start
 		edge._end = end or edge.end
 		if edge.is_directed:
@@ -1134,7 +1137,8 @@ class Graph:
 			edge.end._incoming.append(edge)
 		else:
 			edge.start._bidirectional.append(edge)
-			edge.end._bidirectional.append(edge)
+			if start is not end:
+				edge.end._bidirectional.append(edge)
 		return edge
 
 	def contract_edge(self, edge, node_data):
