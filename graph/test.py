@@ -172,6 +172,14 @@ class AdjacencyTest(unittest.TestCase):
 		self.failUnlessEqual(set(self.node_2.get_adjacent(True, True)), {self.node_1, self.node_2})
 		self.failUnlessEqual(set(self.node_3.get_adjacent(True, True)), {self.node_1})
 
+
+class RemovalTest(unittest.TestCase):
+	
+	def setUp(self):
+		self.g = Graph()
+		self.node_1 = self.g.add_node()
+
+
 class GraphPropertiesTest(unittest.TestCase):
 
 	def setUp(self):
