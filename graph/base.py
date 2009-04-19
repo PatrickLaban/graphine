@@ -597,16 +597,16 @@ class Graph:
 	def __lt__(self, other):
 		"""Compares based on containment.
 
-		This returns False if it contains other, True otherwise.
+		This returns True if this graph is contained in other.
 		"""
-		return not self.contains(other)
+		return other.contains(self) and not self.contains(other)
 
 	def __gt__(self, other):
 		"""Compares baed on containment.
 
 		This returns True if it contains other, False otherwise.
 		"""
-		return self.contains(other)
+		return self.contains(other) and not other.contains(self)
 
 	#################################################################
 	#			Properties				#
