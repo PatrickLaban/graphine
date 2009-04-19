@@ -183,10 +183,38 @@ class RemovalTest(unittest.TestCase):
 
 	def testRemoveNodeDirected(self):
 		# remove an node with a directed edge
-		self.edge_1 = self.g.add_edge(self.node_1, self.node_2)
-		self.edge_2 = self.g.add_edge(self.node_2, self.node_3)
+		self.edge_1 = self.g.add_edge(self.node_1, self.node_2, "edge1")
+		self.edge_2 = self.g.add_edge(self.node_2, self.node_3, "edge2")
 		self.g.remove_node(self.node_1)
-		self.failUnlessEqual(set(self.g.nodes), {self.node_2, self.node_3})		
+		self.failUnlessEqual(set(self.g.nodes), {self.node_2, self.node_3})
+		self.failUnlessEqual(set(self.g.edges), {self.edge_2})
+		self.node_1 = self.g.add_node("node1")
+		self.edge_1 = self.g.add_edge(self.node_1, self.node_2, "edge1")
+		self.g.remove_node(self.node_2)
+		self.failUnlessEqual(set(self.g.nodes), {self.node_1, self.node_3})
+		self.failUnlessEqual(set(self.g.edges), set())
+		self.edge_3 = self.g.add_edge(self.node_3, self.node_3, "edge3")
+		self.g.remove_node(self.node_3)
+		self.failUnlessEqual(set(self.g.nodes), {self.node_1})
+		self.failUnlessEqual(set(self.g.edges), set())		
+
+	def testRemoveNodeUndirected(self):
+		# remove an node with a directed edge
+		self.edge_1 = self.g.add_edge(self.node_1, self.node_2, "edge1", False)
+		self.edge_2 = self.g.add_edge(self.node_2, self.node_3, "edge2", False)
+		self.g.remove_node(self.node_1)
+		self.failUnlessEqual(set(self.g.nodes), {self.node_2, self.node_3})
+		self.failUnlessEqual(set(self.g.edges), {self.edge_2})
+		self.node_1 = self.g.add_node("node1")
+		self.edge_1 = self.g.add_edge(self.node_1, self.node_2, "edge1", False)
+		self.g.remove_node(self.node_2)
+		self.failUnlessEqual(set(self.g.nodes), {self.node_1, self.node_3})
+		self.failUnlessEqual(set(self.g.edges), set())
+		self.edge_3 = self.g.add_edge(self.node_3, self.node_3, "edge3", False)
+		self.g.remove_node(self.node_3)
+		self.failUnlessEqual(set(self.g.nodes), {self.node_1})
+		self.failUnlessEqual(set(self.g.edges), set())
+
 		
 
 class GraphPropertiesTest(unittest.TestCase):
