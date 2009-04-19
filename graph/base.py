@@ -315,7 +315,7 @@ class GraphElement:
 	def __repr__(self):
 		"""Pretty prints this element."""
 		classname = type(self).__name__
-		name = "name=%s, " % self.name
+		name = "name=%s, " % str(self.name)
 		attrs = name + ''.join(("%s=%s, " % (k, v) for k, v in self.data.items()))
 		attrs = attrs[:-2]
 		return "%s(%s)" % (classname, attrs)
@@ -610,9 +610,10 @@ class Graph:
 		KeyError.
 		"""
 		if isinstance(item, GraphElement):
-			if item.name in self._nodes: return item
-			if item.name in self._edges: return item
-			raise KeyError("%s not in %s" % (item, self))
+			element = self._edges.get(item.name, False)
+			element = element or self._nodes.get(item.name, False)
+			if not element: raise KeyError("%s not in %s" % (item, self))
+			return element
 		else:
 			element = self._edges.get(item, False)
 			element = element or self._nodes.get(item, False)
@@ -681,7 +682,10 @@ class Graph:
 			end._incoming.append(edge)
 		else:
 			start._bidirectional.append(edge)
-			end._bidirectional.append(edge)
+			# stops the edge from being added twice if it is an undirected
+			# loop
+			if start is not end:
+				end._bidirectional.append(edge)
 		return edge
 
 	def remove_node(self, node):
@@ -724,7 +728,9 @@ class Graph:
 			end._incoming.remove(edge)
 		else:
 			start._bidirectional.remove(edge)
-			end._bidirectional.remove(edge)
+			# fix the undirected loop problem
+			if start is not end:
+				end._bidirectional.remove(edge)
 		# remove it from storage
 		e = self._edges.pop(edge.name)
 		return e
@@ -829,8 +835,9 @@ class Graph:
 		w = walker()
 		candidates = next(w)
 		while 1:
-			selection = yield(candidates)
+			selection = (yield candidates)
 			candidates = w.send(selection)
+			yield
 
 	def walk_edges(self, start):
 		"""Provides a generator for application-defined walks.
@@ -844,14 +851,15 @@ class Graph:
 		def walker():
 			next = start
 			while next:
-				incident = set(next.other_end(next.start).outgoing)
+				incident = list(next.other_end(next.start).outgoing)
 				next = yield(incident)
 		# convenience wrapper
 		w = walker()
 		candidates = next(w)
 		while 1:
-			selection = yield(candidates)
+			selection = (yield candidates)
 			candidates = w.send(selection)
+			yield
 
 	def heuristic_walk(self, start, selector, reverse=False):
 		"""Traverses the graph using selector as a selection filter on the adjacent nodes.
@@ -1121,8 +1129,11 @@ class Graph:
 			edge.start._outgoing.remove(edge)
 			edge.end._incoming.remove(edge)
 		else:
-			edge.start._bidirectional.remove(edge)
-			edge.end._bidirectional.remove(edge)
+			try:	# to fix the problem with undirected loops
+				edge.start._bidirectional.remove(edge)
+				edge.end._bidirectional.remove(edge)
+			except:
+				pass
 		edge._start = start or edge.start
 		edge._end = end or edge.end
 		if edge.is_directed:
@@ -1130,7 +1141,9 @@ class Graph:
 			edge.end._incoming.append(edge)
 		else:
 			edge.start._bidirectional.append(edge)
-			edge.end._bidirectional.append(edge)
+			# fix the problem with undirected loops
+			if start is not end:
+				edge.end._bidirectional.append(edge)
 		return edge
 
 	def contract_edge(self, edge, node_data):
@@ -1138,6 +1151,15 @@ class Graph:
 
 		node_data should be a callable that returns a dictionary.
 		That dictionary will be used to initialize the new node.
+
+		There are two caveats about using this:
+
+		1) The name passed back by node_data, if present, must
+		   still be unique- and the old nodes can't be deleted
+		   until after the new one is added.
+
+		2) Note that if multiple edges exist between the two nodes,
+		   this will still contract them!
 		"""
 		# get the edge if its a name
 		edge = self.get_element(edge)
@@ -1145,8 +1167,6 @@ class Graph:
 		# it endpoints
 		start = edge.start
 		end = edge.end
-		if self.get_common_edges(start, end) != {edge}:
-			raise
 		new_node = self.add_node(**node_data(start, end))
 		# delete the given edge
 		self.remove_edge(edge)
@@ -1157,8 +1177,13 @@ class Graph:
 		for edge in start.outgoing + end.outgoing:
 			self.move_edge(edge, start=new_node)
 		# delete the existing endpoints
-		self.remove_node(start)
-		self.remove_node(end)
+		# remember, this may be a loop, so you may
+		# only be able to remove one.
+		try:
+			self.remove_node(start)
+			self.remove_node(end)
+		except KeyError:
+			pass
 		return new_node
 
 	def transpose(self):
