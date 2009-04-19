@@ -682,7 +682,8 @@ class Graph:
 			end._incoming.append(edge)
 		else:
 			start._bidirectional.append(edge)
-			end._bidirectional.append(edge)
+			if start is not end:
+				end._bidirectional.append(edge)
 		return edge
 
 	def remove_node(self, node):
