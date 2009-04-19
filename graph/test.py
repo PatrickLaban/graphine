@@ -1224,6 +1224,7 @@ class OneNodeDirectedTest(unittest.TestCase):
 		G2 = self.g - G
 		self.failUnlessEqual((set(self.g.nodes) - set(G.nodes), set(self.g.edges) - set(G.edges)), (set(G2.nodes), set(G2.edges)))
 
+
 class OneNodeUndirectedTest(OneNodeDirectedTest):
 
 	def setUp(self):
@@ -1231,6 +1232,135 @@ class OneNodeUndirectedTest(OneNodeDirectedTest):
 		self.A = self.g.add_node("A")
 		self.AA = self.g.add_edge("A", "A", "AA", is_directed=False)
 
+
+class OneNodeDoubleUndirectedTest(OneNodeDirectedTest):
+
+	def setUp(self):
+		self.g = Graph()
+		self.A = self.g.add_node("A")
+		self.AA = self.g.add_edge("A", "A", "AA", is_directed=False)
+		self.AA_2 = self.g.add_edge("A", "A", "AA_2", is_directed=False)
+
+	def testEdges(self):
+		self.failUnlessEqual(set(self.g.edges), {self.AA, self.AA_2})
+
+	def testContainers(self):
+		self.failUnlessEqual(self.g._nodes, {"A": self.A})
+		self.failUnlessEqual(self.g._edges, {"AA": self.AA, "AA_2": self.AA_2})
+
+	def testAddEdge(self):
+		# make sure that adding a new edge by node names succeeds
+		aa = self.g.add_edge("A", "A", "aa")
+		self.failUnlessEqual(self.g["aa"], aa)
+		self.failUnless(self.g["aa"] is aa)
+		self.failUnlessEqual(aa in self.g, True)
+		self.failUnlessEqual("aa" in self.g, True)
+		self.failUnlessEqual(self.g.size(), 3)
+		self.failUnlessEqual(aa in set(self.g.edges), True)
+		self.failUnlessEqual(aa in self.g._edges.values(), True)
+		# make sure that adding a new edge by node succeeds
+		# also check to make sure that overwriting occurs
+		aa = self.g.add_edge(self.A, self.A, "aa")
+		self.failUnlessEqual(self.g["aa"], aa)
+		self.failUnless(self.g["aa"] is aa)
+		self.failUnlessEqual(aa in self.g, True)
+		self.failUnlessEqual("aa" in self.g, True)
+		self.failUnlessEqual(self.g.size(), 3)
+		self.failUnlessEqual(aa in set(self.g.edges), True)
+		self.failUnlessEqual(aa in self.g._edges.values(), True)
+
+	def testSearchEdges(self):
+		self.failUnlessEqual(list(self.g.search_edges(name="B")), [])
+		self.failUnlessEqual(list(self.g.search_edges(name="AA")), [self.AA])
+		self.failUnlessEqual(set(self.g.search_edges(start="A")), {self.AA, self.AA_2})
+		self.failUnlessEqual(set(self.g.search_edges(end="A")), {self.AA, self.AA_2})
+		self.failUnlessEqual(set(self.g.search_edges(start=self.A)), {self.AA, self.AA_2})
+		self.failUnlessEqual(set(self.g.search_edges(end=self.A)), {self.AA, self.AA_2})
+		self.failUnlessEqual(list(self.g.search_edges(name="AA", start=self.A, end=self.A)), [self.AA])
+
+	def testSize(self):
+		self.failUnlessEqual(self.g.size(), 2)
+
+	def testInduceSubgraph(self):
+		# test it without nodes
+		g1 = self.g.induce_subgraph()
+		self.failUnlessEqual(list(g1.nodes), [])
+		self.failUnlessEqual(set(g1.edges), set())
+		# test it with our only node
+		g1 = self.g.induce_subgraph(self.A)
+		self.failUnlessEqual(list(g1.nodes), [self.A])
+		self.failUnlessEqual(set(g1.edges), {self.AA, self.AA_2})
+		# test it with a bad node
+		self.failUnlessRaises(KeyError, self.g.induce_subgraph, Node("B"))
+		# test it with a bad label
+		self.failUnlessRaises(KeyError, self.g.induce_subgraph, "B")
+
+	def testEdgeContraction(self):
+		# in this case, it should delete one node and add one node
+		def node_initializer(x, y):
+			d = x.data
+			d["name"] = x.name + "2"
+			return d
+		n = self.g.contract_edge(self.AA, node_initializer)
+		# make sure that the new node is data equivalent
+		self.failUnlessEqual(self.A.data, n.data)
+		# make sure its name is related as specified
+		self.failUnlessEqual(n.name, self.A.name + "2")
+		# make sure that there are the same number of nodes
+		self.failUnlessEqual(self.g.order(), 1)
+		# make sure that only the other loop remains
+		self.failUnlessEqual(self.g.size(), 1)
+		# test it on a bad edge
+		self.failUnlessRaises(KeyError, self.g.contract_edge, "BB", lambda x, y: dict())
+		self.failUnlessRaises(KeyError, self.g.contract_edge, Edge("A", "B"), lambda x, y: dict())
+
+	def testWalkNodes(self):
+		w = self.g.walk_nodes(self.A)
+		iteration = 0
+		for candidates in w:
+			if iteration < 5:
+				iteration += 1
+				self.failUnlessEqual(candidates, [self.A])
+				w.send(candidates.pop())
+			else:
+				break
+		w = self.g.walk_nodes("A")
+		iteration = 0
+		for candidates in w:
+			if iteration < 5:
+				iteration += 1
+				self.failUnlessEqual(candidates, [self.A])
+				w.send(candidates.pop())
+			else:
+				break
+		w1 = self.g.walk_nodes("B")
+		w2 = self.g.walk_nodes(Node("B"))
+		self.failUnlessRaises(KeyError, next, w1)
+		self.failUnlessRaises(KeyError, next, w2)
+
+	def testWalkEdges(self):
+		w = self.g.walk_edges(self.AA)
+		iteration = 0
+		for candidates in w:
+			if iteration < 5:
+				iteration += 1
+				self.failUnlessEqual(set(candidates), {self.AA, self.AA_2})
+				w.send(candidates.pop())
+			else:
+				break
+		w = self.g.walk_edges("AA")
+		iteration = 0
+		for candidates in w:
+			if iteration < 5:
+				iteration += 1
+				self.failUnlessEqual(set(candidates), {self.AA, self.AA_2})
+				w.send(candidates.pop())
+			else:
+				break
+		w1 = self.g.walk_edges("B")
+		w2 = self.g.walk_edges(Node("B"))
+		self.failUnlessRaises(KeyError, next, w1)
+		self.failUnlessRaises(KeyError, next, w2)
 
 class GraphPerformanceTest(unittest.TestCase):
 
@@ -1334,9 +1464,11 @@ if __name__ == "__main__":
 	AdjacencyTest = unittest.TestLoader().loadTestsFromTestCase(AdjacencyTest)
 	OneNodeDirectedTest = unittest.TestLoader().loadTestsFromTestCase(OneNodeDirectedTest)
 	OneNodeUndirectedTest = unittest.TestLoader().loadTestsFromTestCase(OneNodeUndirectedTest)
+	OneNodeDoubleUndirectedTest = unittest.TestLoader().loadTestsFromTestCase(OneNodeDoubleUndirectedTest)
 	suites = [GraphCorrectnessTest, NodeCreationTest, EdgeCreationTest, GraphPropertiesTest, GraphSearchTest, EdgeMovementTest, GetElementsTest, TraversalTest, InductionTest, GraphFailureTest, AdjacencyTest]
 	suites += [ZeroNodeTest]
 	suites += [OneNodeDirectedTest]
 	suites += [OneNodeUndirectedTest]
+	suites += [OneNodeDoubleUndirectedTest]
 	CorrectnessTest = unittest.TestSuite(suites)
 	unittest.main()

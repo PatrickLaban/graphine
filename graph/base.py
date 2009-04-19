@@ -329,12 +329,12 @@ class GraphElement:
 		return hash(self._name)
 
 	def __eq__(self, other):
-		"""Compares the two elements based on name and data."""
+		"""Compares the two elements based on name."""
 		if type(self) != type(other): return False
-		return self.name == other.name and self.data == other.data
+		return self.name == other.name
 
 	def __ne__(self, other):
-		"""Compares the two elements based on name and data."""
+		"""Compares the two elements based on name."""
 		return not self == other
 
 	@property
@@ -393,19 +393,19 @@ class Node(GraphElement):
 		seen = set()
 		if outgoing:
 			for edge in self._outgoing:
-				if edge not in seen:
+				if edge.end not in seen:
 					adjacent.append(edge.end)
-					seen.add(edge)
+					seen.add(edge.end)
 		if incoming:
 			for edge in self._incoming:
-				if edge not in seen:
+				if edge.start not in seen:
 					adjacent.append(edge.start)
-					seen.add(edge)
+					seen.add(edge.start)
 		if outgoing or incoming:
 			for edge in self._bidirectional:
-				if edge not in seen:
+				if edge.other_end(self) not in seen:
 					adjacent.append(edge.other_end(self))
-					seen.add(edge)
+					seen.add(edge.other_end(self))
 		return adjacent 
 
 	@property
