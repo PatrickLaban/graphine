@@ -1600,6 +1600,7 @@ class OneNodeDoubleUndirectedTest(OneNodeDirectedTest):
 		self.failUnlessEqual(G > self.g, False)
 		self.failIfEqual(G, self.g)
 
+
 class OneNodeDoubleDirectedTest(OneNodeDoubleUndirectedTest):
 
 	def setUp(self):
@@ -1667,6 +1668,14 @@ class TwoNodeUnconnectedTest(unittest.TestCase):
 		self.failUnlessEqual(self.g.get_common_edges("B", "B"), set())
 		self.failUnlessRaises(KeyError, self.g.get_common_edges, Node("C"), Node("D"))
 
+	def testWalkNodes(self):
+		# should die right off for either node
+		w1 = self.g.walk_nodes(self.A)
+		w2 = self.g.walk_nodes(self.B)
+		for candidates in w1:
+			self.failIf(candidates)
+		for candidates in w2:
+			self.failIf(candidates)	
 	
 class GraphPerformanceTest(unittest.TestCase):
 
