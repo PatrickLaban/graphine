@@ -199,7 +199,7 @@ class RemovalTest(unittest.TestCase):
 		self.failUnlessEqual(set(self.g.edges), set())		
 
 	def testRemoveNodeUndirected(self):
-		# remove an node with a directed edge
+		# remove an node with a undirected edge
 		self.edge_1 = self.g.add_edge(self.node_1, self.node_2, "edge1", False)
 		self.edge_2 = self.g.add_edge(self.node_2, self.node_3, "edge2", False)
 		self.g.remove_node(self.node_1)
@@ -214,6 +214,31 @@ class RemovalTest(unittest.TestCase):
 		self.g.remove_node(self.node_3)
 		self.failUnlessEqual(set(self.g.nodes), {self.node_1})
 		self.failUnlessEqual(set(self.g.edges), set())
+
+	def testRemoveEdgeDirected(self):
+		# remove a directed edge
+		self.edge_1 = self.g.add_edge(self.node_1, self.node_2, "edge1")
+		self.edge_2 = self.g.add_edge(self.node_2, self.node_3, "edge2")
+		self.g.remove_edge(self.edge_1)
+		self.failUnlessEqual(set(self.g.nodes), {self.node_1, self.node_2, self.node_3})
+		self.failUnlessEqual(set(self.g.edges), {self.edge_2})
+		self.edge_3 = self.g.add_edge(self.node_3, self.node_3, "edge3")
+		self.g.remove_edge(self.edge_3)
+		self.failUnlessEqual(set(self.g.nodes), {self.node_1, self.node_3, self.node_2})
+		self.failUnlessEqual(set(self.g.edges), {self.edge_2})		
+
+	def testRemoveNodeUndirected(self):
+		# remove a undirected edge
+		self.edge_1 = self.g.add_edge(self.node_1, self.node_2, "edge1", False)
+		self.edge_2 = self.g.add_edge(self.node_2, self.node_3, "edge2", False)
+		self.g.remove_edge(self.edge_1)
+		self.failUnlessEqual(set(self.g.nodes), {self.node_1, self.node_2, self.node_3})
+		self.failUnlessEqual(set(self.g.edges), {self.edge_2})
+		self.edge_3 = self.g.add_edge(self.node_3, self.node_3, "edge3", False)
+		self.g.remove_edge(self.edge_3)
+		self.failUnlessEqual(set(self.g.nodes), {self.node_1, self.node_3, self.node_2})
+		self.failUnlessEqual(set(self.g.edges), {self.edge_2})	
+
 
 		
 
