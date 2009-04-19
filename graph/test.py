@@ -44,7 +44,6 @@ from base import Graph, Node, Edge, GraphElement
 class NodeCreationTest(unittest.TestCase):
 
 	def setUp(self):
-		# WARNING: g = Graph() MUST work to perform tests
 		self.g = Graph()
 		self.node_1 = self.g.add_node() # basic node
 		self.node_2 = self.g.add_node("node2") # node with name, no data
@@ -78,7 +77,6 @@ class NodeCreationTest(unittest.TestCase):
 class EdgeCreationTest(unittest.TestCase):
 
 	def setUp(self):
-		# WARNING: g = Graph() MUST work to perform tests
 		self.g = Graph()
 		self.node_1 = self.g.add_node()
 		self.node_2 = self.g.add_node()
@@ -154,7 +152,6 @@ class EdgeCreationTest(unittest.TestCase):
 class AdjacencyTest(unittest.TestCase):
 	
 	def setUp(self):
-		# WARNING: g = Graph() MUST work to perform tests
 		self.g = Graph()
 		self.node_1 = self.g.add_node("node1")
 		self.node_2 = self.g.add_node("node2")
@@ -178,7 +175,6 @@ class AdjacencyTest(unittest.TestCase):
 class GraphPropertiesTest(unittest.TestCase):
 
 	def setUp(self):
-		# WARNING: Errors is setup will cuase unkown test failures
 		self.g = Graph()
 		self.n1 = self.g.add_node(first_name="Geremy")
 		self.n2 = self.g.add_node(first_name="Bob")
