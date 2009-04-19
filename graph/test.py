@@ -860,14 +860,35 @@ class OneNodeDirectedTest(unittest.TestCase):
 		self.failUnlessEqual((set(self.g.nodes), set(self.g.edges)), (set(G.nodes), set(G.edges)))
 		# test it on a graph with one node with a loop
 		G = Graph()
-		n = G.add_node(1)
-		e = G.add_edge(1, 1, 11)
+		G.add_node(1)
+		G.add_edge(1, 1, 11)
 		G2 = self.g | G
 		self.failUnlessEqual((set(self.g.nodes) | set(G.nodes), set(self.g.edges) | set(G.edges)), (set(G2.nodes), set(G2.edges)))
 		# test it on a graph with two nodes
+		G = Graph()
+		G.add_node(1)
+		G.add_node(2)
+		G2 = self.g | G
+		self.failUnlessEqual((set(self.g.nodes) | set(G.nodes), set(self.g.edges) | set(G.edges)), (set(G2.nodes), set(G2.edges)))		
 		# test it on a graph with three nodes in a directed cycle
+		G = Graph()
+		G.add_node(1)
+		G.add_node(2)
+		G.add_node(3)
+		G.add_edge(1, 2, (1,2))
+		G.add_edge(2, 3, (2,3))
+		G.add_edge(3, 1, (3,1))
+		G2 = self.g | G
+		self.failUnlessEqual((set(self.g.nodes) | set(G.nodes), set(self.g.edges) | set(G.edges)), (set(G2.nodes), set(G2.edges)))
 		# test it on a graph with five nodes in an undirected cycle
-		
+		G = Graph()
+		for i in range(5):
+			G.add_node(i)
+		for i in range(5):
+			j = (i + 1) % 5
+			G.add_edge(i, j, (i,j))
+		G2 = self.g | G
+		self.failUnlessEqual((set(self.g.nodes) | set(G.nodes), set(self.g.edges) | set(G.edges)), (set(G2.nodes), set(G2.edges)))	
 
 	def testHeuristicWalk(self):
 		class Heuristic:

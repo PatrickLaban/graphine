@@ -51,3 +51,20 @@ def K(n):
 			k.add_edge(i, j, (i,j), is_directed=False)
 	# return the graph
 	return k
+
+def cycle(n, is_directed=True):
+	"""Generates a cycle of size n.
+
+	The verticies are numbered [0, n).
+
+	The edges are named after the verticies they connect such that
+	an edge connecting verticies 1 and 2 is named (1,2).
+	"""
+	G = Graph()
+	for i in range(n):
+		G.add_node(i)
+	for i in range(n):
+		j = (i + 1) % n
+		G.add_edge(i, j, (i,j), is_directed=is_directed)
+	return G
+
