@@ -1093,6 +1093,10 @@ class OneNodeDirectedTest(unittest.TestCase):
 		g1 = self.g.induce_subgraph()
 		self.failUnlessEqual(list(g1.nodes), [])
 		self.failUnlessEqual(list(g1.edges), [])
+		# test it with our only node
+		g1 = self.g.induce_subgraph(self.A)
+		self.failUnlessEqual(list(g1.nodes), [self.A])
+		self.failUnlessEqual(list(g1.edges), [self.AA])
 		# test it with a bad node
 		self.failUnlessRaises(KeyError, self.g.induce_subgraph, Node("B"))
 		# test it with a bad label
@@ -1103,6 +1107,10 @@ class OneNodeDirectedTest(unittest.TestCase):
 		g1 = self.g.edge_induce_subgraph()
 		self.failUnlessEqual(list(g1.nodes), [])
 		self.failUnlessEqual(list(g1.edges), [])
+		# test it with our only edge
+		g1 = self.g.edge_induce_subgraph(self.AA)
+		self.failUnlessEqual(list(g1.nodes), [self.A])
+		self.failUnlessEqual(list(g1.edges), [self.AA])
 		# test it with a bad node
 		self.failUnlessRaises(KeyError, self.g.edge_induce_subgraph, Edge("A", "B"))
 		# test it with a bad label
