@@ -52,7 +52,7 @@ class NodeCreationTest(unittest.TestCase):
 		self.node_5 =  self.g.add_node("node5", foo="stuff", hello="world") # mutiple data attributes and name
 
 	def testNodeCreation(self):
-		""" test Graph.add_node fully """
+		# test Graph.add_node fully
 		self.failUnlessEqual(self.node_1.data, {}) # data is empty
 		self.failUnlessEqual(self.node_2.name, "node2") 
 		self.failUnlessEqual(self.node_2.data, {})
@@ -66,7 +66,7 @@ class NodeCreationTest(unittest.TestCase):
 		self.failUnlessEqual(self.node_5.incoming, [])
 		self.failUnlessEqual(self.node_5.bidirectional, [])
 		self.failUnlessEqual(self.node_5.degree, 0)
-		self.failUnlessEqual(self.node_5.get_adjacent(), []) # no adjacent nodes
+		self.failUnlessEqual(self.node_5.get_adjacent(), []) # no adjacent nodes	
 
 	def testNodeCreationFailPoints(self):
 		""" ensure that node creation fails when it's supposed to """
@@ -1393,6 +1393,67 @@ class OneNodeDirectedTest(unittest.TestCase):
 		G2 = self.g - G
 		self.failUnlessEqual((set(self.g.nodes) - set(G.nodes), set(self.g.edges) - set(G.edges)), (set(G2.nodes), set(G2.edges)))
 
+	def testContains(self):
+		# test it on the zero node case
+		G = Graph()
+		self.failUnlessEqual(self.g.contains(G), True)
+		self.failUnlessEqual(self.g > G, True)
+		self.failUnlessEqual(self.g < G, False)
+		self.failUnlessEqual(G < self.g, True)
+		self.failUnlessEqual(G > self.g, False)
+		self.failIfEqual(G, self.g)
+		# test it on a graph with one node with a loop
+		G = Graph()
+		G.add_node("A")
+		G.add_edge("A", "A", "AA")
+		self.failUnlessEqual(self.g.contains(G), True)
+		self.failUnlessEqual(G.contains(self.g), True)
+		self.failUnlessEqual(self.g < G, False)
+		self.failUnlessEqual(self.g > G, False)
+		self.failUnlessEqual(G < self.g, False)
+		self.failUnlessEqual(G > self.g, False)
+		self.failUnlessEqual(G, self.g)
+		# test it on a graph with two nodes
+		G = Graph()
+		G.add_node("A")
+		G.add_node("B")
+		self.failUnlessEqual(self.g.contains(G), False)
+		self.failUnlessEqual(G.contains(self.g), False)
+		self.failUnlessEqual(self.g < G, False)
+		self.failUnlessEqual(self.g > G, False)
+		self.failUnlessEqual(G < self.g, False)
+		self.failUnlessEqual(G > self.g, False)
+		self.failIfEqual(G, self.g)
+		# test it on a graph with three nodes in a directed cycle
+		G = Graph()
+		G.add_node(1)
+		G.add_node(2)
+		G.add_node(3)
+		G.add_edge(1, 2, (1,2))
+		G.add_edge(2, 3, (2,3))
+		G.add_edge(3, 1, (3,1))
+		self.failUnlessEqual(self.g.contains(G), False)
+		self.failUnlessEqual(G.contains(self.g), False)
+		self.failUnlessEqual(self.g < G, False)
+		self.failUnlessEqual(self.g > G, False)
+		self.failUnlessEqual(G < self.g, False)
+		self.failUnlessEqual(G > self.g, False)
+		self.failIfEqual(G, self.g)
+		# test it on a graph with five nodes in an undirected cycle
+		G = Graph()
+		for i in range(5):
+			G.add_node(i)
+		for i in range(5):
+			j = (i + 1) % 5
+			G.add_edge(i, j, (i,j))
+		self.failUnlessEqual(self.g.contains(G), False)
+		self.failUnlessEqual(G.contains(self.g), False)
+		self.failUnlessEqual(self.g < G, False)
+		self.failUnlessEqual(self.g > G, False)
+		self.failUnlessEqual(G < self.g, False)
+		self.failUnlessEqual(G > self.g, False)
+		self.failIfEqual(G, self.g)
+
 
 class OneNodeUndirectedTest(OneNodeDirectedTest):
 
@@ -1531,6 +1592,68 @@ class OneNodeDoubleUndirectedTest(OneNodeDirectedTest):
 		self.failUnlessRaises(KeyError, next, w1)
 		self.failUnlessRaises(KeyError, next, w2)
 
+	def testContains(self):
+		# test it on the zero node case
+		G = Graph()
+		self.failUnlessEqual(self.g.contains(G), True)
+		self.failUnlessEqual(self.g > G, True)
+		self.failUnlessEqual(self.g < G, False)
+		self.failUnlessEqual(G < self.g, True)
+		self.failUnlessEqual(G > self.g, False)
+		self.failIfEqual(G, self.g)
+		# test it on a graph with one node with a loop
+		G = Graph()
+		G.add_node("A")
+		G.add_edge("A", "A", "AA")
+		self.failUnlessEqual(self.g.contains(G), True)
+		self.failUnlessEqual(G.contains(self.g), False)
+		self.failUnlessEqual(self.g < G, False)
+		self.failUnlessEqual(self.g > G, True)
+		self.failUnlessEqual(G < self.g, True)
+		self.failUnlessEqual(G > self.g, False)
+		self.failIfEqual(G, self.g)
+		# test it on a graph with two nodes
+		G = Graph()
+		G.add_node("A")
+		G.add_node("B")
+		self.failUnlessEqual(self.g.contains(G), False)
+		self.failUnlessEqual(G.contains(self.g), False)
+		self.failUnlessEqual(self.g < G, False)
+		self.failUnlessEqual(self.g > G, False)
+		self.failUnlessEqual(G < self.g, False)
+		self.failUnlessEqual(G > self.g, False)
+		self.failIfEqual(G, self.g)
+		# test it on a graph with three nodes in a directed cycle
+		G = Graph()
+		G.add_node(1)
+		G.add_node(2)
+		G.add_node(3)
+		G.add_edge(1, 2, (1,2))
+		G.add_edge(2, 3, (2,3))
+		G.add_edge(3, 1, (3,1))
+		self.failUnlessEqual(self.g.contains(G), False)
+		self.failUnlessEqual(G.contains(self.g), False)
+		self.failUnlessEqual(self.g < G, False)
+		self.failUnlessEqual(self.g > G, False)
+		self.failUnlessEqual(G < self.g, False)
+		self.failUnlessEqual(G > self.g, False)
+		self.failIfEqual(G, self.g)
+		# test it on a graph with five nodes in an undirected cycle
+		G = Graph()
+		for i in range(5):
+			G.add_node(i)
+		for i in range(5):
+			j = (i + 1) % 5
+			G.add_edge(i, j, (i,j))
+		self.failUnlessEqual(self.g.contains(G), False)
+		self.failUnlessEqual(G.contains(self.g), False)
+		self.failUnlessEqual(self.g < G, False)
+		self.failUnlessEqual(self.g > G, False)
+		self.failUnlessEqual(G < self.g, False)
+		self.failUnlessEqual(G > self.g, False)
+		self.failIfEqual(G, self.g)
+
+
 class OneNodeDoubleDirectedTest(OneNodeDoubleUndirectedTest):
 
 	def setUp(self):
@@ -1598,6 +1721,14 @@ class TwoNodeUnconnectedTest(unittest.TestCase):
 		self.failUnlessEqual(self.g.get_common_edges("B", "B"), set())
 		self.failUnlessRaises(KeyError, self.g.get_common_edges, Node("C"), Node("D"))
 
+	def testWalkNodes(self):
+		# should die right off for either node
+		w1 = self.g.walk_nodes(self.A)
+		w2 = self.g.walk_nodes(self.B)
+		for candidates in w1:
+			self.failIf(candidates)
+		for candidates in w2:
+			self.failIf(candidates)	
 	
 class GraphPerformanceTest(unittest.TestCase):
 
