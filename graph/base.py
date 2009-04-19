@@ -728,7 +728,9 @@ class Graph:
 			end._incoming.remove(edge)
 		else:
 			start._bidirectional.remove(edge)
-			end._bidirectional.remove(edge)
+			# fix the undirected loop problem
+			if start is not end:
+				end._bidirectional.remove(edge)
 		# remove it from storage
 		e = self._edges.pop(edge.name)
 		return e
@@ -1149,6 +1151,15 @@ class Graph:
 
 		node_data should be a callable that returns a dictionary.
 		That dictionary will be used to initialize the new node.
+
+		There are two caveats about using this:
+
+		1) The name passed back by node_data, if present, must
+		   still be unique- and the old nodes can't be deleted
+		   until after the new one is added.
+
+		2) Note that if multiple edges exist between the two nodes,
+		   this will still contract them!
 		"""
 		# get the edge if its a name
 		edge = self.get_element(edge)
@@ -1156,8 +1167,6 @@ class Graph:
 		# it endpoints
 		start = edge.start
 		end = edge.end
-		if self.get_common_edges(start, end) != {edge}:
-			raise
 		new_node = self.add_node(**node_data(start, end))
 		# delete the given edge
 		self.remove_edge(edge)
@@ -1168,8 +1177,13 @@ class Graph:
 		for edge in start.outgoing + end.outgoing:
 			self.move_edge(edge, start=new_node)
 		# delete the existing endpoints
-		self.remove_node(start)
-		self.remove_node(end)
+		# remember, this may be a loop, so you may
+		# only be able to remove one.
+		try:
+			self.remove_node(start)
+			self.remove_node(end)
+		except KeyError:
+			pass
 		return new_node
 
 	def transpose(self):

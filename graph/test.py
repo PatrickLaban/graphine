@@ -677,8 +677,8 @@ class ZeroNodeTest(unittest.TestCase):
 
 	def testEdgeContraction(self):
 		# test it on a bad edge
-		self.failUnlessRaises(KeyError, self.g.contract_edge, "A", lambda x, y: ("", dict()))
-		self.failUnlessRaises(KeyError, self.g.contract_edge, Edge("A", "B"), lambda x, y: ("", dict()))
+		self.failUnlessRaises(KeyError, self.g.contract_edge, "A", lambda x, y: dict())
+		self.failUnlessRaises(KeyError, self.g.contract_edge, Edge("A", "B"), lambda x, y: dict())
 
 	def testTranspose(self):
 		tmp = copy.copy(self.g)
@@ -1063,6 +1063,50 @@ class OneNodeDirectedTest(unittest.TestCase):
 
 	def testSize(self):
 		self.failUnlessEqual(self.g.size(), 1)
+
+	def testEdgeContraction(self):
+		# in this case, it should delete one node and add one node
+		def node_initializer(x, y):
+			d = x.data
+			d["name"] = x.name + "2"
+			return d
+		n = self.g.contract_edge(self.AA, node_initializer)
+		# make sure that the new node is data equivalent
+		self.failUnlessEqual(self.A.data, n.data)
+		# make sure its name is related as specified
+		self.failUnlessEqual(n.name, self.A.name + "2")
+		# make sure that there are the same number of nodes
+		self.failUnlessEqual(self.g.order(), 1)
+		# make sure that there are no edges
+		self.failUnlessEqual(self.g.size(), 0)
+		# test it on a bad edge
+		self.failUnlessRaises(KeyError, self.g.contract_edge, "BB", lambda x, y: dict())
+		self.failUnlessRaises(KeyError, self.g.contract_edge, Edge("A", "B"), lambda x, y: dict())
+
+	def testTranspose(self):
+		tmp = copy.copy(self.g)
+		tmp.transpose()
+		self.failUnlessEqual((set(self.g.nodes), set(self.g.edges)), (set(tmp.nodes), set(tmp.edges)))
+
+	def testInduceSubgraph(self):
+		# test it without nodes
+		g1 = self.g.induce_subgraph()
+		self.failUnlessEqual(list(g1.nodes), [])
+		self.failUnlessEqual(list(g1.edges), [])
+		# test it with a bad node
+		self.failUnlessRaises(KeyError, self.g.induce_subgraph, Node("B"))
+		# test it with a bad label
+		self.failUnlessRaises(KeyError, self.g.induce_subgraph, "B")
+
+	def testEdgeInduceSubgraph(self):
+		# test it without nodes
+		g1 = self.g.edge_induce_subgraph()
+		self.failUnlessEqual(list(g1.nodes), [])
+		self.failUnlessEqual(list(g1.edges), [])
+		# test it with a bad node
+		self.failUnlessRaises(KeyError, self.g.edge_induce_subgraph, Edge("A", "B"))
+		# test it with a bad label
+		self.failUnlessRaises(KeyError, self.g.edge_induce_subgraph, "B")
 
 	def testUnion(self):
 		# test it on ourselves
