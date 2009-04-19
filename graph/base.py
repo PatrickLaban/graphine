@@ -315,7 +315,7 @@ class GraphElement:
 	def __repr__(self):
 		"""Pretty prints this element."""
 		classname = type(self).__name__
-		name = "name=%s, " % self.name
+		name = "name=%s, " % str(self.name)
 		attrs = name + ''.join(("%s=%s, " % (k, v) for k, v in self.data.items()))
 		attrs = attrs[:-2]
 		return "%s(%s)" % (classname, attrs)
