@@ -887,6 +887,19 @@ class OneNodeDirectedTest(unittest.TestCase):
 		self.failUnlessRaises(KeyError, list, t)
 		self.failUnlessRaises(KeyError, list, t2)
 
+	def testDepthFirstTraversal(self):
+		# should only yield one node, no matter what
+		self.failUnlessEqual(list(self.g.depth_first_traversal(self.A)), [self.A])
+		self.failUnlessEqual(list(self.g.depth_first_traversal("A")), [self.A])
+		self.failUnlessEqual(list(self.g.depth_first_traversal(self.A)), [self.A])
+		self.failUnlessEqual(list(self.g.depth_first_traversal("A")), [self.A])
+		self.failUnlessEqual(list(self.g.depth_first_traversal(Node("A"))), [self.A])
+		t = self.g.depth_first_traversal("B")
+		t2 = self.g.depth_first_traversal(Node("B"))
+		self.failUnlessRaises(KeyError, list, t)
+		self.failUnlessRaises(KeyError, list, t2)
+
+
 class GraphPerformanceTest(unittest.TestCase):
 
 	graph_setup = "from base import Graph; g = Graph(); n = g.add_node(first_name='');"
