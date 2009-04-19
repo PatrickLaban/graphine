@@ -913,6 +913,14 @@ class OneNodeDirectedTest(unittest.TestCase):
 	def testGetStronglyConnected(self):
 		self.failUnlessEqual(list(self.g.get_strongly_connected()), [{self.A}])
 
+	def testGetShortestPaths(self):
+		self.failUnlessEqual(self.g.get_shortest_paths(self.A), {self.A: (0, [])})
+		self.failUnlessEqual(self.g.get_shortest_paths("A"), {self.A: (0, [])})
+		self.failUnlessEqual(self.g.get_shortest_paths(Node("A")), {self.A: (0, [])})
+		self.failUnlessRaises(KeyError, self.g.get_shortest_paths, Node("B"))
+		self.failUnlessRaises(KeyError, self.g.get_shortest_paths, "B")
+
+
 class GraphPerformanceTest(unittest.TestCase):
 
 	graph_setup = "from base import Graph; g = Graph(); n = g.add_node(first_name='');"
