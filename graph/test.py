@@ -175,31 +175,75 @@ class AdjacencyTest(unittest.TestCase):
 class GraphPropertiesTest(unittest.TestCase):
 
 	def setUp(self):
-		self.g = Graph()
-		self.n1 = self.g.add_node(first_name="Geremy")
-		self.n2 = self.g.add_node(first_name="Bob")
-		self.n3 = self.g.add_node(first_name="Bill")
-		self.e1 = self.g.add_edge(self.n1, self.n2)
-		self.e2 = self.g.add_edge(self.n2, self.n3)
-		self.g.remove_node(self.n1)
+		self.g1 = Graph()
+		self.g2 = Graph()
+		self.g1_node_1 = self.g1.add_node("node1")
+		self.g1_node_2 = self.g1.add_node("node2")
+		self.g1_node_3 = self.g1.add_node("node3")
+		self.g1_edge_1 = self.g1.add_edge(self.g1_node_1, self.g1_node_2, "edge1")
+		self.g1_edge_2 = self.g1.add_edge(self.g1_node_2, self.g1_node_3, "edge2")
+		self.g1_edge_3 = self.g1.add_edge(self.g1_node_3, self.g1_node_3, "edge3")
+		self.g1.remove_node(self.g1_node_1)
+		self.g2_node_1 = self.g2.add_node("node1")
+		self.g2_node_2 = self.g2.add_node("node2")
+		self.g2_node_3 = self.g2.add_node("node3")
+		self.g2_edge_1 = self.g2.add_edge(self.g2_node_1, self.g2_node_2, "edge1")
+		self.g2_edge_2 = self.g2.add_edge(self.g2_node_2, self.g2_node_3, "edge2")
+		self.g2_edge_3 = self.g2.add_edge(self.g2_node_3, self.g2_node_3, "edge3")
+		self.g2.remove_node(self.g2_node_1)
+
+	def testEqual(self):
+		""" test == between nodes and edges of different graphs """
+		self.failUnlessEqual(self.g1_node_2 == self.g2_node_2, True)
+		self.failUnlessEqual(self.g2_node_3 == self.g1_node_3, True)
+		self.failUnlessEqual(self.g1_node_2 == self.g2_node_3, False)
+		self.failUnlessEqual(self.g1_edge_2 == self.g2_edge_2, True)
+		self.failUnlessEqual(self.g2_edge_3 == self.g1_edge_3, True)
+		self.failUnlessEqual(self.g1_edge_2 == self.g2_edge_3, False)
+		
+	def testNotEqual(self):
+		""" test != between nodes and edges """
+		self.failUnlessEqual(self.g1_node_2 != self.g2_node_2, False)
+		self.failUnlessEqual(self.g2_node_3 != self.g1_node_3, False)
+		self.failUnlessEqual(self.g1_node_2 != self.g2_node_3, True)
+		self.failUnlessEqual(self.g1_edge_2 != self.g2_edge_2, False)
+		self.failUnlessEqual(self.g2_edge_3 != self.g1_edge_3, False)
+		self.failUnlessEqual(self.g1_edge_2 != self.g2_edge_3, True)
 
 	def testIn(self):
 		""" test functionality of 'in' against known values """
-		self.failUnlessEqual(self.n1 in self.g, False)
-		self.failUnlessEqual(self.n2 in self.g, True)
-		self.failUnlessEqual(self.e1 in self.g, False)
-		self.failUnlessEqual(self.e2 in self.g, True)
+		self.failUnlessEqual(self.g1_node_1 in self.g1, False)
+		self.failUnlessEqual(self.g1_node_2 in self.g1, True)
+		self.failUnlessEqual(self.g1_node_3 in self.g1, True)
+		self.failUnlessEqual(self.g1_edge_1 in self.g1, False)
+		self.failUnlessEqual(self.g1_edge_2 in self.g1, True)
+		self.failUnlessEqual(self.g1_edge_3 in self.g1, True)
+		self.failUnlessEqual(self.g1_node_2 in self.g2, True)
+		self.failUnlessEqual(self.g1_edge_2 in self.g2, True)
 
 	def testGetItem(self):
-		self.failUnlessEqual(self.g[self.n2.name], self.n2)
-		self.failUnlessEqual(self.g[self.e2.name], self.e2)
-		self.failUnlessRaises(KeyError, lambda: self.g[self.e1.name])
+		# test retreiving items from graphs
+		self.failUnlessEqual(self.g1[self.g1_node_2.name], self.g1_node_2)
+		self.failUnlessEqual(self.g2[self.g2_edge_2.name], self.g2_edge_2)
+		self.failUnlessRaises(KeyError, lambda: self.g1[self.g1_edge_1.name])
 
 	def testOrder(self):
-		self.failUnlessEqual(self.g.order(), 2)
-
+		""" test order against known amount """
+		self.failUnlessEqual(self.g1.order(), 2)
+		self.failUnlessEqual(self.g2.order(), 2)
+		self.g1.remove_node(self.g1_node_2)
+		self.failUnlessEqual(self.g1.order(), 1)
+		self.g2.remove_edge(self.g2_edge_3)
+		self.failUnlessEqual(self.g2.order(), 2)
+		
 	def testSize(self):
-		self.failUnlessEqual(self.g.size(), 1)
+		""" 	test size against known amount """
+		self.failUnlessEqual(self.g1.size(), 2)
+		self.failUnlessEqual(self.g2.size(), 2)
+		self.g2.remove_node(self.g2_node_2)
+		self.failUnlessEqual(self.g2.size(), 1)
+		self.g2.remove_edge(self.g2_edge_3)
+		self.failUnlessEqual(self.g2.size(), 0)
 
 
 class GraphSearchTest(unittest.TestCase):
