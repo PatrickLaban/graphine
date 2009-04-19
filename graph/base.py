@@ -682,6 +682,8 @@ class Graph:
 			end._incoming.append(edge)
 		else:
 			start._bidirectional.append(edge)
+			# stops the edge from being added twice if it is an undirected
+			# loop
 			if start is not end:
 				end._bidirectional.append(edge)
 		return edge
@@ -1125,7 +1127,7 @@ class Graph:
 			edge.start._outgoing.remove(edge)
 			edge.end._incoming.remove(edge)
 		else:
-			try:
+			try:	# to fix the problem with undirected loops
 				edge.start._bidirectional.remove(edge)
 				edge.end._bidirectional.remove(edge)
 			except:
@@ -1137,6 +1139,7 @@ class Graph:
 			edge.end._incoming.append(edge)
 		else:
 			edge.start._bidirectional.append(edge)
+			# fix the problem with undirected loops
 			if start is not end:
 				edge.end._bidirectional.append(edge)
 		return edge

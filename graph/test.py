@@ -32,6 +32,8 @@ This contains all the test data for Graphine.
 
 import unittest
 import timeit
+import copy
+
 from base import Graph, Node, Edge, GraphElement
 
 
@@ -672,6 +674,36 @@ class ZeroNodeTest(unittest.TestCase):
 
 	def testOrder(self):
 		self.failUnlessEqual(self.g.order(), 0)
+
+	def testEdgeContraction(self):
+		# test it on a bad edge
+		self.failUnlessRaises(KeyError, self.g.contract_edge, "A", lambda x, y: ("", dict()))
+		self.failUnlessRaises(KeyError, self.g.contract_edge, Edge("A", "B"), lambda x, y: ("", dict()))
+
+	def testTranspose(self):
+		tmp = copy.copy(self.g)
+		tmp.transpose()
+		self.failUnlessEqual((set(self.g.nodes), set(self.g.edges)), (set(tmp.nodes), set(tmp.edges)))
+
+	def testInduceSubgraph(self):
+		# test it without nodes
+		g1 = self.g.induce_subgraph()
+		self.failUnlessEqual(list(g1.nodes), [])
+		self.failUnlessEqual(list(g1.edges), [])
+		# test it with a bad node
+		self.failUnlessRaises(KeyError, self.g.induce_subgraph, Node("A"))
+		# test it with a bad label
+		self.failUnlessRaises(KeyError, self.g.induce_subgraph, "A")
+
+	def testEdgeInduceSubgraph(self):
+		# test it without nodes
+		g1 = self.g.edge_induce_subgraph()
+		self.failUnlessEqual(list(g1.nodes), [])
+		self.failUnlessEqual(list(g1.edges), [])
+		# test it with a bad node
+		self.failUnlessRaises(KeyError, self.g.edge_induce_subgraph, Edge("A", "B"))
+		# test it with a bad label
+		self.failUnlessRaises(KeyError, self.g.edge_induce_subgraph, "A")
 
 	def testUnion(self):
 		# test it on ourselves
