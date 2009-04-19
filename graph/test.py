@@ -1700,10 +1700,33 @@ class TwoNodeUnconnectedTest(unittest.TestCase):
 		# should die right off for either node
 		w1 = self.g.walk_nodes(self.A)
 		w2 = self.g.walk_nodes(self.B)
+		w3 = self.g.walk_nodes("A")
+		w4 = self.g.walk_nodes("B")
+		w5 = self.g.walk_nodes(Node("A"))
+		w6 = self.g.walk_nodes(Node("B"))
+		w7 = self.g.walk_nodes("C")
+		w8 = self.g.walk_nodes(Node("C"))
 		for candidates in w1:
 			self.failIf(candidates)
 		for candidates in w2:
-			self.failIf(candidates)	
+			self.failIf(candidates)
+		for candidates in w3:
+			self.failIf(candidates)
+		for candidates in w4:
+			self.failIf(candidates)
+		for candidates in w5:
+			self.failIf(candidates)
+		for candidates in w6:
+			self.failIf(candidates)
+		self.failUnlessRaises(KeyError, next, w7)
+		self.failUnlessRaises(KeyError, next, w8)
+
+	def testWalkEdges(self):
+		# no edges- should be easy
+		w = self.g.walk_edges(Edge("A", "B", "AB"))
+		self.failUnlessRaises(KeyError, next, w)
+		w = self.g.walk_edges("AB")
+		self.failUnlessRaises(KeyError, next, w)
 	
 class GraphPerformanceTest(unittest.TestCase):
 
