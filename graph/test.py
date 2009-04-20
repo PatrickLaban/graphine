@@ -69,7 +69,7 @@ class NodeCreationTest(unittest.TestCase):
 		self.failUnlessEqual(self.node_5.get_adjacent(), []) # no adjacent nodes	
 
 	def testNodeCreationFailPoints(self):
-		""" ensure that node creation fails when it's supposed to """
+		# ensure that node creation fails when it's supposed to
 		self.failUnlessRaises(TypeError, self.g.add_node, "two", "names")
 		self.test_dict = {"a":"b", "b":"c"}
 		self.failUnlessRaises(TypeError, self.g.add_node, self.test_dict)
@@ -92,7 +92,7 @@ class EdgeCreationTest(unittest.TestCase):
 		self.edge_8 = self.g.add_edge("node3", "node4", "edge8", foo="stuff", hello="world")
 
 	def testEdgeCreation(self):
-		""" test Graph.add_edge fully """
+		# test Graph.add_edge fully
 		self.failUnlessEqual(self.edge_1.start, self.node_1) 
 		self.failUnlessEqual(self.edge_1.end, self.node_2)
 		self.failUnless(self.edge_1 in self.node_1.outgoing) 
@@ -144,7 +144,7 @@ class EdgeCreationTest(unittest.TestCase):
 		self.failUnlessEqual(set(self.node_2.bidirectional), {self.edge_6})
 		
 	def testEdgeCreationFailPoints(self):
-		""" ensure that edge creation fails when it's supposed to """
+		# ensure that edge creation fails when it's supposed to
 		self.test_dict = {"a":"b", "b":"c"}
 		self.failUnlessRaises(TypeError, self.g.add_edge, self.node_1, self.node_2, self.test_dict)
 
@@ -161,7 +161,7 @@ class AdjacencyTest(unittest.TestCase):
 		self.edge_3 = self.g.add_edge(self.node_2, self.node_2, "edge3")		
 	
 	def testAdjacency(self):
-		""" test the node.get_adjacent """
+		# test the node.get_adjacent
 		self.failUnlessEqual(set(self.node_1.get_adjacent()), {self.node_2, self.node_3})
 		self.failUnlessEqual(set(self.node_2.get_adjacent()), {self.node_2})
 		self.failUnlessEqual(set(self.node_3.get_adjacent()), {self.node_1})
@@ -250,6 +250,7 @@ class OverwriteTest(unittest.TestCase):
 		self.edge_2 = self.g.add_edge("node2", "node2", "edge2")
 
 	def testOverwriteNode(self):
+		# test node overwriting behavior
 		self.node_3 = self.g.add_node("node1")
 		self.failUnlessEqual(set(self.g.nodes), {self.node_3, self.node_2})
 		self.failUnlessEqual(set(self.g.edges), {self.edge_2})
@@ -268,6 +269,7 @@ class OverwriteTest(unittest.TestCase):
 		self.failUnlessEqual(self.node_1.bidirectional, [])
 
 	def testOverwriteEdge(self):
+		# test edge overwriting behavior
 		self.node_3 = self.g.add_node("node3")
 		self.edge_3 = self.g.add_edge(self.node_1, self.node_3, "edge3")
 		self.edge_4 = self.g.add_edge(self.node_2, self.node_1, "edge3")
@@ -301,7 +303,7 @@ class GraphPropertiesTest(unittest.TestCase):
 		self.g2.remove_node(self.g2_node_1)
 
 	def testEqual(self):
-		""" test == between nodes and edges of different graphs """
+		# test == between nodes and edges of different graphs
 		self.failUnlessEqual(self.g1_node_2 == self.g2_node_2, True)
 		self.failUnlessEqual(self.g2_node_3 == self.g1_node_3, True)
 		self.failUnlessEqual(self.g1_node_2 == self.g2_node_3, False)
@@ -310,7 +312,7 @@ class GraphPropertiesTest(unittest.TestCase):
 		self.failUnlessEqual(self.g1_edge_2 == self.g2_edge_3, False)
 		
 	def testNotEqual(self):
-		""" test != between nodes and edges """
+		# test != between nodes and edges 
 		self.failUnlessEqual(self.g1_node_2 != self.g2_node_2, False)
 		self.failUnlessEqual(self.g2_node_3 != self.g1_node_3, False)
 		self.failUnlessEqual(self.g1_node_2 != self.g2_node_3, True)
@@ -336,7 +338,7 @@ class GraphPropertiesTest(unittest.TestCase):
 		self.failUnlessRaises(KeyError, lambda: self.g1[self.g1_edge_1.name])
 
 	def testOrder(self):
-		""" test order against known amount """
+		# test order against known amount
 		self.failUnlessEqual(self.g1.order(), 2)
 		self.failUnlessEqual(self.g2.order(), 2)
 		self.g1.remove_node(self.g1_node_2)
@@ -345,7 +347,7 @@ class GraphPropertiesTest(unittest.TestCase):
 		self.failUnlessEqual(self.g2.order(), 2)
 		
 	def testSize(self):
-		""" 	test size against known amount """
+		# test size against known amount
 		self.failUnlessEqual(self.g1.size(), 2)
 		self.failUnlessEqual(self.g2.size(), 2)
 		self.g2.remove_node(self.g2_node_2)
@@ -368,6 +370,7 @@ class GraphSearchTest(unittest.TestCase):
 		self.edge_4 = self.g.add_edge(self.node_4, self.node_4, "edge4", distance=0, friends=False)
 		
 	def testNodeSearch(self):
+		# test node searching behavior
 		l = list(self.g.search_nodes(first_name="Geremy"))
 		self.failUnlessEqual(l, [])
 		l = list(self.g.search_nodes(name="Bob"))
@@ -382,6 +385,7 @@ class GraphSearchTest(unittest.TestCase):
 		self.failUnlessEqual(set(l), {self.node_3})
 
 	def testEdgeSearch(self):
+		# test edge searching behavior
 		l = list(self.g.search_edges(weight=5))
 		self.failUnlessEqual(l, [])
 		s = set(self.g.search_edges(name="edge2"))
@@ -419,14 +423,10 @@ class GetElementsTest(unittest.TestCase):
 
 	def setUp(self):
 		self.g = Graph()
-
-		# make some nodes
 		self.jimmy = self.g.add_node(city="New York")
 		self.ted = self.g.add_node(city="Atlanta")
 		self.dan = self.g.add_node(city="Seattle")
 		self.paul = self.g.add_node(city="Austin")
-
-		# try not to error out
 		self.j_to_t = self.g.add_edge(self.jimmy, self.ted, distance=850)
 		self.t_to_d = self.g.add_edge(self.ted, self.dan, distance=2150)
 		self.d_to_p = self.g.add_edge(self.dan, self.paul, distance=2850)

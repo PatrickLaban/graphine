@@ -1151,7 +1151,7 @@ class Graph:
 	def move_edge(self, edge, start=None, end=None):
 		"""Moves the edge, leaving its data intact.
 
-		Does not reverse direction.
+		Can not be used to change a directed edge into an undirected edge.
 		"""
 		# get the edge if its a name
 		edge = self.get_element(edge)
