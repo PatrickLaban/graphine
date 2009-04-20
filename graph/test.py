@@ -756,20 +756,16 @@ class GraphCorrectnessTest(unittest.TestCase):
 
 """
 TODO:
-	- 1 node undirected edge test
-	- 1 node disconnected test
 	- 2 node directed edge test
 	- 2 node undirected edge test
-	- 2 node disconnected test
 	- 3 node directed cycle test
 	- 3 node undirected cycle test
 	- 3 node disconnected test
-	- hodgepodge test
-		- one five node directed cycle component
-		- one undirected k5 component
-		- one five node undirected cycle with a loop on each node
-		- one five node directed tree
-		- one five node undirected tree
+	- 5 node directed cycle component
+	- k5 component
+	- 5 node undirected cycle with a loop on each node
+	- five node directed tree
+	- five node undirected tree
 """
 
 class ZeroNodeTest(unittest.TestCase):
@@ -2208,6 +2204,16 @@ class ThreeNodeCycleTest(unittest.TestCase):
 		self.failUnlessEqual(G > self.g, False)
 		self.failIfEqual(G, self.g)
 
+#################################################################################################################################
+#							PERFORMANCE TESTS							#
+#################################################################################################################################
+
+"""
+TODO:
+
+	- totally redo these tests to use cProfile rather than the inaccurate timeit.
+	- add tests for walks, all traversals, etc.
+"""
 
 class GraphPerformanceTest(unittest.TestCase):
 
