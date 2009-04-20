@@ -276,7 +276,8 @@ class OverwriteTest(unittest.TestCase):
 		self.failUnlessEqual(self.node_3.edges, [])
 		self.failUnlessEqual(self.node_3.incoming, [])
 		self.failUnlessEqual(self.node_3.outgoing, [])
-		self.failUnlessEqual(self.node_3.bidirectional, [])	
+		self.failUnlessEqual(self.node_3.bidirectional, [])
+		self.failUnlessEqual(self.node_2.edges, [self.edge_1, self.edge_2, self.edge_4])
 	
 
 class GraphPropertiesTest(unittest.TestCase):
