@@ -358,31 +358,43 @@ class GraphSearchTest(unittest.TestCase):
 
 	def setUp(self):
 		self.g = Graph()
-		self.n1 = self.g.add_node(first_name="Geremy")
-		self.n2 = self.g.add_node(first_name="Bob")
-		self.n3 = self.g.add_node(first_name="Bill")
-		self.n4 = self.g.add_node(first_name="Bill")
-		self.e1 = self.g.add_edge(self.n1, self.n2)
-		self.e2 = self.g.add_edge(self.n2, self.n3)
-		self.e3 = self.g.add_edge(self.n4, self.n3, weight=5)
-		self.g.remove_node(self.n1)
-
+		self.node_1 = self.g.add_node("node1", first_name="Bob", last_name="Bobson")
+		self.node_2 = self.g.add_node("node2", first_name="Tom", last_name="Tompson")
+		self.node_3 = self.g.add_node("node3", first_name="Bill", last_name="Billson")
+		self.node_4 = self.g.add_node("node4", first_name="Will", last_name="Bobson")
+		self.edge_1 = self.g.add_edge(self.node_1, self.node_2, "edge1", distance=50, friends=True)
+		self.edge_2 = self.g.add_edge(self.node_2, self.node_3, "edge2", distance=50, friends=False)
+		self.edge_3 = self.g.add_edge(self.node_4, self.node_3, "edge3", distance=10, friends=True)
+		self.edge_4 = self.g.add_edge(self.node_4, self.node_4, "edge4", distance=0, friends=False)
+		
 	def testNodeSearch(self):
 		l = list(self.g.search_nodes(first_name="Geremy"))
 		self.failUnlessEqual(l, [])
+		l = list(self.g.search_nodes(name="Bob"))
+		self.failUnlessEqual(l, [])
+		l = list(self.g.search_nodes(name="node2"))
+		self.failUnlessEqual(set(l), {self.node_2})
 		l = list(self.g.search_nodes(first_name="Bob"))
-		self.failUnlessEqual(l, [self.n2])
-		l = list(self.g.search_nodes(first_name="Bill"))
-		self.failUnlessEqual(set(l), {self.n3, self.n4})
+		self.failUnlessEqual(set(l), {self.node_1})
+		l = list(self.g.search_nodes(last_name="Bobson"))
+		self.failUnlessEqual(set(l), {self.node_4, self.node_1})
+		l = list(self.g.search_nodes(first_name="Bill", last_name="Billson"))
+		self.failUnlessEqual(set(l), {self.node_3})
 
 	def testEdgeSearch(self):
 		l = list(self.g.search_edges(weight=5))
-		self.failUnlessEqual(l, [self.e3])
-		s = set(self.g.search_edges(end=self.n3))
-		self.failUnlessEqual(s, {self.e2, self.e3})
-		l = list(self.g.search_edges(start=self.n2))
-		self.failUnlessEqual(l, [self.e2])
-
+		self.failUnlessEqual(l, [])
+		s = set(self.g.search_edges(name="edge2"))
+		self.failUnlessEqual(s, {self.edge_2})
+		s = set(self.g.search_edges(end=self.node_2))
+		self.failUnlessEqual(s, {self.edge_1})
+		s = set(self.g.search_edges(start=self.node_4))
+		self.failUnlessEqual(s, {self.edge_3, self.edge_4})
+		s = set(self.g.search_edges(distance=50))
+		self.failUnlessEqual(s, {self.edge_1, self.edge_2})
+		s = set(self.g.search_edges(distance=50, friends=True))
+		self.failUnlessEqual(s, {self.edge_1})
+		
 
 class EdgeMovementTest(unittest.TestCase):
 
