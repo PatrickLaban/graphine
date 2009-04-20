@@ -2111,11 +2111,6 @@ class ThreeNodeCycleTest(unittest.TestCase):
 		self.failUnless(Edge(self.B, self.C, "BC") in self.g)
 		self.failUnless(Edge(self.C, self.A, "CA") in self.g)
 		# test a bad node and node name
-		self.failUnlessRaises(KeyError, self.g.__contains__, Node("D"))
-		self.failUnlessRaises(KeyError, self.g.__contains__, "D")
-		# test a bad edge and edge name
-		self.failUnlessRaises(KeyError, self.g.__contains__, Edge(Node("A"), Node("C"), "AC"))
-		self.failUnlessRaises(KeyError, self.g.__contains__, "AC")
 
 	def testGetItem(self):
 		# test the three nodes and three edges
@@ -2204,6 +2199,339 @@ class ThreeNodeCycleTest(unittest.TestCase):
 		self.failUnlessEqual(G < self.g, False)
 		self.failUnlessEqual(G > self.g, False)
 		self.failIfEqual(G, self.g)
+
+	def testSearchNodes(self):
+		self.failUnlessEqual(set(self.g.search_nodes(name="A")), {self.A})
+		self.failUnlessEqual(set(self.g.search_nodes(name="B")), {self.B})
+		self.failUnlessEqual(set(self.g.search_nodes(name="C")), {self.C})
+		self.failUnlessEqual(set(self.g.search_nodes(name="D")), set())
+		self.failUnlessEqual(set(self.g.search_nodes(value=5)), set())
+
+	def testSearchEdges(self):
+		self.failUnlessEqual(set(self.g.search_edges(name="AB")), {self.AB})
+		self.failUnlessEqual(set(self.g.search_edges(name="BC")), {self.BC})
+		self.failUnlessEqual(set(self.g.search_edges(name="CA")), {self.CA})
+		self.failUnlessEqual(set(self.g.search_edges(start="A")), {self.AB})
+		self.failUnlessEqual(set(self.g.search_edges(start=self.A)), {self.AB})
+		self.failUnlessEqual(set(self.g.search_edges(end="A")), {self.CA})
+		self.failUnlessEqual(set(self.g.search_edges(end=self.C)), {self.BC})
+		self.failUnlessEqual(set(self.g.search_edges(name="AB", start="A", end="B")), {self.AB})
+		self.failUnlessEqual(list(self.g.search_edges(name="AA", start=self.A, end=self.A)), [])
+
+	def testGetCommonEdges(self):
+		# test each actual path
+		self.failUnlessEqual(self.g.get_common_edges(self.A, self.B), {self.AB})
+		self.failUnlessEqual(self.g.get_common_edges("A", "B"), {self.AB})
+		self.failUnlessEqual(self.g.get_common_edges(Node("A"), Node("B")), {self.AB})
+		self.failUnlessEqual(self.g.get_common_edges(self.B, self.C), {self.BC})
+		self.failUnlessEqual(self.g.get_common_edges("B", "C"), {self.BC})
+		self.failUnlessEqual(self.g.get_common_edges(Node("B"), Node("C")), {self.BC})
+		self.failUnlessEqual(self.g.get_common_edges(self.C, self.A), {self.CA})
+		self.failUnlessEqual(self.g.get_common_edges("C", "A"), {self.CA})
+		self.failUnlessEqual(self.g.get_common_edges(Node("C"), Node("A")), {self.CA})
+		# now test them backwards
+		self.failUnlessEqual(self.g.get_common_edges(self.B, self.A), {self.AB})
+		self.failUnlessEqual(self.g.get_common_edges("B", "A"), {self.AB})
+		self.failUnlessEqual(self.g.get_common_edges(Node("B"), Node("A")), {self.AB})
+		self.failUnlessEqual(self.g.get_common_edges(self.C, self.B), {self.BC})
+		self.failUnlessEqual(self.g.get_common_edges("C", "B"), {self.BC})
+		self.failUnlessEqual(self.g.get_common_edges(Node("C"), Node("B")), {self.BC})
+		self.failUnlessEqual(self.g.get_common_edges(self.C, self.A), {self.CA})
+		self.failUnlessEqual(self.g.get_common_edges("A", "C"), {self.CA})
+		self.failUnlessEqual(self.g.get_common_edges(Node("A"), Node("C")), {self.CA})
+		# test bad start node
+		self.failUnlessRaises(KeyError, self.g.get_common_edges, "D", "B")
+		self.failUnlessRaises(KeyError, self.g.get_common_edges, Node("D"), "B")
+		# test bad end node
+		self.failUnlessRaises(KeyError, self.g.get_common_edges, "A", "D")
+		self.failUnlessRaises(KeyError, self.g.get_common_edges, "A", Node("D"))
+
+	def testWalkNodes(self):
+		w = self.g.walk_nodes(self.A)
+		iteration = 0
+		for candidates in w:
+			if iteration < 5:
+				iteration += 1
+				self.failUnlessEqual(candidates, [self.A])
+				w.send(candidates.pop())
+			else:
+				break
+		w = self.g.walk_nodes("A")
+		iteration = 0
+		for candidates in w:
+			if iteration < 5:
+				iteration += 1
+				self.failUnlessEqual(candidates, [self.A])
+				w.send(candidates.pop())
+			else:
+				break
+		w1 = self.g.walk_nodes("B")
+		w2 = self.g.walk_nodes(Node("B"))
+		self.failUnlessRaises(KeyError, next, w1)
+		self.failUnlessRaises(KeyError, next, w2)
+
+	def testWalkEdges(self):
+		w = self.g.walk_edges(self.AB)
+		iteration = 0
+		for candidates in w:
+			if iteration < 5:
+				iteration += 1
+				self.failUnlessEqual(candidates, [self.BC])
+				w.send(candidates.pop())
+			else:
+				break
+		w = self.g.walk_edges("AB")
+		iteration = 0
+		for candidates in w:
+			if iteration < 5:
+				iteration += 1
+				self.failUnlessEqual(candidates, [self.BC])
+				w.send(candidates.pop())
+			else:
+				break
+		w1 = self.g.walk_edges("CB")
+		w2 = self.g.walk_edges(Node("CB"))
+		self.failUnlessRaises(KeyError, next, w1)
+		self.failUnlessRaises(KeyError, next, w2)
+
+	def testHeuristicWalk(self):
+		class Heuristic:
+			def __init__(self):
+				self.iterations = 0
+				self.iter_max = 5
+			def __call__(self, candidates):
+				if self.iterations < self.iter_max:
+					if candidates:
+						self.iterations += 1
+						return candidates.pop()
+				return None
+		self.failUnlessEqual(list(self.g.heuristic_walk(self.A, Heuristic())), [self.B, self.C, self.A, self.B, self.C])
+		self.failUnlessEqual(list(self.g.heuristic_walk("A", Heuristic())), [self.B, self.C, self.A, self.B, self.C])
+		self.failUnlessEqual(list(self.g.heuristic_walk(self.A, Heuristic(), reverse=True)), [self.B, self.C, self.A, self.B, self.C].reverse())
+		self.failUnlessEqual(list(self.g.heuristic_walk("A", Heuristic(), reverse=True)), [self.B, self.C, self.A, self.B, self.C].reverse())
+		self.failUnlessEqual(list(self.g.heuristic_walk(Node("A"), Heuristic(), reverse=True)), [self.B, self.C, self.A, self.B, self.C].reverse())
+		w = self.g.heuristic_walk("D", Heuristic())
+		w2 = self.g.heuristic_walk(Node("D"), Heuristic())
+		self.failUnlessRaises(KeyError, list, w)
+		self.failUnlessRaises(KeyError, list, w2)
+
+	def testHeuristicTraversal(self):
+		# should only yield one node, no matter what
+		self.failUnlessEqual(list(self.g.heuristic_traversal(self.A, lambda s: s.pop())), [self.A, self.B, self.C])
+		self.failUnlessEqual(list(self.g.heuristic_traversal("A", lambda s: s.pop())), [self.A, self.B, self.C])
+		self.failUnlessEqual(list(self.g.heuristic_traversal(self.A, lambda s: s.pop(0))), [self.A, self.B, self.C])
+		self.failUnlessEqual(list(self.g.heuristic_traversal("A", lambda s: s.pop(0))), [self.A, self.B, self.C])
+		self.failUnlessEqual(list(self.g.heuristic_traversal(Node("A"), lambda s: s.pop())), [self.A, self.B, self.C])
+		t = self.g.heuristic_traversal("D", lambda s: s.pop())
+		t2 = self.g.heuristic_traversal(Node("D"), lambda s: s.pop())
+		self.failUnlessRaises(KeyError, list, t)
+		self.failUnlessRaises(KeyError, list, t2)
+
+	def testDepthFirstTraversal(self):
+		# should only yield one node, no matter what
+		self.failUnlessEqual(list(self.g.depth_first_traversal(self.A)), [self.A, self.B, self.C])
+		self.failUnlessEqual(list(self.g.depth_first_traversal("A")), [self.A, self.B, self.C])
+		self.failUnlessEqual(list(self.g.depth_first_traversal(Node("A"))), [self.A, self.B, self.C])
+		t = self.g.depth_first_traversal("D")
+		t2 = self.g.depth_first_traversal(Node("D"))
+		self.failUnlessRaises(KeyError, list, t)
+		self.failUnlessRaises(KeyError, list, t2)
+
+	def testBreadthFirstTraversal(self):
+		# should only yield one node, no matter what
+		self.failUnlessEqual(list(self.g.breadth_first_traversal(self.A)), [self.A, self.B, self.C])
+		self.failUnlessEqual(list(self.g.breadth_first_traversal("A")), [self.A, self.B, self.C])
+		self.failUnlessEqual(list(self.g.breadth_first_traversal(Node("A"))), [self.A, self.B, self.C])
+		t = self.g.breadth_first_traversal("D")
+		t2 = self.g.breadth_first_traversal(Node("D"))
+		self.failUnlessRaises(KeyError, list, t)
+		self.failUnlessRaises(KeyError, list, t2)
+
+	def testGetConnectedComponents(self):
+		self.failUnlessEqual(list(self.g.get_connected_components()), [{self.A, self.B, self.C}])
+
+	def testGetStronglyConnected(self):
+		self.failUnlessEqual(list(self.g.get_strongly_connected()), [{self.A, self.B, self.C}])
+
+	def testGetShortestPaths(self):
+		self.failUnlessEqual(self.g.get_shortest_paths(self.A), {self.A: (0, [])})
+		self.failUnlessEqual(self.g.get_shortest_paths("A"), {self.A: (0, [])})
+		self.failUnlessEqual(self.g.get_shortest_paths(Node("A")), {self.A: (0, [])})
+		self.failUnlessRaises(KeyError, self.g.get_shortest_paths, Node("B"))
+		self.failUnlessRaises(KeyError, self.g.get_shortest_paths, "B")
+
+	def testOrder(self):
+		self.failUnlessEqual(self.g.order(), 3)
+
+	def testSize(self):
+		self.failUnlessEqual(self.g.size(), 3)
+
+	def testEdgeContraction(self):
+		# in this case, it should delete two nodes and add one node
+		def node_initializer(x, y):
+			d = x.data
+			d["name"] = x.name + "2"
+			return d
+		n = self.g.contract_edge(self.AB, node_initializer)
+		# make sure that the new node is data equivalent
+		self.failUnlessEqual(self.A.data, n.data)
+		# make sure its name is related as specified
+		self.failUnlessEqual(n.name, self.A.name + "2")
+		self.failUnlessEqual(self.g.order(), 2)
+		self.failUnlessEqual(self.g.size(), 2)
+		# test it on a bad edge
+		self.failUnlessRaises(KeyError, self.g.contract_edge, "BB", lambda x, y: dict())
+		self.failUnlessRaises(KeyError, self.g.contract_edge, Edge("A", "B"), lambda x, y: dict())
+
+	def testTranspose(self):
+		tmp = copy.copy(self.g)
+		tmp.transpose()
+		self.failUnlessEqual((set(self.g.nodes), set(self.g.edges)), (set(tmp.nodes), set(tmp.edges)))
+
+	def testInduceSubgraph(self):
+		# test it without nodes
+		g1 = self.g.induce_subgraph()
+		self.failUnlessEqual(list(g1.nodes), [])
+		self.failUnlessEqual(list(g1.edges), [])
+		# test it with node A
+		g1 = self.g.induce_subgraph(self.A)
+		self.failUnlessEqual(list(g1.nodes), [self.A])
+		self.failUnlessEqual(list(g1.edges), [])
+		# test it with nodes A and B
+		# test it with nodes B and C
+		# test it with nodes C and A
+		# test it with a bad node
+		self.failUnlessRaises(KeyError, self.g.induce_subgraph, Node("D"))
+		# test it with a bad label
+		self.failUnlessRaises(KeyError, self.g.induce_subgraph, "D")
+
+	def testEdgeInduceSubgraph(self):
+		# test it without nodes
+		g1 = self.g.edge_induce_subgraph()
+		self.failUnlessEqual(list(g1.nodes), [])
+		self.failUnlessEqual(list(g1.edges), [])
+		# test it with edge AB
+		g1 = self.g.edge_induce_subgraph(self.AB)
+		self.failUnlessEqual(set(g1.nodes), {self.A, self.B})
+		self.failUnlessEqual(list(g1.edges), [self.AB])
+		# test it with edge BC
+		# test it with edge CA
+		# test it with edges AB and BC
+		# test it with edges BC and CA
+		# test it with edges CA and AB
+		# test it with a bad edge
+		self.failUnlessRaises(KeyError, self.g.edge_induce_subgraph, Edge("A", "C"))
+		# test it with a bad label
+		self.failUnlessRaises(KeyError, self.g.edge_induce_subgraph, "D")
+
+	def testUnion(self):
+		# test it on ourselves
+		G = self.g | self.g
+		self.failUnlessEqual((set(self.g.nodes), set(self.g.edges)), (set(G.nodes), set(G.edges)))
+		# test it on a graph with one node with a loop
+		G = Graph()
+		G.add_node(1)
+		G.add_edge(1, 1, 11)
+		G2 = self.g | G
+		self.failUnlessEqual((set(self.g.nodes) | set(G.nodes), set(self.g.edges) | set(G.edges)), (set(G2.nodes), set(G2.edges)))
+		# test it on a graph with two nodes
+		G = Graph()
+		G.add_node(1)
+		G.add_node(2)
+		G2 = self.g | G
+		self.failUnlessEqual((set(self.g.nodes) | set(G.nodes), set(self.g.edges) | set(G.edges)), (set(G2.nodes), set(G2.edges)))		
+		# test it on a graph with three nodes in a directed cycle
+		G = Graph()
+		G.add_node(1)
+		G.add_node(2)
+		G.add_node(3)
+		G.add_edge(1, 2, (1,2))
+		G.add_edge(2, 3, (2,3))
+		G.add_edge(3, 1, (3,1))
+		G2 = self.g | G
+		self.failUnlessEqual((set(self.g.nodes) | set(G.nodes), set(self.g.edges) | set(G.edges)), (set(G2.nodes), set(G2.edges)))
+		# test it on a graph with five nodes in an undirected cycle
+		G = Graph()
+		for i in range(5):
+			G.add_node(i)
+		for i in range(5):
+			j = (i + 1) % 5
+			G.add_edge(i, j, (i,j))
+		G2 = self.g | G
+		self.failUnlessEqual((set(self.g.nodes) | set(G.nodes), set(self.g.edges) | set(G.edges)), (set(G2.nodes), set(G2.edges)))
+
+	def testIntersection(self):
+		# test it on ourselves
+		G = self.g & self.g
+		self.failUnlessEqual((set(self.g.nodes), set(self.g.edges)), (set(G.nodes), set(G.edges)))
+		# test it on a graph with one node with a loop
+		G = Graph()
+		G.add_node(1)
+		G.add_edge(1, 1, 11)
+		G2 = self.g & G
+		self.failUnlessEqual((set(self.g.nodes) & set(G.nodes), set(self.g.edges) & set(G.edges)), (set(G2.nodes), set(G2.edges)))
+		# test it on a graph with two nodes
+		G = Graph()
+		G.add_node(1)
+		G.add_node(2)
+		G2 = self.g & G
+		self.failUnlessEqual((set(self.g.nodes) & set(G.nodes), set(self.g.edges) & set(G.edges)), (set(G2.nodes), set(G2.edges)))		
+		# test it on a graph with three nodes in a directed cycle
+		G = Graph()
+		G.add_node(1)
+		G.add_node(2)
+		G.add_node(3)
+		G.add_edge(1, 2, (1,2))
+		G.add_edge(2, 3, (2,3))
+		G.add_edge(3, 1, (3,1))
+		G2 = self.g & G
+		self.failUnlessEqual((set(self.g.nodes) & set(G.nodes), set(self.g.edges) & set(G.edges)), (set(G2.nodes), set(G2.edges)))
+		# test it on a graph with five nodes in an undirected cycle
+		G = Graph()
+		for i in range(5):
+			G.add_node(i)
+		for i in range(5):
+			j = (i + 1) % 5
+			G.add_edge(i, j, (i,j))
+		G2 = self.g & G
+		self.failUnlessEqual((set(self.g.nodes) & set(G.nodes), set(self.g.edges) & set(G.edges)), (set(G2.nodes), set(G2.edges)))
+
+	def testDifference(self):
+		# test it on ourselves
+		G = self.g - self.g
+		self.failUnlessEqual((set(G.nodes), set(G.edges)), (set(), set()))
+		# test it on a graph with one node with a loop
+		G = Graph()
+		G.add_node(1)
+		G.add_edge(1, 1, 11)
+		G2 = self.g - G
+		self.failUnlessEqual((set(self.g.nodes) - set(G.nodes), set(self.g.edges) - set(G.edges)), (set(G2.nodes), set(G2.edges)))
+		# test it on a graph with two nodes
+		G = Graph()
+		G.add_node(1)
+		G.add_node(2)
+		G2 = self.g - G
+		self.failUnlessEqual((set(self.g.nodes) - set(G.nodes), set(self.g.edges) - set(G.edges)), (set(G2.nodes), set(G2.edges)))		
+		# test it on a graph with three nodes in a directed cycle
+		G = Graph()
+		G.add_node(1)
+		G.add_node(2)
+		G.add_node(3)
+		G.add_edge(1, 2, (1,2))
+		G.add_edge(2, 3, (2,3))
+		G.add_edge(3, 1, (3,1))
+		G2 = self.g - G
+		self.failUnlessEqual((set(self.g.nodes) - set(G.nodes), set(self.g.edges) - set(G.edges)), (set(G2.nodes), set(G2.edges)))
+		# test it on a graph with five nodes in an undirected cycle
+		G = Graph()
+		for i in range(5):
+			G.add_node(i)
+		for i in range(5):
+			j = (i + 1) % 5
+			G.add_edge(i, j, (i,j))
+		G2 = self.g - G
+		self.failUnlessEqual((set(self.g.nodes) - set(G.nodes), set(self.g.edges) - set(G.edges)), (set(G2.nodes), set(G2.edges)))
+
 
 #################################################################################################################################
 #							PERFORMANCE TESTS							#
@@ -2321,6 +2649,7 @@ if __name__ == "__main__":
 	OneNodeDoubleUndirectedTest = unittest.TestLoader().loadTestsFromTestCase(OneNodeDoubleUndirectedTest)
 	OneNodeDoubleDirectedTest = unittest.TestLoader().loadTestsFromTestCase(OneNodeDoubleDirectedTest)
 	TwoNodeUnconnectedTest = unittest.TestLoader().loadTestsFromTestCase(TwoNodeUnconnectedTest)
+	ThreeNodeCycleTest = unittest.TestLoader().loadTestsFromTestCase(ThreeNodeCycleTest)
 	RemovalTest = unittest.TestLoader().loadTestsFromTestCase(RemovalTest)
 	OverwriteTest = unittest.TestLoader().loadTestsFromTestCase(OverwriteTest)
 	suites = [GraphCorrectnessTest, NodeCreationTest, EdgeCreationTest, GraphPropertiesTest, GraphSearchTest, EdgeMovementTest, GetElementsTest]
@@ -2330,5 +2659,6 @@ if __name__ == "__main__":
 	suites += [OneNodeDoubleUndirectedTest]
 	suites += [OneNodeDoubleDirectedTest]
 	suites += [TwoNodeUnconnectedTest]
+	suites += [ThreeNodeCycleTest]
 	CorrectnessTest = unittest.TestSuite(suites)
 	unittest.main()

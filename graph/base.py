@@ -830,8 +830,8 @@ class Graph:
 		# get the actual nodes if names are passed in
 		n1 = self.get_element(n1)
 		n2 = self.get_element(n2)
-		n1_edges = set(n1.incoming + n1.outgoing)
-		n2_edges = set(n2.incoming + n2.outgoing)
+		n1_edges = set(n1.edges)
+		n2_edges = set(n2.edges)
 		return n1_edges & n2_edges
 
 	def walk_nodes(self, start, reverse=False):
