@@ -2045,6 +2045,133 @@ class TwoNodeUnconnectedTest(unittest.TestCase):
 		self.failIfEqual(G, self.g)
 
 
+class ThreeNodeCycleTest(unittest.TestCase):
+
+	def setUp(self):
+		self.g = Graph()
+		self.A = self.g.add_node("A")
+		self.B = self.g.add_node("B")
+		self.C = self.g.add_node("C")
+		self.AB = self.g.add_edge("A", "B", "AB")
+		self.BC = self.g.add_edge("B", "C", "BC")
+		self.CA = self.g.add_edge("C", "A", "CA")
+
+	def testIn(self):
+		# test the three nodes and three edges
+		self.failUnless(self.A in self.g)
+		self.failUnless("A" in self.g)
+		self.failUnless(self.B in self.g)
+		self.failUnless("B" in self.g)
+		self.failUnless(self.C in self.g)
+		self.failUnless("C" in self.g)
+		self.failUnless(self.AB in self.g)
+		self.failUnless("AB" in self.g)
+		self.failUnless(self.BC in self.g)
+		self.failUnless("BC" in self.g)
+		self.failUnless(self.CA in self.g)
+		self.failUnless("CA" in self.g)
+		self.failUnless(Node("A") in self.g)
+		self.failUnless(Node("B") in self.g)
+		self.failUnless(Node("C") in self.g)
+		self.failUnless(Edge(self.A, self.B, "AB") in self.g)
+		self.failUnless(Edge(self.B, self.C, "BC") in self.g)
+		self.failUnless(Edge(self.C, self.A, "CA") in self.g)
+		# test a bad node and node name
+		self.failUnlessRaises(KeyError, self.g.__contains__, Node("D"))
+		self.failUnlessRaises(KeyError, self.g.__contains__, "D")
+		# test a bad edge and edge name
+		self.failUnlessRaises(KeyError, self.g.__contains__, Edge(Node("A"), Node("C"), "AC"))
+		self.failUnlessRaises(KeyError, self.g.__contains__, "AC")
+
+	def testGetItem(self):
+		# test the three nodes and three edges
+		self.failUnless(self.g[self.A] is self.A)
+		self.failUnless(self.g[self.B] is self.B)
+		self.failUnless(self.g[self.C] is self.C)
+		self.failUnless(self.g[self.AB] is self.AB)
+		self.failUnless(self.g[self.BC] is self.BC)
+		self.failUnless(self.g[self.CA] is self.CA)
+		self.failUnless(self.g["A"] is self.A)
+		self.failUnless(self.g["B"] is self.B)
+		self.failUnless(self.g["C"] is self.C)
+		self.failUnless(self.g["AB"] is self.AB)
+		self.failUnless(self.g["BC"] is self.BC)
+		self.failUnless(self.g["CA"] is self.CA)
+		self.failUnless(self.g[Node("A")] is self.A)
+		self.failUnless(self.g[Node("B")] is self.B)
+		self.failUnless(self.g[Node("C")] is self.C)
+		self.failUnless(self.g[Edge(self.A, self.B, "AB")] is self.AB)
+		self.failUnless(self.g[Edge(self.B, self.C, "BC")] is self.BC)
+		self.failUnless(self.g[Edge(self.C, self.A, "CA")] is self.CA)
+		# test the bad node case
+		self.failUnlessRaises(KeyError, self.g.__getitem__, Node("D"))
+		self.failUnlessRaises(KeyError, self.g.__getitem__, "D")
+		# and the bad edge case
+		self.failUnlessRaises(KeyError, self.g.__getitem__, Edge(self.B, self.A, "BA"))
+		self.failUnlessRaises(KeyError, self.g.__getitem__, "BA")
+
+	def testContains(self):
+		# test it on the zero node case
+		G = Graph()
+		self.failUnlessEqual(self.g.contains(G), True)
+		self.failUnlessEqual(self.g > G, True)
+		self.failUnlessEqual(self.g < G, False)
+		self.failUnlessEqual(G < self.g, True)
+		self.failUnlessEqual(G > self.g, False)
+		self.failIfEqual(G, self.g)
+		# test it on a graph with one node with a loop
+		G = Graph()
+		G.add_node("A")
+		G.add_edge("A", "A", "AA")
+		self.failUnlessEqual(self.g.contains(G), False)
+		self.failUnlessEqual(G.contains(self.g), False)
+		self.failUnlessEqual(self.g < G, False)
+		self.failUnlessEqual(self.g > G, False)
+		self.failUnlessEqual(G < self.g, False)
+		self.failUnlessEqual(G > self.g, False)
+		self.failIfEqual(G, self.g)
+		# test it on a graph with two nodes
+		G = Graph()
+		G.add_node("A")
+		G.add_node("B")
+		self.failUnlessEqual(self.g.contains(G), True)
+		self.failUnlessEqual(G.contains(self.g), False)
+		self.failUnlessEqual(self.g < G, False)
+		self.failUnlessEqual(self.g > G, True)
+		self.failUnlessEqual(G < self.g, True)
+		self.failUnlessEqual(G > self.g, False)
+		self.failUnlessEqual(G, self.g)
+		# test it on a graph with three nodes in a directed cycle
+		G = Graph()
+		G.add_node("A")
+		G.add_node("B")
+		G.add_node("C")
+		G.add_edge("A", "B", "AB")
+		G.add_edge("B", "C", "BC")
+		G.add_edge("C", "A", "AC")
+		self.failUnlessEqual(self.g.contains(G), True)
+		self.failUnlessEqual(G.contains(self.g), True)
+		self.failUnlessEqual(self.g < G, False)
+		self.failUnlessEqual(self.g > G, False)
+		self.failUnlessEqual(G < self.g, False)
+		self.failUnlessEqual(G > self.g, False)
+		self.failIfEqual(G, self.g)
+		# test it on a graph with five nodes in an undirected cycle
+		G = Graph()
+		for i in range(5):
+			G.add_node(i)
+		for i in range(5):
+			j = (i + 1) % 5
+			G.add_edge(i, j, (i,j))
+		self.failUnlessEqual(self.g.contains(G), False)
+		self.failUnlessEqual(G.contains(self.g), False)
+		self.failUnlessEqual(self.g < G, False)
+		self.failUnlessEqual(self.g > G, False)
+		self.failUnlessEqual(G < self.g, False)
+		self.failUnlessEqual(G > self.g, False)
+		self.failIfEqual(G, self.g)
+
+
 class GraphPerformanceTest(unittest.TestCase):
 
 	graph_setup = "from base import Graph; g = Graph(); n = g.add_node(first_name='');"
