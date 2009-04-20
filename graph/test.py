@@ -2385,11 +2385,11 @@ class ThreeNodeCycleTest(unittest.TestCase):
 		self.failUnlessEqual(list(self.g.get_strongly_connected()), [{self.A, self.B, self.C}])
 
 	def testGetShortestPaths(self):
-		self.failUnlessEqual(self.g.get_shortest_paths(self.A), {self.A: (0, [])})
-		self.failUnlessEqual(self.g.get_shortest_paths("A"), {self.A: (0, [])})
-		self.failUnlessEqual(self.g.get_shortest_paths(Node("A")), {self.A: (0, [])})
-		self.failUnlessRaises(KeyError, self.g.get_shortest_paths, Node("B"))
-		self.failUnlessRaises(KeyError, self.g.get_shortest_paths, "B")
+		self.failUnlessEqual(self.g.get_shortest_paths(self.A), {self.A: (0, []), self.B: (1, [self.AB]), self.C: (2, [self.AB, self.BC])})
+		self.failUnlessEqual(self.g.get_shortest_paths("A"), {self.A: (0, []), self.B: (1, [self.AB]), self.C: (2, [self.AB, self.BC])})
+		self.failUnlessEqual(self.g.get_shortest_paths(Node("A")), {self.A: (0, []), self.B: (1, [self.AB]), self.C: (2, [self.AB, self.BC])})
+		self.failUnlessRaises(KeyError, self.g.get_shortest_paths, Node("D"))
+		self.failUnlessRaises(KeyError, self.g.get_shortest_paths, "D")
 
 	def testOrder(self):
 		self.failUnlessEqual(self.g.order(), 3)
