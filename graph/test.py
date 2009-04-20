@@ -253,6 +253,9 @@ class OverwriteTest(unittest.TestCase):
 		self.node_3 = self.g.add_node("node1")
 		self.failUnlessEqual(set(self.g.nodes), {self.node_3, self.node_2})
 		self.failUnlessEqual(set(self.g.edges), {self.edge_2})
+		self.node_4 = self.g.add_node("node2")
+		self.failUnlessEqual(set(self.g.nodes), {self.node_3, self.node_4})
+		self.failUnlessEqual(set(self.g.edges), set())
 		self.failUnlessEqual(self.node_1.edges, [])
 		self.failUnlessEqual(self.node_1.incoming, [])
 		self.failUnlessEqual(self.node_1.outgoing, [])
@@ -264,6 +267,16 @@ class OverwriteTest(unittest.TestCase):
 		self.failUnlessEqual(self.node_1.outgoing, [])
 		self.failUnlessEqual(self.node_1.bidirectional, [])
 
+	def testOverwriteEdge(self):
+		self.node_3 = self.g.add_node("node3")
+		self.edge_3 = self.g.add_edge(self.node_1, self.node_3, "edge3")
+		self.edge_4 = self.g.add_edge(self.node_2, self.node_1, "edge3")
+		self.failUnlessEqual(set(self.g.nodes), {self.node_3, self.node_1, self.node_2})
+		self.failUnlessEqual(set(self.g.edges), {self.edge_2, self.edge_3, self.edge_1})
+		self.failUnlessEqual(self.node_3.edges, [])
+		self.failUnlessEqual(self.node_3.incoming, [])
+		self.failUnlessEqual(self.node_3.outgoing, [])
+		self.failUnlessEqual(self.node_3.bidirectional, [])	
 	
 
 class GraphPropertiesTest(unittest.TestCase):
