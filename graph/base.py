@@ -770,12 +770,12 @@ class Graph:
 	#########################################################################
 
 	def search_nodes(self, **kwargs):
-		"""Convenience function to get nodes based on some properties.
+		""" Convenience function to get nodes based on some properties.
 
 		Usage:
 			>>> g = Graph()
-			>>> n1 = g.add_node(name="bob")
-			>>> n2 = g.add_node(name="bill")
+			>>> n1 = g.add_node("bob")
+			>>> n2 = g.add_node("bill")
 			>>> for node in g.search_nodes(name="bob"):
 			... 	print(node)
 			Node(name="bob")
@@ -1151,7 +1151,7 @@ class Graph:
 	def move_edge(self, edge, start=None, end=None):
 		"""Moves the edge, leaving its data intact.
 
-		Does not reverse direction.
+		Can not be used to change a directed edge into an undirected edge.
 		"""
 		# get the edge if its a name
 		edge = self.get_element(edge)
