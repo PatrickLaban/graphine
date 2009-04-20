@@ -404,19 +404,33 @@ class EdgeMovementTest(unittest.TestCase):
 
 	def setUp(self):
 		self.g = Graph()
-		self.geremy = self.g.add_node(first_name="Geremy")
-		self.bill = self.g.add_node(first_name="Bill")
-		self.bob = self.g.add_node(first_name="Bob")
-		self.tom = self.g.add_node(first_name="Tom")
-		self.e = self.g.add_edge(self.geremy, self.bob, first_name="people")
+		self.node_1 = self.g.add_node("node1", first_name="Bob", last_name="Bobson")
+		self.node_2 = self.g.add_node("node2", first_name="Tom", last_name="Tompson")
+		self.node_3 = self.g.add_node("node3", first_name="Bill", last_name="Billson")
+		self.edge_1 = self.g.add_edge(self.node_1, self.node_2, "edge1", distance=50, friends=True)
+		self.edge_2 = self.g.add_edge(self.node_1, self.node_3, "edge2", False, distance=50, friends=False)
+		self.edge_3 = self.g.add_edge(self.node_3, self.node_3, "edge3", False, distance=0, friends=False)
 
 	def testEdgeMoving(self):
-		e2 = self.g.move_edge(self.e, start=self.bill, end=self.tom)
-		self.failUnless(self.e is e2)
-		self.failUnlessEqual(self.e, e2)
-		self.failUnlessEqual(e2.first_name, "people")
-		self.failUnlessEqual(e2.start, self.bill)
-		self.failUnlessEqual(e2.end, self.tom)
+		# test the behavior of edge movement
+		self.g.move_edge("edge1")
+		self.failUnlessEqual(self.edge_1.start, self.node_1)
+		self.failUnlessEqual(self.edge_1.end, self.node_2)
+		self.g.move_edge("edge1", self.node_2, self.node_1)
+		self.failUnlessEqual(self.edge_1.start, self.node_2)
+		self.failUnlessEqual(self.edge_1.end, self.node_1)
+		self.g.move_edge("edge2", self.node_2, self.node_3)
+		self.failUnlessEqual(self.edge_2.start, self.node_2)
+		self.failUnlessEqual(self.edge_2.end, self.node_3)
+		self.g.move_edge("edge3", self.node_1, self.node_2)
+		self.failUnlessEqual(self.edge_3.start, self.node_1)
+		self.failUnlessEqual(self.edge_3.end, self.node_2)
+		self.failUnlessEqual(set(self.node_1.incoming), {self.edge_1, self.edge_3})
+		self.failUnlessEqual(set(self.node_1.outgoing), {self.edge_3})
+		self.failUnlessEqual(set(self.node_2.incoming), {self.edge_2, self.edge_3})
+		self.failUnlessEqual(set(self.node_2.outgoing), {self.edge_2, self.edge_1, self.edge_3})
+		self.failUnlessEqual(set(self.node_3.incoming), {self.edge_2})
+		self.failUnlessEqual(set(self.node_3.outgoing), {self.edge_2})
 
 
 class GetElementsTest(unittest.TestCase):
