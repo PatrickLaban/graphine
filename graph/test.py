@@ -2333,11 +2333,14 @@ class ThreeNodeCycleTest(unittest.TestCase):
 						self.iterations += 1
 						return candidates.pop()
 				return None
-		self.failUnlessEqual(list(self.g.heuristic_walk(self.A, Heuristic())), [self.B, self.C, self.A, self.B, self.C])
-		self.failUnlessEqual(list(self.g.heuristic_walk("A", Heuristic())), [self.B, self.C, self.A, self.B, self.C])
-		self.failUnlessEqual(list(self.g.heuristic_walk(self.A, Heuristic(), reverse=True)), [self.B, self.C, self.A, self.B, self.C].reverse())
-		self.failUnlessEqual(list(self.g.heuristic_walk("A", Heuristic(), reverse=True)), [self.B, self.C, self.A, self.B, self.C].reverse())
-		self.failUnlessEqual(list(self.g.heuristic_walk(Node("A"), Heuristic(), reverse=True)), [self.B, self.C, self.A, self.B, self.C].reverse())
+		correct_cycle = [self.B, self.C, self.A, self.B, self.C]
+		reverse_cycle = copy.copy(correct_cycle)
+		reverse_cycle.reverse()
+		self.failUnlessEqual(list(self.g.heuristic_walk(self.A, Heuristic())), correct_cycle)
+		self.failUnlessEqual(list(self.g.heuristic_walk("A", Heuristic())), correct_cycle)
+		self.failUnlessEqual(list(self.g.heuristic_walk(self.A, Heuristic(), reverse=True)), reverse_cycle)
+		self.failUnlessEqual(list(self.g.heuristic_walk("A", Heuristic(), reverse=True)), reverse_cycle)
+		self.failUnlessEqual(list(self.g.heuristic_walk(Node("A"), Heuristic(), reverse=True)), reverse_cycle)
 		w = self.g.heuristic_walk("D", Heuristic())
 		w2 = self.g.heuristic_walk(Node("D"), Heuristic())
 		self.failUnlessRaises(KeyError, list, w)
