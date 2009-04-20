@@ -1424,7 +1424,7 @@ class Graph:
 
 		Comparison is based on names, and compares both nodes and edges.
 		"""
-		if set(self._nodes.keys()).issuperset(other._nodes.keys()):
-			if set(self._edges.keys()).issuperset(other._edges.keys()):
+		if set(self.nodes).issuperset(other.nodes):
+			if set(self.edges).issuperset(other.edges):
 				return True
 		return False
