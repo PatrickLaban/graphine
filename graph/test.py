@@ -2273,12 +2273,13 @@ class ThreeNodeCycleTest(unittest.TestCase):
 		self.failUnlessRaises(KeyError, self.g.get_common_edges, "A", Node("D"))
 
 	def testWalkNodes(self):
+		correctCycle = [self.B, self.C, self.A, self.B, self.C]
 		w = self.g.walk_nodes(self.A)
 		iteration = 0
 		for candidates in w:
 			if iteration < 5:
+				self.failUnlessEqual(candidates, [correctCycle[iteration]])
 				iteration += 1
-				self.failUnlessEqual(candidates, [self.A])
 				w.send(candidates.pop())
 			else:
 				break
@@ -2286,13 +2287,13 @@ class ThreeNodeCycleTest(unittest.TestCase):
 		iteration = 0
 		for candidates in w:
 			if iteration < 5:
+				self.failUnlessEqual(candidates, [correctCycle[iteration]])
 				iteration += 1
-				self.failUnlessEqual(candidates, [self.A])
 				w.send(candidates.pop())
 			else:
 				break
-		w1 = self.g.walk_nodes("B")
-		w2 = self.g.walk_nodes(Node("B"))
+		w1 = self.g.walk_nodes("D")
+		w2 = self.g.walk_nodes(Node("D"))
 		self.failUnlessRaises(KeyError, next, w1)
 		self.failUnlessRaises(KeyError, next, w2)
 
