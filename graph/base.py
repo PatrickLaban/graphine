@@ -660,14 +660,6 @@ class Edge(GraphElement):
 				return self.start
 		raise AttributeError("%s has no endpoint opposite to %s" % (self, starting_point))
 
-	def unlink(self):
-		"""Allows a structural comparison between edges."""
-		direction = ("direction", self.is_directed)
-		start = ("start", self.start.name)
-		end = ("end", self.end.name)
-		name = ("name", self.name)
-		return frozenset((direction, start, end, name))
-		
 	@property
 	def start(self):
 		"""Returns the starting point for this edge."""
