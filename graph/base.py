@@ -682,7 +682,12 @@ class Graph:
 
 	In graph theoretic terms, this represents a bridge multigraph.
 	This means that it supports both directed and undirected edges,
-	loops, parallel and identical edges, and identical nodes.
+	loops, and parallel edges.
+
+	Note that element names must be unique within this graph; non
+	unique element names between graphs are not only allowable, but
+	encouraged if you wish for those elements to compare equally
+	between graphs.
 
 	Because of its generality, it is suitable as a general-purpose
 	Graph representation.
@@ -775,10 +780,12 @@ class Graph:
 
 	@property
 	def nodes(self):
+		"""Returns an iterator over all the nodes in the graph."""
 		return self._nodes.values()
 
 	@property
 	def edges(self):
+		"""Returns an iterator over all the edges in the graph."""
 		return self._edges.values()
 
 	#################################################################
@@ -828,8 +835,8 @@ class Graph:
 
 		Usage:
 			>>> g = Graph()
-			>>> g.add_node(weight=5)
-			Node(weight=5)
+			>>> g.add_node("bob", weight=5)
+			Node(name=bob, weight=5)
 		"""
 		# create the new node
 		node = self.Node(name, **kwargs)
@@ -956,10 +963,10 @@ class Graph:
 			>>> g = Graph()
 			>>> n1, n2 = g.add_node(), g.add_node()
 			>>> e1 = g.add_edge(n1, n2, weight=4)
-			>>> e2 = g.add_edge(n1, n2, weight=5)
+			>>> e2 = g.add_edge(n1, n2, "n1->n2", weight=5)
 			>>> for edge in g.search_edges(weight=5):
 			... 	print(edge)
-			Edge(weight=5)
+			Edge(name=n1->n2, weight=5)
 		"""
 		if "start" in kwargs:
 			kwargs["start"] = self.get_element(kwargs["start"])
@@ -986,7 +993,7 @@ class Graph:
 			>>> g = Graph()
 			>>> n1 = g.add_node()
 			>>> n2 = g.add_node()
-			>>> e = g.add_edge(n1, n2, name="fluffy")
+			>>> e = g.add_edge(n1, n2, "fluffy")
 			>>> g.get_common_edges(n1, n2)
 			{Edge(name="Fluffy")}
 		"""
@@ -1083,7 +1090,7 @@ class Graph:
 
 		Usage:
 			>>> g = Graph()
-			>>> n1, n2 = g.add_node(name="A"), g.add_node(name="B")
+			>>> n1, n2 = g.add_node("A"), g.add_node("B")
 			>>> e = g.add_edge(n1, n2)
 			>>> for node in g.a_star_traversal(n1, lambda s: s.pop()):
 			>>> 	print(node)
@@ -1117,8 +1124,8 @@ class Graph:
 
 		Usage:
 			>>> g = Graph()
-			>>> a, b = g.add_node(name="A"), g.add_node(name="B")
-			>>> c, d = g.add_node(name="C"), g.add_node(name="D")
+			>>> a, b = g.add_node("A"), g.add_node("B")
+			>>> c, d = g.add_node("C"), g.add_node("D")
 			>>> e1, e2 = g.add_edge(a, b), g.add_edge(a, c)
 			>>> e3, e4 = g.add_edge(b, d), g.add_edge(c, d)
 			>>> for node in g.depth_first_traversal(a):
@@ -1136,8 +1143,8 @@ class Graph:
 
 		Usage:
 			>>> g = Graph()
-			>>> a, b = g.add_node(name="A"), g.add_node(name="B")
-			>>> c, d = g.add_node(name="C"), g.add_node(name="D")
+			>>> a, b = g.add_node("A"), g.add_node("B")
+			>>> c, d = g.add_node("C"), g.add_node("D")
 			>>> e1, e2 = g.add_edge(a, b), g.add_edge(a, c)
 			>>> e3, e4 = g.add_edge(b, d), g.add_edge(c, d)
 			>>> for node in g.breadth_first_traversal(a):
@@ -1236,10 +1243,10 @@ class Graph:
 
 		Usage:
 			>>> g = Graph()
-			>>> n1 = g.add_node(name="A")
-			>>> n2 = g.add_node(name="B")
-			>>> n3 = g.add_node(name="C")
-			>>> n4 = g.add_node(name="D")
+			>>> n1 = g.add_node("A")
+			>>> n2 = g.add_node("B")
+			>>> n3 = g.add_node("C")
+			>>> n4 = g.add_node("D")
 			>>> e1 = g.add_edge(n1, n2, weight=10)
 			>>> e2 = g.add_edge(n1, n4, weight=1)
 			>>> e3 = g.add_edge(n2, n3, weight=1)
@@ -1314,7 +1321,7 @@ class Graph:
 	def move_edge(self, edge, start=None, end=None):
 		"""Moves the edge, leaving its data intact.
 
-		Can not be used to change a directed edge into an undirected edge.
+		Does not change a directed edge into an undirected edge.
 		"""
 		# get the edge if its a name
 		edge = self.get_element(edge)
@@ -1344,6 +1351,8 @@ class Graph:
 
 		node_data should be a callable that returns a dictionary.
 		That dictionary will be used to initialize the new node.
+
+		It returns the node so created.
 
 		There are two caveats about using this:
 
@@ -1392,9 +1401,9 @@ class Graph:
 		Set up your graph:
 
 			>>> enterprise = Graph()
-			>>> kirk = enterprise.add_node(name="kirk")
-			>>> spock = enterprise.add_node(name="spock")
-			>>> bones = enterprise.add_node(name="mccoy")
+			>>> kirk = enterprise.add_node("kirk")
+			>>> spock = enterprise.add_node("spock")
+			>>> bones = enterprise.add_node("mccoy")
 			>>> enterprise.add_edge(kirk, spock)
 			>>> enterprise.add_edge(kirk, bones)
 
@@ -1472,9 +1481,9 @@ class Graph:
 			>>> de = g2.add_edge(d, e, 4)
 			>>> ef = g2.add_edge(e, f, 6)
 			>>> g3 = g1 | g2
-			>>> [node.value for node in g3.nodes]
+			>>> [node.name for node in g3.nodes]
 			[1, 3, 5, 7]
-			>>> [edge.value for edge in g3.edges]
+			>>> [edge.name for edge in g3.edges]
 			[2, 4, 6]
 		"""
 		# create the graph
@@ -1495,20 +1504,20 @@ class Graph:
 		Usage:
 			>>> g1 = Graph()
 			>>> g2 = Graph()
-			>>> a = g1.add_node(value=1)
-			>>> b = g1.add_node(value=3)
-			>>> c = g1.add_node(value=5)
-			>>> ab = g1.add_edge(a, b, value=2)
-			>>> bc = g1.add_edge(b, c, value=4)
-			>>> d = g2.add_node(value=3)
-			>>> e = g2.add_node(value=5)
-			>>> f = g2.add_node(value=7)
-			>>> de = g2.add_edge(d, e, value=4)
-			>>> ef = g2.add_edge(e, f, value=6)
+			>>> a = g1.add_node(1)
+			>>> b = g1.add_node(3)
+			>>> c = g1.add_node(5)
+			>>> ab = g1.add_edge(a, b, 2)
+			>>> bc = g1.add_edge(b, c, 4)
+			>>> d = g2.add_node(3)
+			>>> e = g2.add_node(5)
+			>>> f = g2.add_node(7)
+			>>> de = g2.add_edge(d, e, 4)
+			>>> ef = g2.add_edge(e, f, 6)
 			>>> g3 = g1 & g2
-			>>> [node.value for node in g3.nodes]
+			>>> [node.name for node in g3.nodes]
 			[3, 5]
-			>>> [edge.value for edge in g3.edges]
+			>>> [edge.name for edge in g3.edges]
 			[4]
 		"""
 		# create the graph
@@ -1564,9 +1573,9 @@ class Graph:
 			>>> de = g2.add_edge(d, e, 4)
 			>>> ef = g2.add_edge(e, f, 6)
 			>>> g3 = g1 & g2
-			>>> [node.value for node in g3.nodes]
+			>>> [node.name for node in g3.nodes]
 			[1]
-			>>> [edge.value for edge in g3.edges]
+			>>> [edge.name for edge in g3.edges]
 			[]
 		"""
 		# create the graph
