@@ -606,17 +606,16 @@ class Node(GraphElement):
 class Edge(GraphElement):
 	"""Base edge representation.
 
-	Edges have two properties, start and end, which are
-	Node objects incident to the edge, as well as name
-	and data, inhierited from GraphElement, which provide
-	convenient access to the edge's application defined
-	attributes.
-
-	Because defining equality between edges in two different
-	graphs is ambiguous, the unlink() function is provided.
-	By default, this will produce an object suitable for
-	membership comparisons based on the edge's data,
-	direction, and the names of its endpoints.
+	Edges have five properties. 
+	- start, which is the starting node
+	- end, which is the end node
+	- is_directed, which indicates if the edge is 
+	  directed or undirected
+	- name, which is a unique, non-None value optionally
+	  passed in at instantiation time, and used for hashing
+	  comparisons
+	- data, which is a dictionary of all non-private
+	  (ie, user-defined) attributes of this node
 	"""
 
 	def __init__(self, start, end, name=None, is_directed=True, **kwargs):
