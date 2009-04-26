@@ -90,6 +90,7 @@ class EdgeCreationTest(unittest.TestCase):
 		self.edge_6 = self.g.add_edge(self.node_1, self.node_2, "edge6", False, foo="stuff", hello="world")			
 		self.edge_7 = self.g.add_edge(self.node_1, self.node_1, "edge7", False, foo="stuff", hello="world")
 		self.edge_8 = self.g.add_edge("node3", "node4", "edge8", foo="stuff", hello="world")
+		self.edge_9 = self.g.add_edge("node_5", "node_6", "5->6")
 
 	def testEdgeCreation(self):
 		# test Graph.add_edge fully
@@ -142,6 +143,8 @@ class EdgeCreationTest(unittest.TestCase):
 		self.failUnlessEqual(self.edge_8 in self.node_1.outgoing, False)
 		self.failUnlessEqual(self.edge_8 in self.node_1.incoming, False)
 		self.failUnlessEqual(set(self.node_2.bidirectional), {self.edge_6})
+		self.failUnlessEqual(self.edge_9.start, self.g["node_5"])
+		self.failUnlessEqual(self.edge_9.end, self.g["node_6"])
 		
 	def testEdgeCreationFailPoints(self):
 		# ensure that edge creation fails when it's supposed to
