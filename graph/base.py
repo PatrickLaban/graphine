@@ -646,6 +646,25 @@ class Edge(GraphElement):
 		for k, v in kwargs.items():
 			setattr(self, k, v)
 
+	def __getitem__(self, index):
+		"""Returns the endpoint corresponding to the given index.
+
+		If the index > 1, this raises IndexError.
+
+		For this reason, this is mostly intended to be used for tuple-style unpacking.
+
+		Usage:
+			>>> e = Edge(Node("A"), Node("B"), "AB")
+			>>> a, b = e
+			>>> a
+			Node(name=A)
+			>>> b
+			Node(name=B)
+		"""
+		if not index: return self.start
+		elif index is 1: return self.end
+		raise IndexError("The index %s does not correspond to an endpoint of %s" % (index, self))
+
 	def other_end(self, starting_point):
 		"""Returns the other end of the edge from the given point.
 

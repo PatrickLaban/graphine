@@ -149,6 +149,20 @@ class EdgeCreationTest(unittest.TestCase):
 		self.failUnlessRaises(TypeError, self.g.add_edge, self.node_1, self.node_2, self.test_dict)
 
 
+class EdgeUnpackTest(EdgeCreationTest):
+
+	def testUnpacking(self):
+		edges = [getattr(self, "edge_%i" % i) for i in range(1, 9)]
+		# make sure that the first one is always start
+		self.failUnless(all([edge[0] == edge.start for edge in edges]), True)
+		# make sure that the second one is always end
+		self.failUnless(all([edge[1] == edge.end for edge in edges]), True)
+		# make sure that the third one fails
+		self.failUnlessRaises(IndexError, edges[0].__getitem__, 2)
+		# and the negative first
+		self.failUnlessRaises(IndexError, edges[0].__getitem__, -1)
+
+
 class AdjacencyTest(unittest.TestCase):
 	
 	def setUp(self):
@@ -2683,6 +2697,7 @@ if __name__ == "__main__":
 	ThreeNodeCycleTest = unittest.TestLoader().loadTestsFromTestCase(ThreeNodeCycleTest)
 	RemovalTest = unittest.TestLoader().loadTestsFromTestCase(RemovalTest)
 	OverwriteTest = unittest.TestLoader().loadTestsFromTestCase(OverwriteTest)
+	EdgeUnpackTest = unittest.TestLoader().loadTestsFromTestCase(EdgeUnpackTest)
 	suites = [GraphCorrectnessTest, NodeCreationTest, EdgeCreationTest, GraphPropertiesTest, GraphSearchTest, EdgeMovementTest, GetElementsTest]
 	suites += [ZeroNodeTest, RemovalTest, OverwriteTest, TraversalTest, InductionTest, GraphFailureTest, AdjacencyTest]
 	suites += [OneNodeDirectedTest]
@@ -2691,5 +2706,6 @@ if __name__ == "__main__":
 	suites += [OneNodeDoubleDirectedTest]
 	suites += [TwoNodeUnconnectedTest]
 	suites += [ThreeNodeCycleTest]
+	suites += [EdgeUnpackTest]
 	CorrectnessTest = unittest.TestSuite(suites)
 	unittest.main()
