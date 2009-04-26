@@ -1286,20 +1286,22 @@ class Graph:
 					heapq.heappush(unoptomized, (weight, edge.other_end(current)))
 		return paths
 	
+	@property
 	def size(self):
 		"""Reports the number of edges in the graph.
 
 		Usage:
 			>>> g = Graph()
 			>>> n1, n2 = g.add_node(), g.add_node()
-			>>> g.size()
+			>>> g.size
 			0
 			>>> e = g.add_edge(n1, n2)
-			>>> g.size()
+			>>> g.size
 			1
 		"""
 		return len(self.edges)
 
+	@property	
 	def order(self):
 		"""Reports the number of nodes in the graph.
 
