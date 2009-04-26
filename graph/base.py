@@ -869,6 +869,7 @@ class Graph:
 		"""Adds an edge to the current graph.
 
 		The start and end arguments can be either nodes or node names.
+		If they don't exist in the current graph, they will be created.
 
 		The name argument, if given, should be hashable and unique
 		in this graph.
@@ -882,9 +883,11 @@ class Graph:
 			>>> g.add_edge(n1, n2, weight=5)
 			Edge(weight=5)			
 		"""
-		# get the start and end points
-		start = self.get_element(start)
-		end = self.get_element(end)
+		# get the start and end points, and create them if they don't exist
+		try: start = self.get_element(start)
+		except: start = self.add_node(start)
+		try: end = self.get_element(end)
+		except: end = self.add_node(end)
 		# build the edge
 		edge = self.Edge(start, end, name, is_directed=is_directed, **kwargs)
 		# remove any otherwise identical edges
