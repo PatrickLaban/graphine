@@ -32,25 +32,22 @@ using Graphine.
 
 def node_properties(n):
 	"""Returns default properties for nodes adjusted by the contents of n."""
-	defaults = {"label": None, "color": "black", "shape": "circle", "style": None, "fillcolor": "white"}
+	defaults = {"label": n.name, "color": "black", "shape": "circle", "style": None, "fillcolor": "white"}
 	data = n.data
 	for k in defaults:
 		if k in data:
 			defaults[k] = data[k]
-	if defaults["label"] == None:
-		defaults.pop("label")
 	if defaults["style"] == None:
 		defaults.pop("style")
 	return defaults
 
 def edge_properties(e):
 	"""Returns default properties for edges adjusted by the contents of e."""
-	defaults = {"label": "", "color": "black", "style": None}
+	defaults = {"label": e.name, "color": "black", "style": None}
 	data = e.data
 	for k in defaults:
 		if k in data:
 			defaults[k] = data[k]
-	if defaults["label"] == None: defaults.pop("label")
 	if defaults["style"] == None: defaults.pop("style")
 	return defaults
 
@@ -90,11 +87,12 @@ class DotGenerator:
 			start_label = self.get_node_properties(start)["label"]
 			end_label = self.get_node_properties(end)["label"]
 			edge_properties = self.get_edge_properties(edge)
-			label = edge_properties["label"]
-			color = edge_properties["color"]
-			style = edge_properties["style"]
-			edge_string = "\t%s %s %s [label=%s, color=%s, style=%s];\n" 
-			edge_string %= (start_label, edge_marker, end_label, label, color, style)
+			property_strings = []
+			for k, v in edge_properties.items():
+				property_strings.append("%s=%s" % (k, v))
+			property_strings = str(property_strings).replace("'", "")
+			edge_string = "\t%s %s %s %s\n"
+			edge_string %= (start_label, edge_marker, end_label, property_strings)
 			doc += edge_string
 
 		doc += "}"
