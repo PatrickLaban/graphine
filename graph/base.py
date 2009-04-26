@@ -363,7 +363,7 @@ Inspecting Graphs
 The base Graph class provides several tools for finding potentially
 interesting pieces of information about your graphs.
 
-The most straightforward of these are .order() and .size(), which
+The most straightforward of these are .order and .size, which
 return the number of nodes in the graph and the number of edges in
 the graph, respectively.
 
@@ -1307,10 +1307,10 @@ class Graph:
 
 		Usage:
 			>>> g = Graph()
-			>>> g.order()
+			>>> g.order
 			0
 			>>> n = g.add_node()
-			>>> g.order()
+			>>> g.order
 			1
 		"""
 		return len(self.nodes)
@@ -1410,9 +1410,9 @@ class Graph:
 
 		As you can see, it has 3 nodes and two edges:
 
-			>>> enterprise.order()
+			>>> enterprise.order
 			3
-			>>> enterprise.size()
+			>>> enterprise.size
 			2
 
 		Now we induce a subgraph that includes spock and bones but
@@ -1422,9 +1422,9 @@ class Graph:
 
 		And can see that it has two nodes- spock and bones- but no edges:
 
-			>>> new_mission.order()
+			>>> new_mission.order
 			2
-			>>> new_mission.size()
+			>>> new_mission.size
 			0			
 		"""	
 		g = type(self)()

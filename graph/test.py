@@ -339,21 +339,21 @@ class GraphPropertiesTest(unittest.TestCase):
 
 	def testOrder(self):
 		# test order against known amount
-		self.failUnlessEqual(self.g1.order(), 2)
-		self.failUnlessEqual(self.g2.order(), 2)
+		self.failUnlessEqual(self.g1.order, 2)
+		self.failUnlessEqual(self.g2.order, 2)
 		self.g1.remove_node(self.g1_node_2)
-		self.failUnlessEqual(self.g1.order(), 1)
+		self.failUnlessEqual(self.g1.order, 1)
 		self.g2.remove_edge(self.g2_edge_3)
-		self.failUnlessEqual(self.g2.order(), 2)
+		self.failUnlessEqual(self.g2.order, 2)
 		
 	def testSize(self):
 		# test size against known amount
-		self.failUnlessEqual(self.g1.size(), 2)
-		self.failUnlessEqual(self.g2.size(), 2)
+		self.failUnlessEqual(self.g1.size, 2)
+		self.failUnlessEqual(self.g2.size, 2)
 		self.g2.remove_node(self.g2_node_2)
-		self.failUnlessEqual(self.g2.size(), 1)
+		self.failUnlessEqual(self.g2.size, 1)
 		self.g2.remove_edge(self.g2_edge_3)
-		self.failUnlessEqual(self.g2.size(), 0)
+		self.failUnlessEqual(self.g2.size, 0)
 
 
 class GraphSearchTest(unittest.TestCase):
@@ -633,8 +633,8 @@ class GraphCorrectnessTest(unittest.TestCase):
 		self.failUnlessEqual(set(n.outgoing), {o1, o2, o3, o4})
 		self.failUnlessEqual(n.value, 7)
 		# test the graph's properties
-		self.failUnlessEqual(g.order(), 5)
-		self.failUnlessEqual(g.size(), 12)
+		self.failUnlessEqual(g.order, 5)
+		self.failUnlessEqual(g.size, 12)
 
 	def testUnion(self):
 		g1 = Graph()
@@ -654,8 +654,8 @@ class GraphCorrectnessTest(unittest.TestCase):
 		union = g1 | g2
 		self.failUnlessEqual({1, 2, 3, 4, 5}, {node.name for node in union.nodes})
 		self.failUnlessEqual({12, 23, 31, 34, 45, 53}, {edge.name for edge in union.edges})
-		self.failUnlessEqual(union.order(), 5)
-		self.failUnlessEqual(union.size(), 6)
+		self.failUnlessEqual(union.order, 5)
+		self.failUnlessEqual(union.size, 6)
 
 	def testIntersection(self):
 		g1 = Graph()
@@ -674,8 +674,8 @@ class GraphCorrectnessTest(unittest.TestCase):
 		g2.add_edge(three_2, one_2, 31)
 		one_and_three = g1 & g2
 		self.failUnlessEqual({1, 3}, {node.name for node in one_and_three.nodes})
-		self.failUnlessEqual(one_and_three.order(), 2)
-		self.failUnlessEqual(one_and_three.size(), 1)
+		self.failUnlessEqual(one_and_three.order, 2)
+		self.failUnlessEqual(one_and_three.size, 1)
 
 	def testDifference(self):
 		g1 = Graph()
@@ -696,8 +696,8 @@ class GraphCorrectnessTest(unittest.TestCase):
 		g2.add_edge(three_2, one_2)
 		diff = g1 - g2
 		self.failUnlessEqual({0, 2}, {node.name for node in diff.nodes})
-		self.failUnlessEqual(diff.order(), 2)
-		self.failUnlessEqual(diff.size(), 1)
+		self.failUnlessEqual(diff.order, 2)
+		self.failUnlessEqual(diff.size, 1)
 
 	def testGetAllConnected(self):
 		# setup
@@ -841,10 +841,10 @@ class ZeroNodeTest(unittest.TestCase):
 		self.failUnlessEqual(self.g.get_strongly_connected(), [])
 
 	def testSize(self):
-		self.failUnlessEqual(self.g.size(), 0)
+		self.failUnlessEqual(self.g.size, 0)
 
 	def testOrder(self):
-		self.failUnlessEqual(self.g.order(), 0)
+		self.failUnlessEqual(self.g.order, 0)
 
 	def testEdgeContraction(self):
 		# test it on a bad edge
@@ -1105,7 +1105,7 @@ class OneNodeDirectedTest(unittest.TestCase):
 		B = self.g.add_node("B")
 		self.failUnlessEqual(self.g["B"], B)
 		self.failUnless(self.g["B"] is B)
-		self.failUnlessEqual(self.g.order(), 2)
+		self.failUnlessEqual(self.g.order, 2)
 		self.failUnlessEqual(B in set(self.g.nodes), True)
 		# make sure that adding a new node overwrites the old one
 		# if they share a name
@@ -1120,7 +1120,7 @@ class OneNodeDirectedTest(unittest.TestCase):
 		self.failUnlessEqual(A in self.g._nodes.values(), True)
 		# order- it should have added B, then replaced self.A with A,
 		# thus 2
-		self.failUnlessEqual(self.g.order(), 2)
+		self.failUnlessEqual(self.g.order, 2)
 
 	def testAddEdge(self):
 		# make sure that adding a new edge by node names succeeds
@@ -1129,7 +1129,7 @@ class OneNodeDirectedTest(unittest.TestCase):
 		self.failUnless(self.g["aa"] is aa)
 		self.failUnlessEqual(aa in self.g, True)
 		self.failUnlessEqual("aa" in self.g, True)
-		self.failUnlessEqual(self.g.size(), 2)
+		self.failUnlessEqual(self.g.size, 2)
 		self.failUnlessEqual(aa in set(self.g.edges), True)
 		self.failUnlessEqual(aa in self.g._edges.values(), True)
 		# make sure that adding a new edge by node succeeds
@@ -1139,7 +1139,7 @@ class OneNodeDirectedTest(unittest.TestCase):
 		self.failUnless(self.g["aa"] is aa)
 		self.failUnlessEqual(aa in self.g, True)
 		self.failUnlessEqual("aa" in self.g, True)
-		self.failUnlessEqual(self.g.size(), 2)
+		self.failUnlessEqual(self.g.size, 2)
 		self.failUnlessEqual(aa in set(self.g.edges), True)
 		self.failUnlessEqual(aa in self.g._edges.values(), True)
 
@@ -1147,13 +1147,13 @@ class OneNodeDirectedTest(unittest.TestCase):
 		# make sure node removal works by name
 		A = self.g.remove_node("A")
 		self.failUnlessEqual(self.A, A)
-		self.failUnlessEqual(self.g.order(), 0)
+		self.failUnlessEqual(self.g.order, 0)
 		self.failIf(A in self.g)
 		self.failIf(A.name in self.g)
 		self.failUnlessRaises(KeyError, self.g.__getitem__, "A")
 		self.failUnlessRaises(KeyError, self.g.__getitem__, self.A)
 		# make sure it removes all the edges
-		self.failUnlessEqual(self.g.size(), 0)
+		self.failUnlessEqual(self.g.size, 0)
 
 	def testSearchNodes(self):
 		self.failUnlessEqual(list(self.g.search_nodes(name="A")), [self.A])
@@ -1288,10 +1288,10 @@ class OneNodeDirectedTest(unittest.TestCase):
 		self.failUnlessRaises(KeyError, self.g.get_shortest_paths, "B")
 
 	def testOrder(self):
-		self.failUnlessEqual(self.g.order(), 1)
+		self.failUnlessEqual(self.g.order, 1)
 
 	def testSize(self):
-		self.failUnlessEqual(self.g.size(), 1)
+		self.failUnlessEqual(self.g.size, 1)
 
 	def testEdgeContraction(self):
 		# in this case, it should delete one node and add one node
@@ -1305,9 +1305,9 @@ class OneNodeDirectedTest(unittest.TestCase):
 		# make sure its name is related as specified
 		self.failUnlessEqual(n.name, self.A.name + "2")
 		# make sure that there are the same number of nodes
-		self.failUnlessEqual(self.g.order(), 1)
+		self.failUnlessEqual(self.g.order, 1)
 		# make sure that there are no edges
-		self.failUnlessEqual(self.g.size(), 0)
+		self.failUnlessEqual(self.g.size, 0)
 		# test it on a bad edge
 		self.failUnlessRaises(KeyError, self.g.contract_edge, "BB", lambda x, y: dict())
 		self.failUnlessRaises(KeyError, self.g.contract_edge, Edge("A", "B"), lambda x, y: dict())
@@ -1545,7 +1545,7 @@ class OneNodeDoubleUndirectedTest(OneNodeDirectedTest):
 		self.failUnless(self.g["aa"] is aa)
 		self.failUnlessEqual(aa in self.g, True)
 		self.failUnlessEqual("aa" in self.g, True)
-		self.failUnlessEqual(self.g.size(), 3)
+		self.failUnlessEqual(self.g.size, 3)
 		self.failUnlessEqual(aa in set(self.g.edges), True)
 		self.failUnlessEqual(aa in self.g._edges.values(), True)
 		# make sure that adding a new edge by node succeeds
@@ -1555,7 +1555,7 @@ class OneNodeDoubleUndirectedTest(OneNodeDirectedTest):
 		self.failUnless(self.g["aa"] is aa)
 		self.failUnlessEqual(aa in self.g, True)
 		self.failUnlessEqual("aa" in self.g, True)
-		self.failUnlessEqual(self.g.size(), 3)
+		self.failUnlessEqual(self.g.size, 3)
 		self.failUnlessEqual(aa in set(self.g.edges), True)
 		self.failUnlessEqual(aa in self.g._edges.values(), True)
 
@@ -1569,7 +1569,7 @@ class OneNodeDoubleUndirectedTest(OneNodeDirectedTest):
 		self.failUnlessEqual(list(self.g.search_edges(name="AA", start=self.A, end=self.A)), [self.AA])
 
 	def testSize(self):
-		self.failUnlessEqual(self.g.size(), 2)
+		self.failUnlessEqual(self.g.size, 2)
 
 	def testInduceSubgraph(self):
 		# test it without nodes
@@ -1597,9 +1597,9 @@ class OneNodeDoubleUndirectedTest(OneNodeDirectedTest):
 		# make sure its name is related as specified
 		self.failUnlessEqual(n.name, self.A.name + "2")
 		# make sure that there are the same number of nodes
-		self.failUnlessEqual(self.g.order(), 1)
+		self.failUnlessEqual(self.g.order, 1)
 		# make sure that only the other loop remains
-		self.failUnlessEqual(self.g.size(), 1)
+		self.failUnlessEqual(self.g.size, 1)
 		# test it on a bad edge
 		self.failUnlessRaises(KeyError, self.g.contract_edge, "BB", lambda x, y: dict())
 		self.failUnlessRaises(KeyError, self.g.contract_edge, Edge("A", "B"), lambda x, y: dict())
@@ -1877,10 +1877,10 @@ class TwoNodeUnconnectedTest(unittest.TestCase):
 		self.failUnlessRaises(KeyError, self.g.get_shortest_paths, Node("C"))
 
 	def testOrder(self):
-		self.failUnlessEqual(self.g.order(), 2)
+		self.failUnlessEqual(self.g.order, 2)
 
 	def testSize(self):
-		self.failUnlessEqual(self.g.size(), 0)
+		self.failUnlessEqual(self.g.size, 0)
 
 	def testMoveEdge(self):
 		self.failUnlessRaises(KeyError, self.g.move_edge, Edge("A", "B", "AB"), "B", "A")
@@ -2392,10 +2392,10 @@ class ThreeNodeCycleTest(unittest.TestCase):
 		self.failUnlessRaises(KeyError, self.g.get_shortest_paths, "D")
 
 	def testOrder(self):
-		self.failUnlessEqual(self.g.order(), 3)
+		self.failUnlessEqual(self.g.order, 3)
 
 	def testSize(self):
-		self.failUnlessEqual(self.g.size(), 3)
+		self.failUnlessEqual(self.g.size, 3)
 
 	def testEdgeContraction(self):
 		# in this case, it should delete two nodes and add one node
@@ -2408,8 +2408,8 @@ class ThreeNodeCycleTest(unittest.TestCase):
 		self.failUnlessEqual(self.A.data, n.data)
 		# make sure its name is related as specified
 		self.failUnlessEqual(n.name, self.A.name + "2")
-		self.failUnlessEqual(self.g.order(), 2)
-		self.failUnlessEqual(self.g.size(), 2)
+		self.failUnlessEqual(self.g.order, 2)
+		self.failUnlessEqual(self.g.size, 2)
 		# test it on a bad edge
 		self.failUnlessRaises(KeyError, self.g.contract_edge, "BB", lambda x, y: dict())
 		self.failUnlessRaises(KeyError, self.g.contract_edge, Edge("A", "B"), lambda x, y: dict())
