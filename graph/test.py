@@ -1669,6 +1669,30 @@ class OneNodeDoubleUndirectedTest(OneNodeDirectedTest):
 		self.failUnlessRaises(KeyError, next, w1)
 		self.failUnlessRaises(KeyError, next, w2)
 
+	def testWalkPath(self):
+		w = self.g.walk_path(self.A)
+		iteration = 0
+		for candidates in w:
+			if iteration < 5:
+				iteration += 1
+				self.failUnlessEqual(set(candidates), {self.AA, self.AA_2})
+				w.send(candidates.pop())
+			else:
+				break
+		w = self.g.walk_edges("AA")
+		iteration = 0
+		for candidates in w:
+			if iteration < 5:
+				iteration += 1
+				self.failUnlessEqual(set(candidates), {self.AA, self.AA_2})
+				w.send(candidates.pop())
+			else:
+				break
+		w1 = self.g.walk_edges("B")
+		w2 = self.g.walk_edges(Node("B"))
+		self.failUnlessRaises(KeyError, next, w1)
+		self.failUnlessRaises(KeyError, next, w2)
+
 	def testContains(self):
 		# test it on the zero node case
 		G = Graph()

@@ -1055,7 +1055,7 @@ class Graph:
 		# the wrapper
 		w = walker()
 		candidates = next(w)
-		while 1:
+		while candidates:
 			selection = (yield candidates)
 			candidates = w.send(selection)
 			yield
@@ -1077,8 +1077,46 @@ class Graph:
 		# convenience wrapper
 		w = walker()
 		candidates = next(w)
-		while 1:
+		while candidates:
 			selection = (yield candidates)
+			candidates = w.send(selection)
+			yield
+
+	def walk_path(self, start, reverse=False):
+		"""Provides a generator for application-defined walks.
+
+		Usage is identical to walk_nodes and walk_edges, excepting that it accepts
+		Nodes and yields Edges.
+
+		Usage:
+			>>> g = Graph()
+			>>> g.add_node("A")
+			>>> g.add_node("B")
+			>>> g.add_node("C")
+			>>> g.add_edge("A", "B", "AB")
+			>>> g.add_edge("B", "C", "BC")
+			>>> w = g.walk_path("A")
+			>>> for edges in w:
+			... 	selection = w.pop()
+			... 	print(selection)
+			... 	w.send(selection)
+			Edge(name=AB)
+			Edge(name=BC)
+		"""
+		# make sure we have a real node
+		start = self.get_element(start)
+		def walker():
+			next = start
+			while next:
+				candidates = list(next.outgoing)
+				next = yield(candidates)
+		# convenience wrapper
+		w = walker()
+		previous = start
+		candidates = next(w)
+		while candidates:
+			selection = (yield candidates).other_end(previous)
+			previous = selection
 			candidates = w.send(selection)
 			yield
 
