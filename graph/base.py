@@ -452,8 +452,8 @@ class GraphElement:
 		return "%s(%s)" % (classname, attrs)
 
 	def __lt__(self, other):
-		"""Name-based comparison for sorting."""
-		return self.name < other.name
+		"""Arbitrary comparison for sorting."""
+		return id(self) < id(other)
 
 	def __hash__(self):
 		"""Returns the hash of this object's name."""
