@@ -617,12 +617,12 @@ class GraphCorrectnessTest(unittest.TestCase):
 
 	def testEdgeContraction(self):
 		g = self.g
-		n1 = g.add_node(value=1)
-		n2 = g.add_node(value=2)
-		n3 = g.add_node(value=3)
-		n4 = g.add_node(value=4)
-		n5 = g.add_node(value=6)
-		n6 = g.add_node(value=7)
+		n1 = g.add_node(1)
+		n2 = g.add_node(2)
+		n3 = g.add_node(3)
+		n4 = g.add_node(4)
+		n5 = g.add_node(6)
+		n6 = g.add_node(7)
 		# n1-n3 are completely connected
 		g.add_edge(n1, n2)
 		i1 = g.add_edge(n1, n3)
@@ -641,7 +641,7 @@ class GraphCorrectnessTest(unittest.TestCase):
 		e = g.add_edge(n3, n4)
 		# you'll add the values of the two nodes
 		# together to get the new value
-		getter = lambda s: s.value
+		getter = lambda s: s.name
 		get_new_data = lambda x, y: {"value": getter(x) + getter(y)}
 		# contract the graph
 		n = g.contract_edge(e, get_new_data)

@@ -639,7 +639,7 @@ class Edge(GraphElement):
 			5
 		"""
 		if name is not None: self._name = name
-		else: self._name = id(self)
+		else: self._name = (start, end)
 		self._start = start
 		self._end = end
 		self._directed = is_directed
