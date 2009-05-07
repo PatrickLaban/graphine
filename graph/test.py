@@ -1972,7 +1972,7 @@ class TwoNodeUnconnectedTest(unittest.TestCase):
 		self.failUnlessEqual(list(g1.nodes), [])
 		self.failUnlessEqual(list(g1.edges), [])
 		# test it with a bad edge
-		self.failUnlessRaises(KeyError, self.g.edge_induce_subgraph, Edge("A", "B"))
+		self.failUnlessRaises(KeyError, self.g.edge_induce_subgraph, Edge(Node("A"), Node("B")))
 		# test it with a bad label
 		self.failUnlessRaises(KeyError, self.g.edge_induce_subgraph, "C")
 
