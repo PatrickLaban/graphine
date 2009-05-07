@@ -866,7 +866,7 @@ class ZeroNodeTest(unittest.TestCase):
 	def testEdgeContraction(self):
 		# test it on a bad edge
 		self.failUnlessRaises(KeyError, self.g.contract_edge, "A", lambda x, y: dict())
-		self.failUnlessRaises(KeyError, self.g.contract_edge, Edge("A", "B"), lambda x, y: dict())
+		self.failUnlessRaises(KeyError, self.g.contract_edge, Edge(Node("A"), Node("B")), lambda x, y: dict())
 
 	def testTranspose(self):
 		tmp = copy.copy(self.g)
@@ -889,7 +889,7 @@ class ZeroNodeTest(unittest.TestCase):
 		self.failUnlessEqual(list(g1.nodes), [])
 		self.failUnlessEqual(list(g1.edges), [])
 		# test it with a bad node
-		self.failUnlessRaises(KeyError, self.g.edge_induce_subgraph, Edge("A", "B"))
+		self.failUnlessRaises(KeyError, self.g.edge_induce_subgraph, Edge(Node("A"), Node("B")))
 		# test it with a bad label
 		self.failUnlessRaises(KeyError, self.g.edge_induce_subgraph, "A")
 
@@ -1327,7 +1327,7 @@ class OneNodeDirectedTest(unittest.TestCase):
 		self.failUnlessEqual(self.g.size, 0)
 		# test it on a bad edge
 		self.failUnlessRaises(KeyError, self.g.contract_edge, "BB", lambda x, y: dict())
-		self.failUnlessRaises(KeyError, self.g.contract_edge, Edge("A", "B"), lambda x, y: dict())
+		self.failUnlessRaises(KeyError, self.g.contract_edge, Edge(Node("A"), Node("B")), lambda x, y: dict())
 
 	def testTranspose(self):
 		tmp = copy.copy(self.g)
@@ -1619,7 +1619,7 @@ class OneNodeDoubleUndirectedTest(OneNodeDirectedTest):
 		self.failUnlessEqual(self.g.size, 1)
 		# test it on a bad edge
 		self.failUnlessRaises(KeyError, self.g.contract_edge, "BB", lambda x, y: dict())
-		self.failUnlessRaises(KeyError, self.g.contract_edge, Edge("A", "B"), lambda x, y: dict())
+		self.failUnlessRaises(KeyError, self.g.contract_edge, Edge(Node("A"), Node("B")), lambda x, y: dict())
 
 	def testWalkNodes(self):
 		w = self.g.walk_nodes(self.A)
