@@ -2453,7 +2453,7 @@ class ThreeNodeCycleTest(unittest.TestCase):
 		self.failUnlessEqual(self.g.size, 2)
 		# test it on a bad edge
 		self.failUnlessRaises(KeyError, self.g.contract_edge, "BB", lambda x, y: dict())
-		self.failUnlessRaises(KeyError, self.g.contract_edge, Edge("A", "B"), lambda x, y: dict())
+		self.failUnlessRaises(KeyError, self.g.contract_edge, Edge(Node("A"), Node("B")), lambda x, y: dict())
 
 	def testTranspose(self):
 		tmp = copy.copy(self.g)
