@@ -2492,7 +2492,7 @@ class ThreeNodeCycleTest(unittest.TestCase):
 		# test it with edges BC and CA
 		# test it with edges CA and AB
 		# test it with a bad edge
-		self.failUnlessRaises(KeyError, self.g.edge_induce_subgraph, Edge("A", "C"))
+		self.failUnlessRaises(KeyError, self.g.edge_induce_subgraph, Edge(Node("A"), Node("C")))
 		# test it with a bad label
 		self.failUnlessRaises(KeyError, self.g.edge_induce_subgraph, "D")
 
