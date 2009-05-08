@@ -191,7 +191,7 @@ to explore the graph from those points.
 To get all the outgoing edges of a particular node:
 
 	>>> n1.outgoing
-	[Edge(name=AB)]
+	[Edge(name=AB), Edge(name=CA)]
 
 And to get the incoming edges:
 
@@ -204,7 +204,7 @@ The same sorts of things work for the properties
 	>>> n1.bidirectional
 	[Edge(name=CA)]
 	>>> n1.edges
-	[Edge(name=AB), Edge(name=CA)]
+	[Edge(name=CA), Edge(name=AB)]
 
 You can also directly get all the nodes adjacent to a
 given node:
@@ -233,10 +233,11 @@ given node- for instance, because the edge is directed the other
 way- it raises AttributeError.
 
 	>>> endpoint = e1.other_end("A")
+	>>> endpoint
 	Node(name=B)
 	>>> e1.other_end("B")
 	...
-	AttributeError: Edge(name=AB) contains no endpoint opposite to Node(name=B)
+	AttributeError: Edge(name=AB) has no endpoint opposite to B
 
 You will frequently see "other_end" used in situations where it is
 possible that the given edge could be either directed or undirected,
@@ -251,7 +252,8 @@ traversals and walks for more complex behavior.
 To iterate over all the nodes in a graph:
 
 	>>> for node in G.nodes:
-	>>>	print(node)
+	...	print(node)
+	...
 	Node(name=C)
 	Node(name=A)
 	Node(name=B)
@@ -263,7 +265,8 @@ presented in the same order on two consecutive passes.
 To do the same for edges:
 
 	>>> for edge in G.edges:
-	>>> 	print(edge)
+	... 	print(edge)
+	...
 	Edge(name=BC)
 	Edge(name=CA)
 	Edge(name=AB)
@@ -272,13 +275,15 @@ If you only want certain nodes, the search functions are provided
 for convenience:
 
 	>>> for node in G.search_nodes(name="A"):
-	>>> 	print(node)
+	... 	print(node)
+	...
 	Node(name=A)
 	
 And for edges:
 
 	>>> for edge in G.search_edges(name="CA", is_directed=False):
-	>>> 	print(edge)
+	... 	print(edge)
+	...
 	Edge(name=CA)
 
 In addition to the datawise and unordered views of graphs,
@@ -316,17 +321,19 @@ popular (ie, most incoming edges) nodes first, I could
 write a getter function as follows:
 
 	>>> def get_popularity(node):
-	>>> 	return len(node.incoming)
+	... 	return len(node.incoming)
+	...
 
 A selector function:
 
 	>>> def get_most_popular(nodes):
-	>>> 	nodes.sort(nodes, key=get_popularity)
-	>>>	return nodes.pop()
+	... 	nodes.sort(nodes, key=get_popularity)
+	...	return nodes.pop()
+	...
 
 And traverse the graph:
 
-	>>> for node in g.heuristic_traversal("A", get_most_popular):
+	>>> for node in G.heuristic_traversal("A", get_most_popular):
 	>>> 	print(node)
 	Node(name=A)
 	Node(name=C)
