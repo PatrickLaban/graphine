@@ -38,7 +38,7 @@ To add a node:
 
 	>>> node_1 = g.add_node()
 	>>> node_1
-	Node(name=3081985036)
+	Node(name=3082215852)
 
 To add a named node:
 
@@ -50,7 +50,7 @@ To add a node with data attributes:
 
 	>>> node_3 = g.add_node("dan", weight=5)
 	>>> node_3
-	Node(name="dan", weight=5)
+	Node(name=dan, weight=5)
 
 Since Edges connect nodes, it makes sense that instantiating
 an edge will require exactly two nodes as arguments. These
@@ -60,7 +60,7 @@ To add an edge:
 
 	>>> edge_1 = g.add_edge(node_1, node_2)
 	>>> edge_1
-	Edge(name=3081985196)
+	Edge(name=(3082215852, 'bob'))
 
 To add a named edge:
 
@@ -71,6 +71,7 @@ To add a named edge:
 To add an edge by node name:
 
 	>>> edge_3 = g.add_edge("bob", "dan", "bob->dan")
+	>>> edge_3
 	Edge(name=bob->dan)
 	
 Notice that edges can have data attributes as well:
@@ -99,6 +100,7 @@ value is True, meaning that the edge will be directed from the
 first node provided to the second node provided.
 
 	>>> edge_5 = g.add_edge(node_1, node_2, "1->2", is_directed=False)
+	>>> edge_5
 	Edge(name=1->2)
 
 In the next section, you will learn how to use the properties
@@ -110,7 +112,7 @@ This can also be done either by name or by element reference.
 To remove nodes:
 
 	>>> g.remove_node(node_1)
-	Node(name=3081985036)
+	Node(name=3082215852)
 
 To remove nodes by name:
 
@@ -149,11 +151,17 @@ Let's say we have constructed the following graph:
 
 	>>> G = Graph()
 	>>> G.add_node("A")
+	Node(name=A)
 	>>> G.add_node("B")
+	Node(name=B)
 	>>> G.add_node("C")
+	Node(name=C)
 	>>> G.add_edge("A", "B", "AB")
+	Edge(name=AB)
 	>>> G.add_edge("B", "C", "BC")
-	>>> G.add_edge("C", "A", "CA" is_directed=False)
+	Edge(name=BC)
+	>>> G.add_edge("C", "A", "CA", is_directed=False)
+	Edge(name=CA)
 
 Notice that we haven't stored any references to our Nodes
 or Edges. We can do this because the graph automatically
@@ -174,7 +182,7 @@ It should be noted that this also works for elements, and
 can be a quick test to get an element in the given graph
 equivalent to one from another graph:
 
-	>>> G[Node("A")] is n1
+	>>> G["A"] is n1
 	True
 
 Of course, now that we have a Node and Edge we can begin
