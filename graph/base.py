@@ -327,7 +327,7 @@ write a getter function as follows:
 A selector function:
 
 	>>> def get_most_popular(nodes):
-	... 	nodes.sort(nodes, key=get_popularity)
+	... 	nodes.sort(key=get_popularity)
 	...	return nodes.pop()
 	...
 
