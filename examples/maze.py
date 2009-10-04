@@ -1,4 +1,4 @@
-#! /usr/bin/env python3.0
+#! /usr/bin/env python3
 
 import random
 
@@ -22,7 +22,7 @@ def build_maze():
 	# while some components are unconnected
 	while len(nodes) > 1:
 		# choose two components at random
-		component_1, component_2 = random.sample(nodes, 2)
+		component_1, component_2 = random.sample(list(nodes), 2)
 		# and one node from each component
 		node_1 = random.choice(component_1)
 		node_2 = random.choice(component_2)
@@ -34,7 +34,7 @@ def build_maze():
 			component_1.extend(component_2)
 			nodes.remove(component_2)
 	# finally, make sure that the start and end points have doors.
-	choices = random.sample(maze.nodes, 3)
+	choices = random.sample(list(maze.nodes), 3)
 	if len(p1_start.outgoing) < NUM_DOORS: maze.add_edge(p1_start, choices[0], is_directed=False)
 	if len(p2_start.outgoing) < NUM_DOORS: maze.add_edge(p2_start, choices[1], is_directed=False)
 	if len(end.outgoing) < NUM_DOORS: maze.add_edge(end, choices[2], is_directed=False)
@@ -55,7 +55,7 @@ def ai_path(start, maze):
 	distance = 0
 	previous = start
 	# traverse the maze, using selector() as your heuristic
-	for node in maze.a_star_traversal(start, selector):
+	for node in maze.heuristic_traversal(start, selector):
 		# take all the steps between dead ends
 		distance += maze.get_shortest_paths(previous)[node][0]
 		# and end if you're at the end
@@ -74,18 +74,17 @@ def player_select(options):
 	
 def handle_player(start, maze, max_length):
 	"""Walks the maze, giving the player the choice of where to go."""
-	w = maze.walk_nodes()
-	w.send(None)
-	next = w.send(start)
+	w = maze.walk_nodes(start)
 	# while the AI hasn't beat you and you've got places to go
-	while next and max_length:
-		max_length -= 1
-		# go where the player tells you
-		selection = player_select(next)
-		if selection.name == "END":
+	print(max_length)
+	for adjacent_rooms in w:
+		if max_length > 0: max_length -= 1
+		else: break
+		selection = player_select(adjacent_rooms)
+		if selection.name is "END":
 			print("You win!")
 			return
-		next = w.send(selection)
+		w.send(selection)
 	# otherwise, lose
 	print("You lose!")
 
