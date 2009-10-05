@@ -10,9 +10,7 @@ G = Graph()
 
 class UrlGetter(HTMLParser):
 	"""Extracts all the links from the given html"""
-
 	links = None
-
 	def handle_starttag(self, tag, attrs):
 		attrs = dict(attrs)
 		if tag == "a":
