@@ -5,6 +5,8 @@ base.py
 
 Written by Geremy Condra
 
+Co-developed by Geremy Condra, Patrick Laban, and Robbie Clemmons
+
 Licensed under the GNU GPLv3
 
 Released 25 Mar 2009
