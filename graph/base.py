@@ -5,7 +5,7 @@ base.py
 
 Written by Geremy Condra
 
-Co-developed by Geremy Condra, Patrick Laban, and Robbie Clemmons
+Many thanks to Patrick Laban and Robbie Clemons
 
 Licensed under the GNU GPLv3
 
