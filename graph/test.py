@@ -36,15 +36,20 @@ import copy
 
 from base import Graph, Node, Edge, GraphElement
 
-
 #########################################################################################
 #      				     COMPONENT TESTS					#	
 #########################################################################################
 
-class NodeCreationTest(unittest.TestCase):
+class BaseGraphTest(unittest.TestCase):
+
+	def build_graph(self):
+		return Graph()
+		
+
+class NodeCreationTest(BaseGraphTest):
 
 	def setUp(self):
-		self.g = Graph()
+		self.g = self.build_graph()
 		self.node_1 = self.g.add_node() # basic node
 		self.node_2 = self.g.add_node("node2") # node with name, no data
 		self.node_3 = self.g.add_node(foo="stuff") # data, no name
@@ -74,10 +79,10 @@ class NodeCreationTest(unittest.TestCase):
 		self.test_dict = {"a":"b", "b":"c"}
 		self.failUnlessRaises(TypeError, self.g.add_node, self.test_dict)
 
-class EdgeCreationTest(unittest.TestCase):
+class EdgeCreationTest(BaseGraphTest):
 
 	def setUp(self):
-		self.g = Graph()
+		self.g = self.build_graph()
 		self.node_1 = self.g.add_node()
 		self.node_2 = self.g.add_node()
 		self.node_3 = self.g.add_node("node3", foo="stuff")
@@ -166,10 +171,10 @@ class EdgeUnpackTest(EdgeCreationTest):
 		self.failUnlessRaises(IndexError, edges[0].__getitem__, -1)
 
 
-class AdjacencyTest(unittest.TestCase):
+class AdjacencyTest(BaseGraphTest):
 	
 	def setUp(self):
-		self.g = Graph()
+		self.g = self.build_graph()
 		self.node_1 = self.g.add_node("node1")
 		self.node_2 = self.g.add_node("node2")
 		self.node_3 = self.g.add_node("node3")
@@ -190,10 +195,10 @@ class AdjacencyTest(unittest.TestCase):
 		self.failUnlessEqual(set(self.node_3.get_adjacent(True, True)), {self.node_1})
 
 
-class RemovalTest(unittest.TestCase):
+class RemovalTest(BaseGraphTest):
 	
 	def setUp(self):
-		self.g = Graph()
+		self.g = self.build_graph()
 		self.node_1 = self.g.add_node("node1")
 		self.node_2 = self.g.add_node("node2")
 		self.node_3 = self.g.add_node("node3")
@@ -257,10 +262,10 @@ class RemovalTest(unittest.TestCase):
 		self.failUnlessEqual(set(self.g.edges), {self.edge_2})	
 
 
-class OverwriteTest(unittest.TestCase):
+class OverwriteTest(BaseGraphTest):
 	
 	def setUp(self):
-		self.g = Graph()
+		self.g = self.build_graph()
 		self.node_1 = self.g.add_node("node1")
 		self.node_2 = self.g.add_node("node2")
 		self.edge_1 = self.g.add_edge("node1", "node2", "edge1")
@@ -299,11 +304,11 @@ class OverwriteTest(unittest.TestCase):
 		self.failUnlessEqual(self.node_2.edges, [self.edge_1, self.edge_2, self.edge_4])
 	
 
-class GraphPropertiesTest(unittest.TestCase):
+class GraphPropertiesTest(BaseGraphTest):
 
 	def setUp(self):
-		self.g1 = Graph()
-		self.g2 = Graph()
+		self.g1 = self.build_graph()
+		self.g2 = self.build_graph()
 		self.g1_node_1 = self.g1.add_node("node1")
 		self.g1_node_2 = self.g1.add_node("node2")
 		self.g1_node_3 = self.g1.add_node("node3")
@@ -373,10 +378,10 @@ class GraphPropertiesTest(unittest.TestCase):
 		self.failUnlessEqual(self.g2.size, 0)
 
 
-class GraphSearchTest(unittest.TestCase):
+class GraphSearchTest(BaseGraphTest):
 
 	def setUp(self):
-		self.g = Graph()
+		self.g = self.build_graph()
 		self.node_1 = self.g.add_node("node1", first_name="Bob", last_name="Bobson")
 		self.node_2 = self.g.add_node("node2", first_name="Tom", last_name="Tompson")
 		self.node_3 = self.g.add_node("node3", first_name="Bill", last_name="Billson")
@@ -417,10 +422,10 @@ class GraphSearchTest(unittest.TestCase):
 		self.failUnlessEqual(s, {self.edge_1})
 		
 
-class EdgeMovementTest(unittest.TestCase):
+class EdgeMovementTest(BaseGraphTest):
 
 	def setUp(self):
-		self.g = Graph()
+		self.g = self.build_graph()
 		self.node_1 = self.g.add_node("node1", first_name="Bob", last_name="Bobson")
 		self.node_2 = self.g.add_node("node2", first_name="Tom", last_name="Tompson")
 		self.node_3 = self.g.add_node("node3", first_name="Bill", last_name="Billson")
@@ -450,10 +455,10 @@ class EdgeMovementTest(unittest.TestCase):
 		self.failUnlessEqual(set(self.node_3.outgoing), {self.edge_2})
 
 
-class GetElementsTest(unittest.TestCase):
+class GetElementsTest(BaseGraphTest):
 
 	def setUp(self):
-		self.g = Graph()
+		self.g = self.build_graph()
 		self.jimmy = self.g.add_node(city="New York")
 		self.ted = self.g.add_node(city="Atlanta")
 		self.dan = self.g.add_node(city="Seattle")
@@ -475,10 +480,10 @@ class GetElementsTest(unittest.TestCase):
 		self.failUnlessEqual([e for e in self.g.search_edges(distance=2850)], [self.d_to_p])
 
 
-class TraversalTest(unittest.TestCase):
+class TraversalTest(BaseGraphTest):
 
 	def setUp(self):
-		g = Graph()
+		g = self.build_graph()
 		nodes = {}
 		edges = []
 		nodes["A"] = g.add_node(first_name="A")
@@ -532,10 +537,10 @@ class TraversalTest(unittest.TestCase):
 		self.failUnless(max(positions["B"], positions["C"], positions["E"]) < min(positions["D"], positions["F"], positions["G"]))
 
 
-class InductionTest(unittest.TestCase):
+class InductionTest(BaseGraphTest):
 
 	def setUp(self):
-		g = Graph()
+		g = self.build_graph()
 		kirk = g.add_node(first_name="kirk")
 		spock = g.add_node(first_name="spock")
 		bones = g.add_node(first_name="bones")
@@ -581,10 +586,10 @@ class InductionTest(unittest.TestCase):
 		self.failUnlessEqual(uhura.outgoing[1].end.first_name, "bones")
 
 
-class GraphFailureTest(unittest.TestCase):
+class GraphFailureTest(BaseGraphTest):
 
 	def setUp(self):
-		self.g = Graph()
+		self.g = self.build_graph()
 
 	"""
 	Tests to be written:
@@ -593,10 +598,10 @@ class GraphFailureTest(unittest.TestCase):
 	"""
 
 
-class GraphCorrectnessTest(unittest.TestCase):
+class GraphCorrectnessTest(BaseGraphTest):
 
 	def setUp(self):
-		self.g = Graph()
+		self.g = self.build_graph()
 
 	def testGetCommonEdges(self):
 		""" Testing common edges correctness """
@@ -654,8 +659,8 @@ class GraphCorrectnessTest(unittest.TestCase):
 		self.failUnlessEqual(g.size, 12)
 
 	def testUnion(self):
-		g1 = Graph()
-		g2 = Graph()
+		g1 = self.build_graph()
+		g2 = self.build_graph()
 		g1.add_node(1)
 		g1.add_node(2)
 		g1.add_node(3)
@@ -675,8 +680,8 @@ class GraphCorrectnessTest(unittest.TestCase):
 		self.failUnlessEqual(union.size, 6)
 
 	def testIntersection(self):
-		g1 = Graph()
-		g2 = Graph()
+		g1 = self.build_graph()
+		g2 = self.build_graph()
 		one = g1.add_node(1)
 		two = g1.add_node(2)
 		three = g1.add_node(3)
@@ -695,8 +700,8 @@ class GraphCorrectnessTest(unittest.TestCase):
 		self.failUnlessEqual(one_and_three.size, 1)
 
 	def testDifference(self):
-		g1 = Graph()
-		g2 = Graph()
+		g1 = self.build_graph()
+		g2 = self.build_graph()
 		zero = g1.add_node(0)
 		one = g1.add_node(1)
 		two = g1.add_node(2)
@@ -718,7 +723,7 @@ class GraphCorrectnessTest(unittest.TestCase):
 
 	def testGetAllConnected(self):
 		# setup
-		g = Graph()
+		g = self.build_graph()
 		# one connected component
 		n1 = g.add_node(first_name="Bob")
 		n2 = g.add_node(first_name="Bill")
@@ -737,12 +742,12 @@ class GraphCorrectnessTest(unittest.TestCase):
 
 	def testGetShortestPaths(self):
 		# trivial graph
-		g = Graph()
+		g = self.build_graph()
 		n1 = g.add_node(first_name="Geremy")
 		paths = g.get_shortest_paths(n1)
 		self.failUnlessEqual(paths, {n1: (0, [])})
 		# less trivial graph
-		g = Graph()
+		g = self.build_graph()
 		n1 = g.add_node(first_name="Geremy")
 		n2 = g.add_node(first_name="Bob")
 		n3 = g.add_node(first_name="Snowflake")
@@ -751,7 +756,7 @@ class GraphCorrectnessTest(unittest.TestCase):
 		paths = g.get_shortest_paths(n1, get_weight=lambda e: e.weight)
 		self.failUnlessEqual(paths, {n1: (0, []), n2: (4, [e1]), n3: (5, [e2])})
 		# tricksy graph
-		g = Graph()
+		g = self.build_graph()
 		n1 = g.add_node(first_name="Geremy")
 		n2 = g.add_node(first_name="Bob")
 		n3 = g.add_node(first_name="Snowflake")
@@ -769,7 +774,7 @@ class GraphCorrectnessTest(unittest.TestCase):
 		self.failUnlessEqual(paths, {n1: (0, []), n2: (5, [e1]), n3: (6, [e1, e2])})
 
 	def testStronglyConnectedComponents(self):
-		g = Graph()
+		g = self.build_graph()
 		n1 = g.add_node(value=1)
 		n2 = g.add_node(value=2)
 		n3 = g.add_node(value=3)
@@ -812,11 +817,11 @@ TODO:
 	- five node undirected tree
 """
 
-class ZeroNodeTest(unittest.TestCase):
+class ZeroNodeTest(BaseGraphTest):
 	# tests all applicable operations with the zero node case
 
 	def setUp(self):
-		self.g = Graph()
+		self.g = self.build_graph()
 
 	def testContainers(self):
 		# test to make sure that the containers are okay
@@ -898,19 +903,19 @@ class ZeroNodeTest(unittest.TestCase):
 		G = self.g | self.g
 		self.failUnlessEqual((set(self.g.nodes), set(self.g.edges)), (set(G.nodes), set(G.edges)))
 		# test it on a graph with one node with a loop
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_edge(1, 1, 11)
 		G2 = self.g | G
 		self.failUnlessEqual((set(self.g.nodes) | set(G.nodes), set(self.g.edges) | set(G.edges)), (set(G2.nodes), set(G2.edges)))
 		# test it on a graph with two nodes
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_node(2)
 		G2 = self.g | G
 		self.failUnlessEqual((set(self.g.nodes) | set(G.nodes), set(self.g.edges) | set(G.edges)), (set(G2.nodes), set(G2.edges)))		
 		# test it on a graph with three nodes in a directed cycle
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_node(2)
 		G.add_node(3)
@@ -920,7 +925,7 @@ class ZeroNodeTest(unittest.TestCase):
 		G2 = self.g | G
 		self.failUnlessEqual((set(self.g.nodes) | set(G.nodes), set(self.g.edges) | set(G.edges)), (set(G2.nodes), set(G2.edges)))
 		# test it on a graph with five nodes in an undirected cycle
-		G = Graph()
+		G = self.build_graph()
 		for i in range(5):
 			G.add_node(i)
 		for i in range(5):
@@ -934,19 +939,19 @@ class ZeroNodeTest(unittest.TestCase):
 		G = self.g & self.g
 		self.failUnlessEqual((set(self.g.nodes), set(self.g.edges)), (set(G.nodes), set(G.edges)))
 		# test it on a graph with one node with a loop
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_edge(1, 1, 11)
 		G2 = self.g & G
 		self.failUnlessEqual((set(self.g.nodes) & set(G.nodes), set(self.g.edges) & set(G.edges)), (set(G2.nodes), set(G2.edges)))
 		# test it on a graph with two nodes
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_node(2)
 		G2 = self.g & G
 		self.failUnlessEqual((set(self.g.nodes) & set(G.nodes), set(self.g.edges) & set(G.edges)), (set(G2.nodes), set(G2.edges)))		
 		# test it on a graph with three nodes in a directed cycle
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_node(2)
 		G.add_node(3)
@@ -956,7 +961,7 @@ class ZeroNodeTest(unittest.TestCase):
 		G2 = self.g & G
 		self.failUnlessEqual((set(self.g.nodes) & set(G.nodes), set(self.g.edges) & set(G.edges)), (set(G2.nodes), set(G2.edges)))
 		# test it on a graph with five nodes in an undirected cycle
-		G = Graph()
+		G = self.build_graph()
 		for i in range(5):
 			G.add_node(i)
 		for i in range(5):
@@ -970,19 +975,19 @@ class ZeroNodeTest(unittest.TestCase):
 		G = self.g - self.g
 		self.failUnlessEqual((set(G.nodes), set(G.edges)), (set(), set()))
 		# test it on a graph with one node with a loop
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_edge(1, 1, 11)
 		G2 = self.g - G
 		self.failUnlessEqual((set(self.g.nodes) - set(G.nodes), set(self.g.edges) - set(G.edges)), (set(G2.nodes), set(G2.edges)))
 		# test it on a graph with two nodes
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_node(2)
 		G2 = self.g - G
 		self.failUnlessEqual((set(self.g.nodes) - set(G.nodes), set(self.g.edges) - set(G.edges)), (set(G2.nodes), set(G2.edges)))		
 		# test it on a graph with three nodes in a directed cycle
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_node(2)
 		G.add_node(3)
@@ -992,7 +997,7 @@ class ZeroNodeTest(unittest.TestCase):
 		G2 = self.g - G
 		self.failUnlessEqual((set(self.g.nodes) - set(G.nodes), set(self.g.edges) - set(G.edges)), (set(G2.nodes), set(G2.edges)))
 		# test it on a graph with five nodes in an undirected cycle
-		G = Graph()
+		G = self.build_graph()
 		for i in range(5):
 			G.add_node(i)
 		for i in range(5):
@@ -1008,7 +1013,7 @@ class ZeroNodeTest(unittest.TestCase):
 		self.failUnlessEqual(self.g < self.g, False)
 		self.failUnlessEqual(self.g, self.g)
 		# test it on a graph with one node with a loop
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_edge(1, 1, 11)
 		self.failUnlessEqual(self.g.contains(G), False)
@@ -1019,7 +1024,7 @@ class ZeroNodeTest(unittest.TestCase):
 		self.failUnlessEqual(G > self.g, True)
 		self.failIfEqual(G, self.g)
 		# test it on a graph with two nodes
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_node(2)
 		self.failUnlessEqual(self.g.contains(G), False)
@@ -1030,7 +1035,7 @@ class ZeroNodeTest(unittest.TestCase):
 		self.failUnlessEqual(G > self.g, True)
 		self.failIfEqual(G, self.g)
 		# test it on a graph with three nodes in a directed cycle
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_node(2)
 		G.add_node(3)
@@ -1045,7 +1050,7 @@ class ZeroNodeTest(unittest.TestCase):
 		self.failUnlessEqual(G > self.g, True)
 		self.failIfEqual(G, self.g)
 		# test it on a graph with five nodes in an undirected cycle
-		G = Graph()
+		G = self.build_graph()
 		for i in range(5):
 			G.add_node(i)
 		for i in range(5):
@@ -1060,10 +1065,10 @@ class ZeroNodeTest(unittest.TestCase):
 		self.failIfEqual(G, self.g)
 
 
-class OneNodeDirectedTest(unittest.TestCase):
+class OneNodeDirectedTest(BaseGraphTest):
 
 	def setUp(self):
-		self.g = Graph()
+		self.g = self.build_graph()
 		self.A = self.g.add_node("A")
 		self.AA = self.g.add_edge("A", "A", "AA")
 
@@ -1367,19 +1372,19 @@ class OneNodeDirectedTest(unittest.TestCase):
 		G = self.g | self.g
 		self.failUnlessEqual((set(self.g.nodes), set(self.g.edges)), (set(G.nodes), set(G.edges)))
 		# test it on a graph with one node with a loop
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_edge(1, 1, 11)
 		G2 = self.g | G
 		self.failUnlessEqual((set(self.g.nodes) | set(G.nodes), set(self.g.edges) | set(G.edges)), (set(G2.nodes), set(G2.edges)))
 		# test it on a graph with two nodes
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_node(2)
 		G2 = self.g | G
 		self.failUnlessEqual((set(self.g.nodes) | set(G.nodes), set(self.g.edges) | set(G.edges)), (set(G2.nodes), set(G2.edges)))		
 		# test it on a graph with three nodes in a directed cycle
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_node(2)
 		G.add_node(3)
@@ -1389,7 +1394,7 @@ class OneNodeDirectedTest(unittest.TestCase):
 		G2 = self.g | G
 		self.failUnlessEqual((set(self.g.nodes) | set(G.nodes), set(self.g.edges) | set(G.edges)), (set(G2.nodes), set(G2.edges)))
 		# test it on a graph with five nodes in an undirected cycle
-		G = Graph()
+		G = self.build_graph()
 		for i in range(5):
 			G.add_node(i)
 		for i in range(5):
@@ -1403,19 +1408,19 @@ class OneNodeDirectedTest(unittest.TestCase):
 		G = self.g & self.g
 		self.failUnlessEqual((set(self.g.nodes), set(self.g.edges)), (set(G.nodes), set(G.edges)))
 		# test it on a graph with one node with a loop
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_edge(1, 1, 11)
 		G2 = self.g & G
 		self.failUnlessEqual((set(self.g.nodes) & set(G.nodes), set(self.g.edges) & set(G.edges)), (set(G2.nodes), set(G2.edges)))
 		# test it on a graph with two nodes
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_node(2)
 		G2 = self.g & G
 		self.failUnlessEqual((set(self.g.nodes) & set(G.nodes), set(self.g.edges) & set(G.edges)), (set(G2.nodes), set(G2.edges)))		
 		# test it on a graph with three nodes in a directed cycle
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_node(2)
 		G.add_node(3)
@@ -1425,7 +1430,7 @@ class OneNodeDirectedTest(unittest.TestCase):
 		G2 = self.g & G
 		self.failUnlessEqual((set(self.g.nodes) & set(G.nodes), set(self.g.edges) & set(G.edges)), (set(G2.nodes), set(G2.edges)))
 		# test it on a graph with five nodes in an undirected cycle
-		G = Graph()
+		G = self.build_graph()
 		for i in range(5):
 			G.add_node(i)
 		for i in range(5):
@@ -1439,19 +1444,19 @@ class OneNodeDirectedTest(unittest.TestCase):
 		G = self.g - self.g
 		self.failUnlessEqual((set(G.nodes), set(G.edges)), (set(), set()))
 		# test it on a graph with one node with a loop
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_edge(1, 1, 11)
 		G2 = self.g - G
 		self.failUnlessEqual((set(self.g.nodes) - set(G.nodes), set(self.g.edges) - set(G.edges)), (set(G2.nodes), set(G2.edges)))
 		# test it on a graph with two nodes
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_node(2)
 		G2 = self.g - G
 		self.failUnlessEqual((set(self.g.nodes) - set(G.nodes), set(self.g.edges) - set(G.edges)), (set(G2.nodes), set(G2.edges)))		
 		# test it on a graph with three nodes in a directed cycle
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_node(2)
 		G.add_node(3)
@@ -1461,7 +1466,7 @@ class OneNodeDirectedTest(unittest.TestCase):
 		G2 = self.g - G
 		self.failUnlessEqual((set(self.g.nodes) - set(G.nodes), set(self.g.edges) - set(G.edges)), (set(G2.nodes), set(G2.edges)))
 		# test it on a graph with five nodes in an undirected cycle
-		G = Graph()
+		G = self.build_graph()
 		for i in range(5):
 			G.add_node(i)
 		for i in range(5):
@@ -1472,7 +1477,7 @@ class OneNodeDirectedTest(unittest.TestCase):
 
 	def testContains(self):
 		# test it on the zero node case
-		G = Graph()
+		G = self.build_graph()
 		self.failUnlessEqual(self.g.contains(G), True)
 		self.failUnlessEqual(self.g > G, True)
 		self.failUnlessEqual(self.g < G, False)
@@ -1480,7 +1485,7 @@ class OneNodeDirectedTest(unittest.TestCase):
 		self.failUnlessEqual(G > self.g, False)
 		self.failIfEqual(G, self.g)
 		# test it on a graph with one node with a loop
-		G = Graph()
+		G = self.build_graph()
 		G.add_node("A")
 		G.add_edge("A", "A", "AA")
 		self.failUnlessEqual(self.g.contains(G), True)
@@ -1491,7 +1496,7 @@ class OneNodeDirectedTest(unittest.TestCase):
 		self.failUnlessEqual(G > self.g, False)
 		self.failUnlessEqual(G, self.g)
 		# test it on a graph with two nodes
-		G = Graph()
+		G = self.build_graph()
 		G.add_node("A")
 		G.add_node("B")
 		self.failUnlessEqual(self.g.contains(G), False)
@@ -1502,7 +1507,7 @@ class OneNodeDirectedTest(unittest.TestCase):
 		self.failUnlessEqual(G > self.g, False)
 		self.failIfEqual(G, self.g)
 		# test it on a graph with three nodes in a directed cycle
-		G = Graph()
+		G = self.build_graph()
 		G.add_node("A")
 		G.add_node("B")
 		G.add_node("C")
@@ -1517,7 +1522,7 @@ class OneNodeDirectedTest(unittest.TestCase):
 		self.failUnlessEqual(G > self.g, False)
 		self.failIfEqual(G, self.g)
 		# test it on a graph with five nodes in an undirected cycle
-		G = Graph()
+		G = self.build_graph()
 		for i in range(5):
 			G.add_node(i)
 		for i in range(5):
@@ -1535,7 +1540,7 @@ class OneNodeDirectedTest(unittest.TestCase):
 class OneNodeUndirectedTest(OneNodeDirectedTest):
 
 	def setUp(self):
-		self.g = Graph()
+		self.g = self.build_graph()
 		self.A = self.g.add_node("A")
 		self.AA = self.g.add_edge("A", "A", "AA", is_directed=False)
 
@@ -1543,7 +1548,7 @@ class OneNodeUndirectedTest(OneNodeDirectedTest):
 class OneNodeDoubleUndirectedTest(OneNodeDirectedTest):
 
 	def setUp(self):
-		self.g = Graph()
+		self.g = self.build_graph()
 		self.A = self.g.add_node("A")
 		self.AA = self.g.add_edge("A", "A", "AA", is_directed=False)
 		self.AA_2 = self.g.add_edge("A", "A", "AA_2", is_directed=False)
@@ -1695,7 +1700,7 @@ class OneNodeDoubleUndirectedTest(OneNodeDirectedTest):
 
 	def testContains(self):
 		# test it on the zero node case
-		G = Graph()
+		G = self.build_graph()
 		self.failUnlessEqual(self.g.contains(G), True)
 		self.failUnlessEqual(self.g > G, True)
 		self.failUnlessEqual(self.g < G, False)
@@ -1703,7 +1708,7 @@ class OneNodeDoubleUndirectedTest(OneNodeDirectedTest):
 		self.failUnlessEqual(G > self.g, False)
 		self.failIfEqual(G, self.g)
 		# test it on a graph with one node with a loop
-		G = Graph()
+		G = self.build_graph()
 		G.add_node("A")
 		G.add_edge("A", "A", "AA")
 		self.failUnlessEqual(self.g.contains(G), True)
@@ -1714,7 +1719,7 @@ class OneNodeDoubleUndirectedTest(OneNodeDirectedTest):
 		self.failUnlessEqual(G > self.g, False)
 		self.failIfEqual(G, self.g)
 		# test it on a graph with two nodes
-		G = Graph()
+		G = self.build_graph()
 		G.add_node("A")
 		G.add_node("B")
 		self.failUnlessEqual(self.g.contains(G), False)
@@ -1725,7 +1730,7 @@ class OneNodeDoubleUndirectedTest(OneNodeDirectedTest):
 		self.failUnlessEqual(G > self.g, False)
 		self.failIfEqual(G, self.g)
 		# test it on a graph with three nodes in a directed cycle
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_node(2)
 		G.add_node(3)
@@ -1740,7 +1745,7 @@ class OneNodeDoubleUndirectedTest(OneNodeDirectedTest):
 		self.failUnlessEqual(G > self.g, False)
 		self.failIfEqual(G, self.g)
 		# test it on a graph with five nodes in an undirected cycle
-		G = Graph()
+		G = self.build_graph()
 		for i in range(5):
 			G.add_node(i)
 		for i in range(5):
@@ -1758,16 +1763,16 @@ class OneNodeDoubleUndirectedTest(OneNodeDirectedTest):
 class OneNodeDoubleDirectedTest(OneNodeDoubleUndirectedTest):
 
 	def setUp(self):
-		self.g = Graph()
+		self.g = self.build_graph()
 		self.A = self.g.add_node("A")
 		self.AA = self.g.add_edge("A", "A", "AA")
 		self.AA_2 = self.g.add_edge("A", "A", "AA_2")
 
 
-class TwoNodeUnconnectedTest(unittest.TestCase):
+class TwoNodeUnconnectedTest(BaseGraphTest):
 
 	def setUp(self):
-		self.g = Graph()
+		self.g = self.build_graph()
 		self.A = self.g.add_node("A")
 		self.B = self.g.add_node("B")
 
@@ -1981,19 +1986,19 @@ class TwoNodeUnconnectedTest(unittest.TestCase):
 		G = self.g | self.g
 		self.failUnlessEqual((set(self.g.nodes), set(self.g.edges)), (set(G.nodes), set(G.edges)))
 		# test it on a graph with one node with a loop
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_edge(1, 1, 11)
 		G2 = self.g | G
 		self.failUnlessEqual((set(self.g.nodes) | set(G.nodes), set(self.g.edges) | set(G.edges)), (set(G2.nodes), set(G2.edges)))
 		# test it on a graph with two nodes
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_node(2)
 		G2 = self.g | G
 		self.failUnlessEqual((set(self.g.nodes) | set(G.nodes), set(self.g.edges) | set(G.edges)), (set(G2.nodes), set(G2.edges)))		
 		# test it on a graph with three nodes in a directed cycle
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_node(2)
 		G.add_node(3)
@@ -2003,7 +2008,7 @@ class TwoNodeUnconnectedTest(unittest.TestCase):
 		G2 = self.g | G
 		self.failUnlessEqual((set(self.g.nodes) | set(G.nodes), set(self.g.edges) | set(G.edges)), (set(G2.nodes), set(G2.edges)))
 		# test it on a graph with five nodes in an undirected cycle
-		G = Graph()
+		G = self.build_graph()
 		for i in range(5):
 			G.add_node(i)
 		for i in range(5):
@@ -2017,19 +2022,19 @@ class TwoNodeUnconnectedTest(unittest.TestCase):
 		G = self.g & self.g
 		self.failUnlessEqual((set(self.g.nodes), set(self.g.edges)), (set(G.nodes), set(G.edges)))
 		# test it on a graph with one node with a loop
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_edge(1, 1, 11)
 		G2 = self.g & G
 		self.failUnlessEqual((set(self.g.nodes) & set(G.nodes), set(self.g.edges) & set(G.edges)), (set(G2.nodes), set(G2.edges)))
 		# test it on a graph with two nodes
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_node(2)
 		G2 = self.g & G
 		self.failUnlessEqual((set(self.g.nodes) & set(G.nodes), set(self.g.edges) & set(G.edges)), (set(G2.nodes), set(G2.edges)))		
 		# test it on a graph with three nodes in a directed cycle
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_node(2)
 		G.add_node(3)
@@ -2039,7 +2044,7 @@ class TwoNodeUnconnectedTest(unittest.TestCase):
 		G2 = self.g & G
 		self.failUnlessEqual((set(self.g.nodes) & set(G.nodes), set(self.g.edges) & set(G.edges)), (set(G2.nodes), set(G2.edges)))
 		# test it on a graph with five nodes in an undirected cycle
-		G = Graph()
+		G = self.build_graph()
 		for i in range(5):
 			G.add_node(i)
 		for i in range(5):
@@ -2053,19 +2058,19 @@ class TwoNodeUnconnectedTest(unittest.TestCase):
 		G = self.g - self.g
 		self.failUnlessEqual((set(G.nodes), set(G.edges)), (set(), set()))
 		# test it on a graph with one node with a loop
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_edge(1, 1, 11)
 		G2 = self.g - G
 		self.failUnlessEqual((set(self.g.nodes) - set(G.nodes), set(self.g.edges) - set(G.edges)), (set(G2.nodes), set(G2.edges)))
 		# test it on a graph with two nodes
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_node(2)
 		G2 = self.g - G
 		self.failUnlessEqual((set(self.g.nodes) - set(G.nodes), set(self.g.edges) - set(G.edges)), (set(G2.nodes), set(G2.edges)))		
 		# test it on a graph with three nodes in a directed cycle
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_node(2)
 		G.add_node(3)
@@ -2075,7 +2080,7 @@ class TwoNodeUnconnectedTest(unittest.TestCase):
 		G2 = self.g - G
 		self.failUnlessEqual((set(self.g.nodes) - set(G.nodes), set(self.g.edges) - set(G.edges)), (set(G2.nodes), set(G2.edges)))
 		# test it on a graph with five nodes in an undirected cycle
-		G = Graph()
+		G = self.build_graph()
 		for i in range(5):
 			G.add_node(i)
 		for i in range(5):
@@ -2086,7 +2091,7 @@ class TwoNodeUnconnectedTest(unittest.TestCase):
 
 	def testContains(self):
 		# test it on the zero node case
-		G = Graph()
+		G = self.build_graph()
 		self.failUnlessEqual(self.g.contains(G), True)
 		self.failUnlessEqual(self.g > G, True)
 		self.failUnlessEqual(self.g < G, False)
@@ -2094,7 +2099,7 @@ class TwoNodeUnconnectedTest(unittest.TestCase):
 		self.failUnlessEqual(G > self.g, False)
 		self.failIfEqual(G, self.g)
 		# test it on a graph with one node with a loop
-		G = Graph()
+		G = self.build_graph()
 		G.add_node("A")
 		G.add_edge("A", "A", "AA")
 		self.failUnlessEqual(self.g.contains(G), False)
@@ -2105,7 +2110,7 @@ class TwoNodeUnconnectedTest(unittest.TestCase):
 		self.failUnlessEqual(G > self.g, False)
 		self.failIfEqual(G, self.g)
 		# test it on a graph with two nodes
-		G = Graph()
+		G = self.build_graph()
 		G.add_node("A")
 		G.add_node("B")
 		self.failUnlessEqual(self.g.contains(G), True)
@@ -2116,7 +2121,7 @@ class TwoNodeUnconnectedTest(unittest.TestCase):
 		self.failUnlessEqual(G > self.g, False)
 		self.failUnlessEqual(G, self.g)
 		# test it on a graph with three nodes in a directed cycle
-		G = Graph()
+		G = self.build_graph()
 		G.add_node("A")
 		G.add_node("B")
 		G.add_node("C")
@@ -2131,7 +2136,7 @@ class TwoNodeUnconnectedTest(unittest.TestCase):
 		self.failUnlessEqual(G > self.g, True)
 		self.failIfEqual(G, self.g)
 		# test it on a graph with five nodes in an undirected cycle
-		G = Graph()
+		G = self.build_graph()
 		for i in range(5):
 			G.add_node(i)
 		for i in range(5):
@@ -2146,10 +2151,10 @@ class TwoNodeUnconnectedTest(unittest.TestCase):
 		self.failIfEqual(G, self.g)
 
 
-class ThreeNodeCycleTest(unittest.TestCase):
+class ThreeNodeCycleTest(BaseGraphTest):
 
 	def setUp(self):
-		self.g = Graph()
+		self.g = self.build_graph()
 		self.A = self.g.add_node("A")
 		self.B = self.g.add_node("B")
 		self.C = self.g.add_node("C")
@@ -2208,7 +2213,7 @@ class ThreeNodeCycleTest(unittest.TestCase):
 
 	def testContains(self):
 		# test it on the zero node case
-		G = Graph()
+		G = self.build_graph()
 		self.failUnlessEqual(self.g.contains(G), True)
 		self.failUnlessEqual(self.g > G, True)
 		self.failUnlessEqual(self.g < G, False)
@@ -2216,7 +2221,7 @@ class ThreeNodeCycleTest(unittest.TestCase):
 		self.failUnlessEqual(G > self.g, False)
 		self.failIfEqual(G, self.g)
 		# test it on a graph with one node with a loop
-		G = Graph()
+		G = self.build_graph()
 		G.add_node("A")
 		G.add_edge("A", "A", "AA")
 		self.failUnlessEqual(self.g.contains(G), False)
@@ -2227,7 +2232,7 @@ class ThreeNodeCycleTest(unittest.TestCase):
 		self.failUnlessEqual(G > self.g, False)
 		self.failIfEqual(G, self.g)
 		# test it on a graph with two nodes
-		G = Graph()
+		G = self.build_graph()
 		G.add_node("A")
 		G.add_node("B")
 		self.failUnlessEqual(self.g.contains(G), True)
@@ -2238,7 +2243,7 @@ class ThreeNodeCycleTest(unittest.TestCase):
 		self.failUnlessEqual(G > self.g, False)
 		self.failIfEqual(G, self.g)
 		# test it on a graph with three nodes in a directed cycle
-		G = Graph()
+		G = self.build_graph()
 		G.add_node("A")
 		G.add_node("B")
 		G.add_node("C")
@@ -2253,7 +2258,7 @@ class ThreeNodeCycleTest(unittest.TestCase):
 		self.failUnlessEqual(G > self.g, False)
 		self.failUnlessEqual(G, self.g)
 		# test it on a graph with five nodes in an undirected cycle
-		G = Graph()
+		G = self.build_graph()
 		for i in range(5):
 			G.add_node(i)
 		for i in range(5):
@@ -2501,19 +2506,19 @@ class ThreeNodeCycleTest(unittest.TestCase):
 		G = self.g | self.g
 		self.failUnlessEqual((set(self.g.nodes), set(self.g.edges)), (set(G.nodes), set(G.edges)))
 		# test it on a graph with one node with a loop
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_edge(1, 1, 11)
 		G2 = self.g | G
 		self.failUnlessEqual((set(self.g.nodes) | set(G.nodes), set(self.g.edges) | set(G.edges)), (set(G2.nodes), set(G2.edges)))
 		# test it on a graph with two nodes
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_node(2)
 		G2 = self.g | G
 		self.failUnlessEqual((set(self.g.nodes) | set(G.nodes), set(self.g.edges) | set(G.edges)), (set(G2.nodes), set(G2.edges)))		
 		# test it on a graph with three nodes in a directed cycle
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_node(2)
 		G.add_node(3)
@@ -2523,7 +2528,7 @@ class ThreeNodeCycleTest(unittest.TestCase):
 		G2 = self.g | G
 		self.failUnlessEqual((set(self.g.nodes) | set(G.nodes), set(self.g.edges) | set(G.edges)), (set(G2.nodes), set(G2.edges)))
 		# test it on a graph with five nodes in an undirected cycle
-		G = Graph()
+		G = self.build_graph()
 		for i in range(5):
 			G.add_node(i)
 		for i in range(5):
@@ -2537,19 +2542,19 @@ class ThreeNodeCycleTest(unittest.TestCase):
 		G = self.g & self.g
 		self.failUnlessEqual((set(self.g.nodes), set(self.g.edges)), (set(G.nodes), set(G.edges)))
 		# test it on a graph with one node with a loop
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_edge(1, 1, 11)
 		G2 = self.g & G
 		self.failUnlessEqual((set(self.g.nodes) & set(G.nodes), set(self.g.edges) & set(G.edges)), (set(G2.nodes), set(G2.edges)))
 		# test it on a graph with two nodes
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_node(2)
 		G2 = self.g & G
 		self.failUnlessEqual((set(self.g.nodes) & set(G.nodes), set(self.g.edges) & set(G.edges)), (set(G2.nodes), set(G2.edges)))		
 		# test it on a graph with three nodes in a directed cycle
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_node(2)
 		G.add_node(3)
@@ -2559,7 +2564,7 @@ class ThreeNodeCycleTest(unittest.TestCase):
 		G2 = self.g & G
 		self.failUnlessEqual((set(self.g.nodes) & set(G.nodes), set(self.g.edges) & set(G.edges)), (set(G2.nodes), set(G2.edges)))
 		# test it on a graph with five nodes in an undirected cycle
-		G = Graph()
+		G = self.build_graph()
 		for i in range(5):
 			G.add_node(i)
 		for i in range(5):
@@ -2573,19 +2578,19 @@ class ThreeNodeCycleTest(unittest.TestCase):
 		G = self.g - self.g
 		self.failUnlessEqual((set(G.nodes), set(G.edges)), (set(), set()))
 		# test it on a graph with one node with a loop
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_edge(1, 1, 11)
 		G2 = self.g - G
 		self.failUnlessEqual((set(self.g.nodes) - set(G.nodes), set(self.g.edges) - set(G.edges)), (set(G2.nodes), set(G2.edges)))
 		# test it on a graph with two nodes
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_node(2)
 		G2 = self.g - G
 		self.failUnlessEqual((set(self.g.nodes) - set(G.nodes), set(self.g.edges) - set(G.edges)), (set(G2.nodes), set(G2.edges)))		
 		# test it on a graph with three nodes in a directed cycle
-		G = Graph()
+		G = self.build_graph()
 		G.add_node(1)
 		G.add_node(2)
 		G.add_node(3)
@@ -2595,7 +2600,7 @@ class ThreeNodeCycleTest(unittest.TestCase):
 		G2 = self.g - G
 		self.failUnlessEqual((set(self.g.nodes) - set(G.nodes), set(self.g.edges) - set(G.edges)), (set(G2.nodes), set(G2.edges)))
 		# test it on a graph with five nodes in an undirected cycle
-		G = Graph()
+		G = self.build_graph()
 		for i in range(5):
 			G.add_node(i)
 		for i in range(5):
@@ -2616,9 +2621,9 @@ TODO:
 	- add tests for walks, all traversals, etc.
 """
 
-class GraphPerformanceTest(unittest.TestCase):
+class GraphPerformanceTest(BaseGraphTest):
 
-	graph_setup = "from base import Graph; g = Graph(); n = g.add_node(first_name='');"
+	graph_setup = "from base import Graph; g = self.build_graph(); n = g.add_node(first_name='');"
 
 	def testNodeAdditionPerformance(self):
 		setup = self.graph_setup
