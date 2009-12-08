@@ -442,7 +442,7 @@ individual docstrings.
 from collections import deque, namedtuple, defaultdict
 import heapq
 import copy
-from itertools import chain
+from itertools import chain, count
 
 class GraphElement:
 	"""Base class for Nodes and Edges.
@@ -513,21 +513,14 @@ class Node(GraphElement):
 	- degree, which is the number of edges incident to this node
 	- data, which is a dictionary of all non-private (ie, user-defined)
 	  attributes of this node
-	- and name, which is a unique, non-None value optionally passed in
-	  at instantiation time, and used for hashing comparisons. 
-
-	In the event that a name is not passed in, the object's id will be used.
+	- and name, which is a unique value optionally passed in
+	  at instantiation time, and used for hashing comparisons.
 	"""
 
-	def __init__(self, name=None, **kwargs):
+	def __init__(self, name, **kwargs):
 		"""Initializes the Node object.
 
-		Accepts an optional name argument and a variable number of kwargs.
-
-		If a name is provided, it can be accessed through the .name property.
-
-		If a name is not provided, one will be automatically generated based
-		on the object's id.
+		Accepts an mandatory name argument and a variable number of kwargs.
 
 		The kwargs are mapped into attributes.
 
@@ -540,8 +533,7 @@ class Node(GraphElement):
 			5
 		"""
 
-		if name is not None: self._name = name
-		else: self._name = id(self)
+		self._name = name
 		self._incoming = []
 		self._outgoing = []
 		self._bidirectional = []
@@ -732,14 +724,51 @@ class Graph:
 	Node = Node
 	Edge = Edge
 
-	def __init__(self):
+	def __init__(self, nodes=set(), edges=set()):
 		"""Base initializer for Graphs.
+
+		Accepts two keyword arguments: nodes and edges.
+
+		Nodes accepts an iterable of valid node names, while
+		edges accepts an iterable containing tuples and sets.
+
+		If edges is passed a tuple, it should be of the form
+		(source, destination), and will create a directed
+		edge named (source, destination).
+
+		If edges is passed a set, it should be of the form
+		{endpoint, endpoint}, and will create an undirected
+		edge named frozenset((endpoint, endpoint)).
 
 		Usage:
 			>>> g = Graph()
+			>>> g = Graph(nodes=['a', 'b', 'c'])
+			>>> 'a' in g
+			True
+			>>> g = Graph(nodes=['a', 'b'], edges=[('a','b')])
+			>>> ('a', 'b') in g
+			True
+			>>> ('b', 'a') in g
+			False
+			>>> g = Graph(nodes=['a', 'b'], edges=[{'a', 'b'}])
+			>>> frozenset(('a', 'b')) in g
+			True
 		"""
+		# initialize the basic elements of the graph
 		self._nodes = {}
 		self._edges = {}
+		# the counter is a thread-safe way to track default names
+		self._counter = count()
+		# add the nodes and edges specified by kwargs
+		for node in nodes:
+			self.add_node(node)
+		for edge in edges:
+			start, end = edge
+			if type(edge) is set:
+				is_directed = True
+			else:
+				is_directed = False
+			self.add_edge(start, end, is_directed=is_directed)
 
 	#################################################################
 	#			Operators				#
@@ -875,6 +904,7 @@ class Graph:
 			Node(name=bob, weight=5)
 		"""
 		# create the new node
+		if name is None: name = next(self._counter)
 		node = self.Node(name, **kwargs)
 		# remove any otherwise identical nodes
 		try: self.remove_node(node)
