@@ -44,7 +44,27 @@ class BaseGraphTest(unittest.TestCase):
 
 	def build_graph(self):
 		return Graph()
-		
+
+
+class GraphCreationTest(BaseGraphTest):
+
+	def testGraphCreation(self):
+		self.g = Graph()
+		self.failUnlessEqual(self.g.order, 0)
+		self.failUnlessEqual(self.g.size, 0)
+		self.g = Graph(nodes=['a', 'b', 'c'], edges=[('a', 'b'), ('a', 'c')])
+		self.failUnlessEqual(self.g.order, 3)
+		self.failUnlessEqual(self.g.size, 2)
+		self.failUnlessEqual(self.g[('a','b')].is_directed, True)
+		self.failUnlessEqual(self.g[('a','c')].is_directed, True)
+		self.g = Graph(nodes=['a', 'b', 'c'], edges=[{'a', 'b'}, {'a', 'c'}])
+		self.failUnlessEqual(self.g.order, 3)
+		self.failUnlessEqual(self.g.size, 2)
+		self.failUnlessEqual(self.g[frozenset(('a','b'))].is_directed, False)
+		self.failUnlessEqual(self.g[frozenset(('a','c'))].is_directed, False)
+		self.failUnlessEqual(self.g[frozenset(('b','a'))].is_directed, False)
+		self.failUnlessEqual(self.g[frozenset(('c','a'))].is_directed, False)
+
 
 class NodeCreationTest(BaseGraphTest):
 
@@ -2713,6 +2733,7 @@ if __name__ == "__main__":
 	GraphPropertiesTest = unittest.TestLoader().loadTestsFromTestCase(GraphPropertiesTest)
 	GraphFailureTest = unittest.TestLoader().loadTestsFromTestCase(GraphFailureTest)
 	GraphSearchTest = unittest.TestLoader().loadTestsFromTestCase(GraphSearchTest)
+	GraphCreationTest = unittest.TestLoader().loadTestsFromTestCase(GraphCreationTest)
 	NodeCreationTest = unittest.TestLoader().loadTestsFromTestCase(NodeCreationTest)
 	EdgeCreationTest = unittest.TestLoader().loadTestsFromTestCase(EdgeCreationTest)
 	EdgeMovementTest = unittest.TestLoader().loadTestsFromTestCase(EdgeMovementTest)
@@ -2730,7 +2751,7 @@ if __name__ == "__main__":
 	RemovalTest = unittest.TestLoader().loadTestsFromTestCase(RemovalTest)
 	OverwriteTest = unittest.TestLoader().loadTestsFromTestCase(OverwriteTest)
 	EdgeUnpackTest = unittest.TestLoader().loadTestsFromTestCase(EdgeUnpackTest)
-	suites = [GraphCorrectnessTest, NodeCreationTest, EdgeCreationTest, GraphPropertiesTest, GraphSearchTest, EdgeMovementTest, GetElementsTest]
+	suites = [GraphCorrectnessTest, GraphCreationTest, NodeCreationTest, EdgeCreationTest, GraphPropertiesTest, GraphSearchTest, EdgeMovementTest, GetElementsTest]
 	suites += [ZeroNodeTest, RemovalTest, OverwriteTest, TraversalTest, InductionTest, GraphFailureTest, AdjacencyTest]
 	suites += [OneNodeDirectedTest]
 	suites += [OneNodeUndirectedTest]

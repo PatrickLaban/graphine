@@ -765,9 +765,9 @@ class Graph:
 		for edge in edges:
 			start, end = edge
 			if type(edge) is set:
-				is_directed = True
-			else:
 				is_directed = False
+			else:
+				is_directed = True
 			self.add_edge(start, end, is_directed=is_directed)
 
 	#################################################################
