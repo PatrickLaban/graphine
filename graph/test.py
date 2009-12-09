@@ -692,12 +692,13 @@ class GraphCorrectnessTest(BaseGraphTest):
 		g2.add_node(5)
 		g2.add_edge(3, 4, 34)
 		g2.add_edge(4, 5, 45)
-		g2.add_edge(5, 3, 53)
+		g2.add_edge(5, 3, 53, color='red')
 		union = g1 | g2
 		self.failUnlessEqual({1, 2, 3, 4, 5}, {node.name for node in union.nodes})
 		self.failUnlessEqual({12, 23, 31, 34, 45, 53}, {edge.name for edge in union.edges})
 		self.failUnlessEqual(union.order, 5)
 		self.failUnlessEqual(union.size, 6)
+		self.failUnlessEqual(union[53].color, 'red')
 
 	def testIntersection(self):
 		g1 = self.build_graph()
