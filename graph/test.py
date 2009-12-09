@@ -57,7 +57,7 @@ class GraphCreationTest(BaseGraphTest):
 		self.failUnlessEqual(self.g.size, 2)
 		self.failUnlessEqual(self.g[('a','b')].is_directed, True)
 		self.failUnlessEqual(self.g[('a','c')].is_directed, True)
-		self.g = Graph(nodes=['a', 'b', 'c'], edges=[{'a', 'b'}, {'a', 'c'}])
+		self.g = Graph(nodes=['a', 'b', 'c'], edges={('a', 'b'):{'is_directed':False}, ('a', 'c'):{'is_directed':False}})
 		self.failUnlessEqual(self.g.order, 3)
 		self.failUnlessEqual(self.g.size, 2)
 		self.failUnlessEqual(self.g[frozenset(('a','b'))].is_directed, False)

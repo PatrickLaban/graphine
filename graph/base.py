@@ -761,14 +761,12 @@ class Graph:
 		self._counter = count()
 		# add the nodes and edges specified by kwargs
 		for node in nodes:
-			self.add_node(node)
+			try: self.add_node(node, **nodes[node])
+			except: self.add_node(node)
 		for edge in edges:
 			start, end = edge
-			if type(edge) is set:
-				is_directed = False
-			else:
-				is_directed = True
-			self.add_edge(start, end, is_directed=is_directed)
+			try: self.add_edge(start, end, **edges[edge])
+			except: self.add_edge(start, end)
 
 	#################################################################
 	#			Operators				#
