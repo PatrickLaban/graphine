@@ -1602,7 +1602,7 @@ class Graph:
 			g.add_node(node.name, **node.data)
 		# and for edges
 		for edge in chain(self.edges, other.edges):
-			g.add_edge(edge.start.name, edge.end.name, edge.name, edge.is_directed, **node.data)
+			g.add_edge(edge.start.name, edge.end.name, edge.name, edge.is_directed, **edge.data)
 		return g
 
 	def intersection(self, other):
