@@ -761,9 +761,13 @@ class Graph:
 			True
 			>>> ('b', 'a') in g
 			False
-			>>> g = Graph(nodes=['a', 'b'], edges=[('a', 'b')])
-			>>> frozenset(('a', 'b')) in g
+			>>> g = Graph(nodes=['a', 'b'], edges=[('a', 'b', 'ab', False)])
+			>>> 'ab' in g
 			True
+			>>> g['ab'].is_directed
+			False
+			>>> g = Graph(nodes={'a':{'spotted':True}, 'b':{'spotted':False}}, edges=[('a', 'b')])
+			
 		"""
 		# initialize the basic elements of the graph
 		self._nodes = {}
@@ -1270,6 +1274,25 @@ class Graph:
 			Node(name="D")
 		"""
 		for node in self.heuristic_traversal(root, lambda s: s.pop(0)):
+			yield node
+
+	def topological_traversal(self):
+		"""Traverses the graph, returning nodes in topological order."""
+		# build a dictionary mapping nodes to their incoming degree
+		nodes_to_degrees = {n:len(n.incoming) for n in self.nodes}
+		# get a queue of source nodes, ie, those with 0 incoming edges.
+		queue = deque(n for n, degree in nodes_to_degrees.items() if not degree)
+		result = []
+		while queue:
+			n = queue.popleft()
+			result.append(n)
+			# get the nodes which n is outgoing adjacent to
+			for destination in n.get_adjacent(outgoing=True, incoming=False):
+				nodes_to_degrees[destination] -= 1
+				# if the destination is now a source
+				if not nodes_to_degrees[destination]:
+				    queue.append(destination)
+		for node in result:
 			yield node
 
 	def get_connected_components(self):
