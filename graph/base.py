@@ -729,16 +729,27 @@ class Graph:
 
 		Accepts two keyword arguments: nodes and edges.
 
-		Nodes accepts an iterable of valid node names, while
-		edges accepts an iterable containing tuples and sets.
+		Nodes can be either an iterable whose items are valid node
+		names or a mapping of node names to a dictionary of attributes.
+		Intuitively, this is equivalent to:
 
-		If edges is passed a tuple, it should be of the form
-		(source, destination), and will create a directed
-		edge named (source, destination).
+		>>> for n in nodes:
+		... 	g.add_node(n)
 
-		If edges is passed a set, it should be of the form
-		{endpoint, endpoint}, and will create an undirected
-		edge named frozenset((endpoint, endpoint)).
+		or:
+
+		>>> for n in nodes:
+		... 	g.add_node(n, **nodes[n])
+
+		The same logic applies for the edges argument, for example:
+
+		>>> for e in edges:
+		... 	g.add_edge(*e)
+
+		or:
+
+		>>> for e in edges:
+		... 	g.add_edge(*e, **edges[e])
 
 		Usage:
 			>>> g = Graph()
@@ -750,7 +761,7 @@ class Graph:
 			True
 			>>> ('b', 'a') in g
 			False
-			>>> g = Graph(nodes=['a', 'b'], edges=[{'a', 'b'}])
+			>>> g = Graph(nodes=['a', 'b'], edges=[('a', 'b')])
 			>>> frozenset(('a', 'b')) in g
 			True
 		"""
@@ -762,11 +773,10 @@ class Graph:
 		# add the nodes and edges specified by kwargs
 		for node in nodes:
 			try: self.add_node(node, **nodes[node])
-			except: self.add_node(node)
+			except TypeError: self.add_node(node)
 		for edge in edges:
-			start, end = edge
-			try: self.add_edge(start, end, **edges[edge])
-			except: self.add_edge(start, end)
+			try: self.add_edge(*edge, **edges[edge])
+			except TypeError: self.add_edge(*edge)
 
 	#################################################################
 	#			Operators				#
