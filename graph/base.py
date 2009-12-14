@@ -753,15 +753,15 @@ class Graph:
 
 		Usage:
 			>>> g = Graph()
-			>>> g = Graph(nodes=['a', 'b', 'c'])
+			>>> g = Graph(nodes={'a', 'b', 'c'})
 			>>> 'a' in g
 			True
-			>>> g = Graph(nodes=['a', 'b'], edges=[('a','b')])
+			>>> g = Graph(nodes={'a', 'b'}, edges={('a','b')})
 			>>> ('a', 'b') in g
 			True
 			>>> ('b', 'a') in g
 			False
-			>>> g = Graph(nodes=['a', 'b'], edges=[('a', 'b', 'ab', False)])
+			>>> g = Graph(nodes={'a', 'b'}, edges={('a', 'b', 'ab', False)})
 			>>> 'ab' in g
 			True
 			>>> g['ab'].is_directed
@@ -1277,23 +1277,36 @@ class Graph:
 			yield node
 
 	def topological_traversal(self):
-		"""Traverses the graph, returning nodes in topological order."""
+		"""Traverses the graph, yielding nodes in topological order.
+
+		This is useful in cases like a dependency graph, where it
+		is desirable to get all of the nodes 
+
+		This code is lightly modified from bearophile's pygraph
+		project, and like his, simply fails to return all the nodes
+		if it encounters a cycle.
+
+		Usage:
+			>>> g = Graph(edges={('a','b'},('a','c'),('b','c')})
+			>>> for node in g.topological_traversal():
+			... 	print(node)
+			Node(name=a)
+			Node(name=b)
+			Node(name=c)
+		"""
 		# build a dictionary mapping nodes to their incoming degree
 		nodes_to_degrees = {n:len(n.incoming) for n in self.nodes}
 		# get a queue of source nodes, ie, those with 0 incoming edges.
 		queue = deque(n for n, degree in nodes_to_degrees.items() if not degree)
-		result = []
 		while queue:
 			n = queue.popleft()
-			result.append(n)
+			yield n
 			# get the nodes which n is outgoing adjacent to
 			for destination in n.get_adjacent(outgoing=True, incoming=False):
 				nodes_to_degrees[destination] -= 1
 				# if the destination is now a source
 				if not nodes_to_degrees[destination]:
 				    queue.append(destination)
-		for node in result:
-			yield node
 
 	def get_connected_components(self):
 		"""Gets all the connected components from the graph.
@@ -1369,6 +1382,16 @@ class Graph:
 			strongly_connected_components.append(current_component)
 			self.transpose()
 		return strongly_connected_components
+
+	def get_cycles(self):
+		"""Finds and returns a list of cycles in the current graph.
+
+		Each cycle is represented as an independent graph.
+		"""
+		acyclic_nodes = set(self.topological_traversal())
+		cyclic_nodes = (node for node in self.nodes if node not in acyclic_nodes)
+		g = self.induce_subgraph(*cyclic_nodes)
+		return g.get_connected_components()
 
 	def get_shortest_paths(self, source, get_weight=lambda e: 1):
 		"""Finds the shortest path to all connected nodes from source.
