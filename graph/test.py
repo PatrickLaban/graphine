@@ -765,7 +765,7 @@ class GraphCorrectnessTest(BaseGraphTest):
 		# trivial graph
 		g = self.build_graph()
 		n1 = g.add_node(first_name="Geremy")
-		paths = g.get_shortest_paths(n1)
+		paths = g.get_shortest_paths(n1, pretty=False)
 		self.failUnlessEqual(paths, {n1: (0, [])})
 		# less trivial graph
 		g = self.build_graph()
@@ -774,7 +774,7 @@ class GraphCorrectnessTest(BaseGraphTest):
 		n3 = g.add_node(first_name="Snowflake")
 		e1 = g.add_edge(n1, n2, weight=4)
 		e2 = g.add_edge(n1, n3, weight=5)
-		paths = g.get_shortest_paths(n1, get_weight=lambda e: e.weight)
+		paths = g.get_shortest_paths(n1, get_weight=lambda e: e.weight, pretty=False)
 		self.failUnlessEqual(paths, {n1: (0, []), n2: (4, [e1]), n3: (5, [e2])})
 		# tricksy graph
 		g = self.build_graph()
@@ -791,7 +791,7 @@ class GraphCorrectnessTest(BaseGraphTest):
 		e4 = g.add_edge(n3, n3, weight=1)
 		# form a cycle
 		e5 = g.add_edge(n3, n2, weight=1)
-		paths = g.get_shortest_paths(n1, get_weight=lambda e: e.weight)
+		paths = g.get_shortest_paths(n1, get_weight=lambda e: e.weight, pretty=False)
 		self.failUnlessEqual(paths, {n1: (0, []), n2: (5, [e1]), n3: (6, [e1, e2])})
 
 	def testStronglyConnectedComponents(self):
@@ -1324,11 +1324,11 @@ class OneNodeDirectedTest(BaseGraphTest):
 		self.failUnlessEqual(list(self.g.get_strongly_connected()), [{self.A}])
 
 	def testGetShortestPaths(self):
-		self.failUnlessEqual(self.g.get_shortest_paths(self.A), {self.A: (0, [])})
-		self.failUnlessEqual(self.g.get_shortest_paths("A"), {self.A: (0, [])})
-		self.failUnlessEqual(self.g.get_shortest_paths(Node("A")), {self.A: (0, [])})
-		self.failUnlessRaises(KeyError, self.g.get_shortest_paths, Node("B"))
-		self.failUnlessRaises(KeyError, self.g.get_shortest_paths, "B")
+		self.failUnlessEqual(self.g.get_shortest_paths(self.A, pretty=False), {self.A: (0, [])})
+		self.failUnlessEqual(self.g.get_shortest_paths("A", pretty=False), {self.A: (0, [])})
+		self.failUnlessEqual(self.g.get_shortest_paths(Node("A"), pretty=False), {self.A: (0, [])})
+		self.failUnlessRaises(KeyError, self.g.get_shortest_paths, Node("B"), pretty=False)
+		self.failUnlessRaises(KeyError, self.g.get_shortest_paths, "B", pretty=False)
 
 	def testOrder(self):
 		self.failUnlessEqual(self.g.order, 1)
@@ -1934,14 +1934,14 @@ class TwoNodeUnconnectedTest(BaseGraphTest):
 		self.failUnlessEqual({frozenset(component) for component in self.g.get_connected_components()}, {frozenset([self.A]), frozenset([self.B])})
 
 	def testGetShortestPath(self):
-		self.failUnlessEqual(self.g.get_shortest_paths(self.A), {self.A: (0, [])})
-		self.failUnlessEqual(self.g.get_shortest_paths(self.B), {self.B: (0, [])})
-		self.failUnlessEqual(self.g.get_shortest_paths("A"), {self.A: (0, [])})
-		self.failUnlessEqual(self.g.get_shortest_paths("B"), {self.B: (0, [])})
-		self.failUnlessEqual(self.g.get_shortest_paths(Node("A")), {self.A: (0, [])})
-		self.failUnlessEqual(self.g.get_shortest_paths(Node("B")), {self.B: (0, [])})
-		self.failUnlessRaises(KeyError, self.g.get_shortest_paths, "C")
-		self.failUnlessRaises(KeyError, self.g.get_shortest_paths, Node("C"))
+		self.failUnlessEqual(self.g.get_shortest_paths(self.A, pretty=False), {self.A: (0, [])})
+		self.failUnlessEqual(self.g.get_shortest_paths(self.B, pretty=False), {self.B: (0, [])})
+		self.failUnlessEqual(self.g.get_shortest_paths("A", pretty=False), {self.A: (0, [])})
+		self.failUnlessEqual(self.g.get_shortest_paths("B", pretty=False), {self.B: (0, [])})
+		self.failUnlessEqual(self.g.get_shortest_paths(Node("A"), pretty=False), {self.A: (0, [])})
+		self.failUnlessEqual(self.g.get_shortest_paths(Node("B"), pretty=False), {self.B: (0, [])})
+		self.failUnlessRaises(KeyError, self.g.get_shortest_paths, "C", pretty=False)
+		self.failUnlessRaises(KeyError, self.g.get_shortest_paths, Node("C"), pretty=False)
 
 	def testOrder(self):
 		self.failUnlessEqual(self.g.order, 2)
@@ -2452,11 +2452,11 @@ class ThreeNodeCycleTest(BaseGraphTest):
 		self.failUnlessEqual(list(self.g.get_strongly_connected()), [{self.A, self.B, self.C}])
 
 	def testGetShortestPaths(self):
-		self.failUnlessEqual(self.g.get_shortest_paths(self.A), {self.A: (0, []), self.B: (1, [self.AB]), self.C: (2, [self.AB, self.BC])})
-		self.failUnlessEqual(self.g.get_shortest_paths("A"), {self.A: (0, []), self.B: (1, [self.AB]), self.C: (2, [self.AB, self.BC])})
-		self.failUnlessEqual(self.g.get_shortest_paths(Node("A")), {self.A: (0, []), self.B: (1, [self.AB]), self.C: (2, [self.AB, self.BC])})
-		self.failUnlessRaises(KeyError, self.g.get_shortest_paths, Node("D"))
-		self.failUnlessRaises(KeyError, self.g.get_shortest_paths, "D")
+		self.failUnlessEqual(self.g.get_shortest_paths(self.A, pretty=False), {self.A: (0, []), self.B: (1, [self.AB]), self.C: (2, [self.AB, self.BC])})
+		self.failUnlessEqual(self.g.get_shortest_paths("A", pretty=False), {self.A: (0, []), self.B: (1, [self.AB]), self.C: (2, [self.AB, self.BC])})
+		self.failUnlessEqual(self.g.get_shortest_paths(Node("A"), pretty=False), {self.A: (0, []), self.B: (1, [self.AB]), self.C: (2, [self.AB, self.BC])})
+		self.failUnlessRaises(KeyError, self.g.get_shortest_paths, Node("D"), pretty=False)
+		self.failUnlessRaises(KeyError, self.g.get_shortest_paths, "D", pretty=False)
 
 	def testOrder(self):
 		self.failUnlessEqual(self.g.order, 3)

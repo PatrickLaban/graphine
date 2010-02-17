@@ -32,18 +32,16 @@ using Graphine.
 
 def node_properties(n):
 	"""Returns default properties for nodes adjusted by the contents of n."""
-	defaults = {"label": n.name, "color": "black", "shape": "circle", "style": None, "fillcolor": "white"}
+	defaults = {"label": n.name, "color": "black", "shape": "circle", "style": "filled", "fillcolor": "white"}
 	data = n.data
 	for k in defaults:
-		if k in data:
-			defaults[k] = data[k]
-	if defaults["style"] == None:
-		defaults.pop("style")
+		try: defaults[k] = data[k]
+		except: pass
 	return defaults
 
 def edge_properties(e):
 	"""Returns default properties for edges adjusted by the contents of e."""
-	defaults = {"label": e.name, "color": "black", "style": None}
+	defaults = {"label": "'" + str(e.name) + "'", "color": "black", "style": None}
 	data = e.data
 	for k in defaults:
 		if k in data:

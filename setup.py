@@ -8,6 +8,6 @@ setup(name='Graphine',
       author='Geremy Condra',
       author_email='CTO@OpenMigration.Net',
       url='http://www.graphine.org',
-      packages=['graph']
+      packages=['graph', 'graph.extras']
      )
 

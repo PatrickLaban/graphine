@@ -30,7 +30,7 @@ of graphs using Graphine.
 # You should have received a copy of the GNU General Public License
 # along with Graphine.  If not, see <http://www.gnu.org/licenses/>.
 
-from base import Graph
+from graph.base import Graph
 
 def K(n):
 	"""Generates a completely connected undirected graph of size n.

@@ -1393,14 +1393,15 @@ class Graph:
 		g = self.induce_subgraph(*cyclic_nodes)
 		return g.get_connected_components()
 
-	def get_shortest_paths(self, source, get_weight=lambda e: 1):
+	def get_shortest_paths(self, source, get_weight=lambda e: 1, pretty=True):
 		"""Finds the shortest path to all connected nodes from source.
 
 		The optional get_weight argument should be a callable that
 		accepts an edge and returns its weight.
 
-		Returns a dictionary of node -> (path_length, [edges_traversed])
-		mappings.
+		Returns a dictionary of node -> subgraph mappings.
+		Each subgraph has an additional 'weight' attribute
+		that specifies the total weight of the path.
 
 		Usage:
 			>>> g = Graph()
@@ -1446,8 +1447,109 @@ class Graph:
 					paths[edge.other_end(current)] = (weight, path + [edge])
 					# and put it on the heap
 					heapq.heappush(unoptomized, (weight, edge.other_end(current)))
-		return paths
-	
+		# this preserves compatibility with the old way
+		if not pretty:
+			return paths
+		else:
+			# makes it a lot prettier
+			processed_paths = {}
+			# turn the lists of edges into graphs
+			for endpoint, weight_and_edges in paths.items():
+				weight, path = weight_and_edges
+				# induce the graph on the edges
+				induced_path = self.edge_induce_subgraph(*path)
+				# give it a weight attribute
+				induced_path.weight = weight
+				# and fill the data structure
+				processed_paths[endpoint] = induced_path
+			return processed_paths
+			
+	def get_max_flow(self, source, destination, get_capacity=lambda e: 1):
+		"""Gets the maximum flow between the start and the destination.
+
+		The optional get_capacity argument should accept an edge as an
+		argument and should return a numeric value representing the
+		maximum amount of flow over the given edge.
+
+		Usage:
+			>>> g = Graph()
+			>>> ab = g.add_edge('a', 'b', capacity=5)
+			>>> bc = g.add_edge('b', 'c', capacity=6)
+			>>> ac = g.add_edge('a', 'c', capacity=0)
+			>>> g.get_max_flow('a', 'c', lambda e: e.capacity)
+			5
+		"""
+		# make sure we're getting nodes
+		source = self.get_element(source)
+		destination = self.get_element(destination)
+
+		# nested functions to help organize the operations
+		def push(origin, edge):
+			spare = min(origin._excess, edge._capacity - edge._flow)
+			edge._flow += spare
+			origin._excess -= spare
+			edge.other_end(origin)._excess += spare
+
+		def relabel(node):
+			min_height = node._height
+			for edge in node.outgoing:
+				if edge._capacity > edge._flow:
+					min_height = min(min_height, edge.other_end(node)._height)
+					node._height = min_height + 1
+
+		def discharge(node):
+			if node._excess > 0:
+				for edge in node.outgoing:
+					neighbor = edge.other_end(node)
+					if not neighbor._seen:
+						if edge._capacity > edge._flow:
+							if node._height > neighbor._height:
+								push(node, edge)
+						else: neighbor._seen = True
+					else:
+						relabel(node)
+						node._seen = False
+						for n in node.get_adjacent():
+							n._seen = False
+
+		# set up the node
+		nodes = []
+		for node in self.nodes:
+			node._height = 0
+			node._excess = 0
+			node._seen = False
+			if node not in (source, destination):
+				nodes.append(node)
+
+		# set up the edges
+		for edge in self.edges:
+			edge._capacity = get_capacity(edge)
+			edge._flow = 0
+
+		# set up the source
+		source._height = self.order
+		source._excess = float('inf')
+		for edge in source.outgoing:
+			push(source, edge)
+
+		# start the loop
+		count = 0
+		while count < self.order-2:
+			node = nodes[count]
+			height = node._height
+			discharge(node)
+			if node._height > height:
+				nodes.pop(count)
+				nodes.insert(0, node)
+				count = 0
+			count += 1
+		
+		flow = 0
+		for edge in source.outgoing:
+			flow += edge._flow
+
+		return flow
+
 	@property
 	def size(self):
 		"""Reports the number of edges in the graph.
