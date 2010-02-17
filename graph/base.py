@@ -1559,27 +1559,6 @@ class Graph:
 
 		return sum(flows[(source, vertex)] for vertex in source.get_adjacent())
 
-	def get_maximum_flow2(self, source, destination, capacity=lambda e: 1):
-		"""Gets the maximum flow between the start and the destination.
-
-		The optional get_capacity argument should accept an edge as an
-		argument and should return a numeric value representing the
-		maximum amount of flow over the given edge.
-
-		Usage:
-			>>> g = Graph()
-			>>> ab = g.add_edge('a', 'b', capacity=5)
-			>>> bc = g.add_edge('b', 'c', capacity=6)
-			>>> ac = g.add_edge('a', 'c', capacity=0)
-			>>> g.get_maximum_flow('a', 'c', lambda e: e.capacity)
-			5
-		"""
-		# make sure we're getting nodes
-		source = self.get_element(source)
-		destination = self.get_element(destination)
-		if source == destination:
-			return float('inf')
-
 	@property
 	def size(self):
 		"""Reports the number of edges in the graph.
