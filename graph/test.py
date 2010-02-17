@@ -556,6 +556,26 @@ class TraversalTest(BaseGraphTest):
 		self.failUnless(positions["A"] < min(positions["B"], positions["C"], positions["E"]))
 		self.failUnless(max(positions["B"], positions["C"], positions["E"]) < min(positions["D"], positions["F"], positions["G"]))
 
+	def testLevelTraversal(self):
+		g = self.g
+		ab = g.add_edge('a', 'b', is_directed=False)
+		bc = g.add_edge('b', 'c', is_directed=False)
+		cd = g.add_edge('c', 'd', is_directed=False)
+		ad = g.add_edge('a', 'd', is_directed=False)
+		ef = g.add_edge('e', 'f', is_directed=False)
+		ff = g.add_edge('f', 'f')
+		a_levels = [level for level in g.level_traversal('a')]
+		b_levels = [level for level in g.level_traversal('b')]
+		c_levels = [level for level in g.level_traversal('c')]
+		d_levels = [level for level in g.level_traversal('d')]
+		e_levels = [level for level in g.level_traversal('e')]
+		f_levels = [level for level in g.level_traversal('f')]
+		self.failUnlessEqual(a_levels, [{g['a']}, {g['b'], g['d']}, {g['c']}])
+		self.failUnlessEqual(b_levels, [{g['b']}, {g['a'], g['c']}, {g['d']}])
+		self.failUnlessEqual(c_levels, [{g['c']}, {g['b'], g['d']}, {g['a']}])
+		self.failUnlessEqual(d_levels, [{g['d']}, {g['a'], g['c']}, {g['b']}])
+		self.failUnlessEqual(e_levels, [{g['e']}, {g['f']}])
+		self.failUnlessEqual(f_levels, [{g['f']}, {g['e']}])
 
 class InductionTest(BaseGraphTest):
 
