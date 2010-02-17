@@ -1280,7 +1280,8 @@ class Graph:
 		"""Traverses the graph, yielding nodes in topological order.
 
 		This is useful in cases like a dependency graph, where it
-		is desirable to get all of the nodes 
+		is desirable to get all of the nodes that depend on others
+		last.
 
 		This code is lightly modified from bearophile's pygraph
 		project, and like his, simply fails to return all the nodes
@@ -1463,8 +1464,28 @@ class Graph:
 				# and fill the data structure
 				processed_paths[endpoint] = induced_path
 			return processed_paths
-			
-	def get_max_flow(self, source, destination, get_capacity=lambda e: 1):
+
+	def minimum_span(self, weight=lambda e: 1):
+		"""Returns the minimum spanning tree/forest for a given graph.
+
+		Returns a graph object that represents the MST/F.
+
+		Usage:
+			>>> g = Graph()
+			>>> g.add_edge('a', 'b', weight=10)
+			>>> g.add_edge('a', 'c', weight=10)
+			>>> g.add_edge('b', 'c', weight=11)
+			>>> g.minimum_span(lambda e: e.weight)
+			... <graph object>
+
+		"""
+		tree = type(self)()
+		for e in sorted(list(self.edges), key=weight):
+			if not ((e.start in tree) and (e.end in tree)):
+				tree.add_edge(e.start.name, e.end.name, e.name, **e.data)
+		return tree
+				
+	def get_maximum_flow(self, source, destination, capacity=lambda e: 1):
 		"""Gets the maximum flow between the start and the destination.
 
 		The optional get_capacity argument should accept an edge as an
@@ -1476,79 +1497,45 @@ class Graph:
 			>>> ab = g.add_edge('a', 'b', capacity=5)
 			>>> bc = g.add_edge('b', 'c', capacity=6)
 			>>> ac = g.add_edge('a', 'c', capacity=0)
-			>>> g.get_max_flow('a', 'c', lambda e: e.capacity)
+			>>> g.get_maximum_flow('a', 'c', lambda e: e.capacity)
 			5
 		"""
 		# make sure we're getting nodes
 		source = self.get_element(source)
 		destination = self.get_element(destination)
+		if source == destination:
+			return float('inf')
 
-		# nested functions to help organize the operations
-		def push(origin, edge):
-			spare = min(origin._excess, edge._capacity - edge._flow)
-			edge._flow += spare
-			origin._excess -= spare
-			edge.other_end(origin)._excess += spare
+		flows = defaultdict(lambda: 0)
 
-		def relabel(node):
-			min_height = node._height
-			for edge in node.outgoing:
-				if edge._capacity > edge._flow:
-					min_height = min(min_height, edge.other_end(node)._height)
-					node._height = min_height + 1
+		for e in self.edges:
+			c = capacity(e)
+			flows[(e.start, e.end)] = c
+			if e.is_directed: flows[(e.end, e.start)] = c
 
-		def discharge(node):
-			if node._excess > 0:
-				for edge in node.outgoing:
-					neighbor = edge.other_end(node)
-					if not neighbor._seen:
-						if edge._capacity > edge._flow:
-							if node._height > neighbor._height:
-								push(node, edge)
-						else: neighbor._seen = True
-					else:
-						relabel(node)
-						node._seen = False
-						for n in node.get_adjacent():
-							n._seen = False
+		def find_path(source, sink, path=[]):
+			if source == sink: return path
+			for edge in source.outgoing:
+				neighbor = edge.other_end(source)
+				edge._residual = capacity(edge) - flows[(source, neighbor)]
+				if edge._residual > 0 and edge not in path:
+					result = find_path(neighbor, sink, path + [edge])
+					if result != None: return result
 
-		# set up the node
-		nodes = []
-		for node in self.nodes:
-			node._height = 0
-			node._excess = 0
-			node._seen = False
-			if node not in (source, destination):
-				nodes.append(node)
+		path = find_path(source, destination)
+		while path != None:
+			flow = min(edge._residual for edge in path)
+			for edge in path:
+				if not edge.is_directed or edge.start == source:
+					flows[(edge.start, edge.end)] += flow
+					flows[(edge.end, edge.start)] -= flow
+			path = self.find_path(source, destination)
 
-		# set up the edges
 		for edge in self.edges:
-			edge._capacity = get_capacity(edge)
-			edge._flow = 0
+			try: del edge._residual
+			except AttributeError: pass
 
-		# set up the source
-		source._height = self.order
-		source._excess = float('inf')
-		for edge in source.outgoing:
-			push(source, edge)
-
-		# start the loop
-		count = 0
-		while count < self.order-2:
-			node = nodes[count]
-			height = node._height
-			discharge(node)
-			if node._height > height:
-				nodes.pop(count)
-				nodes.insert(0, node)
-				count = 0
-			count += 1
-		
-		flow = 0
-		for edge in source.outgoing:
-			flow += edge._flow
-
-		return flow
+		return sum(flows[(source, vertex)] for vertex in source.get_adjacent())
 
 	@property
 	def size(self):
