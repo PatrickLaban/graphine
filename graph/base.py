@@ -1288,7 +1288,7 @@ class Graph:
 		if it encounters a cycle.
 
 		Usage:
-			>>> g = Graph(edges={('a','b'},('a','c'),('b','c')})
+			>>> g = Graph(edges={('a','b'),('a','c'),('b','c')})
 			>>> for node in g.topological_traversal():
 			... 	print(node)
 			Node(name=a)
@@ -1308,6 +1308,28 @@ class Graph:
 				# if the destination is now a source
 				if not nodes_to_degrees[destination]:
 				    queue.append(destination)
+
+	def level_traversal(self, root):
+		"""Traverses the graph, yielding nodes by level.
+
+		This is useful for building level graphs and other network
+		structures.
+
+		Usage:
+			>>> g = Graph(edges={('a', 'b'),('a','c'),('b','c'),('b','d')})
+			>>> for level in g.level_traversal():
+			... 	print(level)
+			{Node('a')}
+			{Node('b'), Node('c')}
+			{Node('d')}
+		"""
+		paths = self.get_shortest_paths(root)
+		levels = []
+		for end, path in paths.items():
+			while path.weight >= len(levels):
+				levels.append(set())
+			levels[path.weight].add(end)
+		for i in levels: yield i
 
 	def get_connected_components(self):
 		"""Gets all the connected components from the graph.
@@ -1536,6 +1558,27 @@ class Graph:
 			except AttributeError: pass
 
 		return sum(flows[(source, vertex)] for vertex in source.get_adjacent())
+
+	def get_maximum_flow2(self, source, destination, capacity=lambda e: 1):
+		"""Gets the maximum flow between the start and the destination.
+
+		The optional get_capacity argument should accept an edge as an
+		argument and should return a numeric value representing the
+		maximum amount of flow over the given edge.
+
+		Usage:
+			>>> g = Graph()
+			>>> ab = g.add_edge('a', 'b', capacity=5)
+			>>> bc = g.add_edge('b', 'c', capacity=6)
+			>>> ac = g.add_edge('a', 'c', capacity=0)
+			>>> g.get_maximum_flow('a', 'c', lambda e: e.capacity)
+			5
+		"""
+		# make sure we're getting nodes
+		source = self.get_element(source)
+		destination = self.get_element(destination)
+		if source == destination:
+			return float('inf')
 
 	@property
 	def size(self):
