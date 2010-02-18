@@ -852,6 +852,19 @@ class GraphCorrectnessTest(BaseGraphTest):
 		g.add_edge('3', 't', capacity=10)
 		g.add_edge('4', 't', capacity=10)
 		self.failUnlessEqual(g.get_maximum_flow('s', 't', lambda e: e.capacity), 19)
+		g = base.Graph()
+		ab = g.add_edge('a', 'b', is_directed=False, capacity=5)
+		bc = g.add_edge('b', 'c', is_directed=False, capacity=6)
+		cd = g.add_edge('c', 'd', is_directed=False, capacity=2)
+		ac = g.add_edge('a', 'd', is_directed=False, capacity=1)
+		g.get_maximum_flow('a', 'a')
+		g.get_maximum_flow('a', 'b')
+		g.get_maximum_flow('a', 'c')
+		g.get_maximum_flow('a', 'd')
+		self.failUnlessEqual(g.get_maximum_flow('a', 'a', lambda e: e.capacity), float('inf'))
+		self.failUnlessEqual(g.get_maximum_flow('a', 'b', lambda e: e.capacity), 6)
+		self.failUnlessEqual(g.get_maximum_flow('a', 'c', lambda e: e.capacity), 6)
+		self.failUnlessEqual(g.get_maximum_flow('a', 'd', lambda e: e.capacity), 6)
 
 #########################################################################################################################################
 #								SCENARIO TESTS								#
