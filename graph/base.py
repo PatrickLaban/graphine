@@ -1211,7 +1211,7 @@ class Graph:
 			>>> g = Graph()
 			>>> n1, n2 = g.add_node("A"), g.add_node("B")
 			>>> e = g.add_edge(n1, n2)
-			>>> for node in g.a_star_traversal(n1, lambda s: s.pop()):
+			>>> for node in g.heuristic_traversal(n1, lambda s: s.pop()):
 			>>> 	print(node)
 			Node(name="A")
 			Node(name="B")
@@ -1238,6 +1238,41 @@ class Graph:
 				if node not in discovered:
 					discovered.append(node)
 
+	def heuristic_edge_traversal(self, root, selector):
+		"""Traverses the graph using selector as a selection filter on the unvisited edges.
+
+		Usage is otherwise identical to heuristic_traversal.
+
+		Usage:
+			>>> g = Graph()
+			>>> n1, n2 = g.add_node("A"), g.add_node("B")
+			>>> e = g.add_edge(n1, n2, name='ab')
+			>>> for edge in g.heuristic_traversal(n1, lambda s: s.pop()):
+			>>> 	print(edge)
+			Edge(name='ab')
+		"""
+		# handle the its-a-name case
+		root = self.get_element(root)
+		# stores edges that are known to the algorithm but not yet visited
+		discovered = [edge for edge in root.outgoing]
+		visited = set()
+		# while there are unprocessed edges
+		while discovered:
+			# select the next one
+			next = selector(discovered)
+			yield next
+			# visit it
+			visited.add(next)
+			# get the incident edges
+			incident = {edge for edge in next.start.edges}
+			incident |= {edge for edge in next.end.edges}
+			# filter it against those we've already visited
+			not_yet_visited = incident - visited
+			# make sure we're not double-adding
+			for edge in not_yet_visited:
+				if edge not in discovered:
+					discovered.append(edge)
+
 	def depth_first_traversal(self, root):
 		"""Traverses the graph by visiting a node, then a child of that node, and so on.
 
@@ -1256,6 +1291,14 @@ class Graph:
 		"""
 		for node in self.heuristic_traversal(root, lambda s: s.pop()):
 			yield node
+
+	def depth_first_edge_traversal(self, root):
+		"""Traverses the graph by visiting an edge, then all descendant incident edges.
+
+		Usage is identical to its node-centric kin.
+		"""
+		for edge in self.heuristic_edge_traversal(root, lambda s: s.pop()):
+			yield edge
 		
 	def breadth_first_traversal(self, root):
 		"""Traverses the graph by visiting a node, then each of its children, then their children.
@@ -1275,6 +1318,14 @@ class Graph:
 		"""
 		for node in self.heuristic_traversal(root, lambda s: s.pop(0)):
 			yield node
+
+	def breadth_first_edge_traversal(self, root):
+		"""Traverses the graph by visiting an edge, then all adjacent incident edges.
+
+		Usage is identical to its node-centric kin.
+		"""
+		for edge in self.heuristic_edge_traversal(root, lambda s: s.pop(0)):
+			yield edge
 
 	def topological_traversal(self):
 		"""Traverses the graph, yielding nodes in topological order.
@@ -1330,7 +1381,7 @@ class Graph:
 				levels.append(set())
 			levels[path.weight].add(end)
 		for i in levels: yield i
-
+			
 	def get_connected_components(self):
 		"""Gets all the connected components from the graph.
 
@@ -1415,6 +1466,39 @@ class Graph:
 		cyclic_nodes = (node for node in self.nodes if node not in acyclic_nodes)
 		g = self.induce_subgraph(*cyclic_nodes)
 		return g.get_connected_components()
+
+	def get_path(self, start, end):
+		"""Gets an arbitrary path from start to end.
+
+		Note that it is *not* gauranteed to be the shortest such
+		path.
+
+		Raises ValueError if the requested path does not exist.
+
+		Usage:
+			>>> g = Graph()
+			>>> ab = g.add_edge('a', 'b')
+			>>> bc = g.add_edge('b', 'c')
+			>>> cd = g.add_edge('c', 'd')
+			>>> ad = g.add_edge('a', 'd')
+			>>> g.get_path('a', 'd')
+			... <Graph object at 0x1da73d0>
+		"""
+		start = self[start]
+		end = self[end]
+		path = []
+		for edge in self.depth_first_edge_traversal(start):
+			if not path: path = [edge]
+			if edge in end.incoming:
+				return self.edge_induce_subgraph(*(path + [edge]))
+			for pos, parent in enumerate(path):
+				if edge == parent:
+					path = path[:pos] + [edge]
+				elif parent.end == edge.start :
+					path = path[:pos+1] + [edge]
+				else:
+					path += [edge]
+		raise ValueError("No path from %s to %s found" % (start, end))
 
 	def get_shortest_paths(self, source, get_weight=lambda e: 1, pretty=True):
 		"""Finds the shortest path to all connected nodes from source.
@@ -1506,7 +1590,7 @@ class Graph:
 			if not ((e.start in tree) and (e.end in tree)):
 				tree.add_edge(e.start.name, e.end.name, e.name, **e.data)
 		return tree
-				
+	
 	def get_maximum_flow(self, source, destination, capacity=lambda e: 1):
 		"""Gets the maximum flow between the start and the destination.
 
@@ -1522,43 +1606,30 @@ class Graph:
 			>>> g.get_maximum_flow('a', 'c', lambda e: e.capacity)
 			5
 		"""
-		# make sure we're getting nodes
-		source = self.get_element(source)
-		destination = self.get_element(destination)
-		if source == destination:
-			return float('inf')
+		if source == destination: return float('inf')
 
-		flows = defaultdict(lambda: 0)
+		g = self | self
+		source = g[source]
+		destination = g[destination]
 
-		for e in self.edges:
-			c = capacity(e)
-			flows[(e.start, e.end)] = c
-			if e.is_directed: flows[(e.end, e.start)] = c
+		for edge in g.edges:
+			edge.flow = 0		
 
-		def find_path(source, sink, path=[]):
-			if source == sink: return path
-			for edge in source.outgoing:
-				neighbor = edge.other_end(source)
-				edge._residual = capacity(edge) - flows[(source, neighbor)]
-				if edge._residual > 0 and edge not in path:
-					result = find_path(neighbor, sink, path + [edge])
-					if result != None: return result
+		residual = lambda e: e.capacity - e.flow
+		min_cut = lambda p: min((e for e in p.edges), key=residual)
 
-		path = find_path(source, destination)
-		while path != None:
-			flow = min(edge._residual for edge in path)
-			for edge in path:
-				if not edge.is_directed or edge.start == source:
-					flows[(edge.start, edge.end)] += flow
-					flows[(edge.end, edge.start)] -= flow
-			path = self.find_path(source, destination)
+		while True:
+			try:
+				path = g.get_path(source, destination)
+			except ValueError:
+				return sum(e.flow for e in destination.incoming) + sum(e.flow for e in source.outgoing)
+			cut = min_cut(path)
+			flow = cut.capacity - cut.flow
+			for edge in path.edges:
+				g[edge.name].flow += flow
+			g.remove_edge(cut)
 
-		for edge in self.edges:
-			try: del edge._residual
-			except AttributeError: pass
-
-		return sum(flows[(source, vertex)] for vertex in source.get_adjacent())
-
+		
 	@property
 	def size(self):
 		"""Reports the number of edges in the graph.
