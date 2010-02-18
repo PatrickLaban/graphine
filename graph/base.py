@@ -1613,22 +1613,25 @@ class Graph:
 		destination = g[destination]
 
 		for edge in g.edges:
-			edge.flow = 0		
+			edge.flow = 0			
 
-		residual = lambda e: e.capacity - e.flow
-		min_cut = lambda p: min((e for e in p.edges), key=residual)
+		residual = lambda e: capacity(e) - e.flow
+		get_min_cut = lambda p: min((e for e in p.edges), key=residual)
 
+		max_flow = 0
 		while True:
 			try:
 				path = g.get_path(source, destination)
 			except ValueError:
-				return sum(e.flow for e in destination.incoming) + sum(e.flow for e in source.outgoing)
-			cut = min_cut(path)
-			flow = cut.capacity - cut.flow
+				return max_flow
+			min_cut = get_min_cut(path)
+			print(path.edges)
+			print(min_cut)
+			path_flow = residual(min_cut)
 			for edge in path.edges:
-				g[edge.name].flow += flow
-			g.remove_edge(cut)
-
+				g[edge].flow = path_flow
+			max_flow += min_cut.flow
+			g.remove_edge(min_cut)
 		
 	@property
 	def size(self):
