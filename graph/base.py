@@ -1590,7 +1590,7 @@ class Graph:
 			if not ((e.start in tree) and (e.end in tree)):
 				tree.add_edge(e.start.name, e.end.name, e.name, **e.data)
 		return tree
-	
+
 	def get_maximum_flow(self, source, destination, capacity=lambda e: 1):
 		"""Gets the maximum flow between the start and the destination.
 
@@ -1609,30 +1609,84 @@ class Graph:
 		if source == destination: return float('inf')
 
 		g = self | self
+
 		source = g[source]
 		destination = g[destination]
 
+		tried = set()
+
+		pos = g.order
+		for node in g.breadth_first_traversal(source):
+			pos -= 1
+			node.height = pos
+			node.excess = 0
+
+		source.excess = float('inf')
+		source.height = g.order
+		destination.height = 0
+
 		for edge in g.edges:
-			edge.flow = 0			
+			edge.capacity = capacity(edge)
+			edge.flow = 0
 
-		residual = lambda e: capacity(e) - e.flow
-		get_min_cut = lambda p: min((e for e in p.edges), key=residual)
+		# gets the residual capacity for flow between u and v
+		rc = lambda u, v: sum(e.capacity - e.flow for e in g.get_common_edges(u,v))
 
-		max_flow = 0
-		while True:
-			try:
-				path = g.get_path(source, destination)
-			except ValueError:
-				return max_flow
-			min_cut = get_min_cut(path)
-			print(path.edges)
-			print(min_cut)
-			path_flow = residual(min_cut)
-			for edge in path.edges:
-				g[edge].flow = path_flow
-			max_flow += min_cut.flow
-			g.remove_edge(min_cut)
+		def push(s, d):
+			# only works for one edge!
+			common_edge = g.get_common_edges(s, d).pop()
+			residual_capacity = rc(s, d)
+			amt = min(s.excess, residual_capacity)
+			s.excess -= amt
+			d.excess += amt
+			common_edge.flow = min(amt + common_edge.flow, residual_capacity)
+			
+		def relabel(u):
+			h1 = u.height
+			neighbors_with_capacity = {n for n in u.get_adjacent() if rc(u,n)}
+			if neighbors_with_capacity:
+				u.height = min(neighbors_with_capacity,  key=lambda n: n.height, default=0) + 1
+			return u.height == h1
+
+		def find_legal_push(g):
+			pushed = False
+			for u in g.nodes:
+				if not u.excess: continue
+				if u == source: continue
+				neighbors = u.get_adjacent()
+				for v in neighbors:
+					if u.height > v.height:
+						print(u, v)
+						push(u, v)
+						pushed = True
+						break
+			return pushed
+
+		def find_legal_relabel(g):
+			print('relabelling')
+			for u in g.nodes:
+				if not u.excess: continue
+				neighbors = u.get_adjacent()
+				if not neighbors: continue
+				lowest_adjacent = min(u.get_adjacent(), key=lambda v: v.height)
+				print(u, lowest_adjacent)
+				if u.height > lowest_adjacent.height: continue
+				relabel(u)
+				return True
+			return False
 		
+		for node in source.get_adjacent():
+			push(source, node)
+
+		while 1:
+			if find_legal_push(g): continue
+			if find_legal_relabel(g): continue
+			break
+
+		print([level for level in g.level_traversal(source)])
+		print([edge for edge in g.edges])
+		return destination.excess
+
 	@property
 	def size(self):
 		"""Reports the number of edges in the graph.
