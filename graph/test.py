@@ -839,17 +839,7 @@ class GraphCorrectnessTest(BaseGraphTest):
 		# get strongly connected components
 		comp = g.get_strongly_connected()
 		self.failUnlessEqual(set([frozenset([n1, n2, n3]), frozenset([n4, n5, n6])]), {frozenset(i) for i in comp})
-	
-	def testMaximumFlow(self):
-		g = self.build_graph()
-		ab = g.add_edge('a', 'b', is_directed=False, capacity=5)
-		bc = g.add_edge('b', 'c', is_directed=False, capacity=6)
-		cd = g.add_edge('c', 'd', is_directed=False, capacity=2)
-		ac = g.add_edge('a', 'd', is_directed=False, capacity=1)
-		self.failUnlessEqual(g.get_maximum_flow('a', 'a', lambda e: e.capacity), float('inf'))
-		self.failUnlessEqual(g.get_maximum_flow('a', 'b', lambda e: e.capacity), 5)
-		self.failUnlessEqual(g.get_maximum_flow('a', 'c', lambda e: e.capacity), 5)
-		self.failUnlessEqual(g.get_maximum_flow('a', 'd', lambda e: e.capacity), 2)
+
 
 #########################################################################################################################################
 #								SCENARIO TESTS								#
