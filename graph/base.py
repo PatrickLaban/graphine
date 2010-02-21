@@ -1632,47 +1632,45 @@ class Graph:
 		# gets the residual capacity for flow between u and v
 		rc = lambda u, v: sum(e.capacity - e.flow for e in g.get_common_edges(u,v))
 
-		def push(s, d):
-			# only works for one edge!
-			common_edge = g.get_common_edges(s, d).pop()
-			residual_capacity = rc(s, d)
-			amt = min(s.excess, residual_capacity)
+		def push(s, d):	
+			if not s.excess: return
+			common_forward_edge = g.get_common_edges(s, d).pop()
+			common_backward_edge = g.get_common_edges(d, s).pop()
+			amt = min(s.excess, rc(s, d))
 			s.excess -= amt
 			d.excess += amt
-			common_edge.flow = min(amt + common_edge.flow, residual_capacity)
+			common_forward_edge.flow += amt
+			common_backward_edge.flow -= amt
 			
 		def relabel(u):
-			h1 = u.height
-			neighbors_with_capacity = {n for n in u.get_adjacent() if rc(u,n)}
-			if neighbors_with_capacity:
-				u.height = min(neighbors_with_capacity,  key=lambda n: n.height, default=0) + 1
-			return u.height == h1
+			h = u.height
+			for neighbor in u.get_adjacent():
+				if rc(u, neighbor):
+					h = min(u.height, neighbor.height)
+			u.height = h + 1
 
 		def find_legal_push(g):
-			pushed = False
 			for u in g.nodes:
-				if not u.excess: continue
 				if u == source: continue
-				neighbors = u.get_adjacent()
-				for v in neighbors:
+				for v in u.get_adjacent():
 					if u.height > v.height:
-						print(u, v)
-						push(u, v)
-						pushed = True
-						break
-			return pushed
+						if rc(u, v):
+							print(u, v)
+							push(u, v)
+							return True
+			return False
 
 		def find_legal_relabel(g):
 			print('relabelling')
 			for u in g.nodes:
 				if not u.excess: continue
-				neighbors = u.get_adjacent()
-				if not neighbors: continue
-				lowest_adjacent = min(u.get_adjacent(), key=lambda v: v.height)
-				print(u, lowest_adjacent)
-				if u.height > lowest_adjacent.height: continue
-				relabel(u)
-				return True
+				try: 
+					lowest_adjacent = min(u.get_adjacent(), key=lambda v: v.height)
+				except ValueError:
+					continue
+				if u.height < lowest_adjacent.height:
+					relabel(u)
+					return True
 			return False
 		
 		for node in source.get_adjacent():
@@ -1681,11 +1679,14 @@ class Graph:
 		while 1:
 			if find_legal_push(g): continue
 			if find_legal_relabel(g): continue
+			print(g.nodes)
+			print()
+			print(g.edges)
 			break
 
 		print([level for level in g.level_traversal(source)])
 		print([edge for edge in g.edges])
-		return destination.excess
+		return sum(e.flow for e in destination.incoming)
 
 	@property
 	def size(self):
